@@ -124,7 +124,6 @@ export interface DigitsViewProps {
   // Branding (used by preview route; no-op in the real app)
   logoSrc?: string;
   appName?: string;
-  showAppName?: boolean;
 
   /**
    * No-code config. When provided, the controls render in configurable
@@ -195,7 +194,6 @@ export function DigitsView({
   stopAutoTrading,
   logoSrc,
   appName,
-  showAppName,
   appConfig,
   editMode,
   onSelect,
@@ -312,7 +310,6 @@ export function DigitsView({
         onSwitchAccount={editMode ? noopAsync : onSwitchAccount}
         logoSrc={logoSrc}
         appName={appName}
-        showAppName={showAppName}
       />
     );
   }, [
@@ -326,7 +323,6 @@ export function DigitsView({
     onSwitchAccount,
     logoSrc,
     appName,
-    showAppName,
   ]);
 
   if (error) {

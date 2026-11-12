@@ -1,5 +1,45 @@
 /* Custom CSS for this template */
 
+.brand-logo-mark {
+  animation: brand-logo-breathe 3s ease-in-out infinite;
+}
+
+.brand-name {
+  color: rgb(var(--primary));
+  transform-origin: left center;
+  animation: brand-name-grow 3.2s ease-in-out infinite;
+  text-shadow: 0 0 4px rgb(var(--primary) / 0.18);
+}
+
+@keyframes brand-logo-breathe {
+  0%, 100% {
+    filter: drop-shadow(0 0 3px rgb(var(--primary) / 0.24));
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    filter: drop-shadow(0 0 10px rgb(var(--primary) / 0.7));
+    transform: scale(1.08) rotate(2deg);
+  }
+}
+
+@keyframes brand-name-grow {
+  0%, 100% {
+    text-shadow: 0 0 4px rgb(var(--primary) / 0.18);
+    transform: scale(1);
+  }
+  50% {
+    text-shadow: 0 0 14px rgb(var(--primary) / 0.55);
+    transform: scale(1.055);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-logo-mark,
+  .brand-name {
+    animation: none;
+  }
+}
+
 .factorpulse-shell {
   background-color: rgb(var(--background));
   background-image:

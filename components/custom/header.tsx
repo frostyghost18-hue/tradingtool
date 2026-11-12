@@ -30,11 +30,6 @@ interface HeaderProps {
    *  is provided. Prefers the live preview / Customise name, then
    *  NEXT_PUBLIC_DERIV_APP_NAME, then 'Pulse Factor'. */
   appName?: string;
-  /**
-   * When false, hide the name text next to the logo. Defaults to the
-   * NEXT_PUBLIC_DERIV_SHOW_APP_NAME env var (true when unset).
-   */
-  showAppName?: boolean;
 }
 
 function AccountLabel({ type }: { type: 'demo' | 'real' }) {
@@ -57,11 +52,6 @@ function AccountLabel({ type }: { type: 'demo' | 'real' }) {
 function resolveHeaderAppName(appName?: string): string {
   const fromEnv = process.env.NEXT_PUBLIC_DERIV_APP_NAME?.trim();
   return appName?.trim() || fromEnv || 'Pulse Factor';
-}
-
-function resolveShowAppName(showAppName?: boolean): boolean {
-  if (typeof showAppName === 'boolean') return showAppName;
-  return process.env.NEXT_PUBLIC_DERIV_SHOW_APP_NAME !== 'false';
 }
 
 function AuthButtons({
@@ -266,12 +256,10 @@ export function Header({
   onSignUp,
   logoSrc,
   appName,
-  showAppName,
 }: HeaderProps) {
   const { localize, locale } = useAppTranslations();
   const [logoError, setLogoError] = useState(false);
   const resolvedName = resolveHeaderAppName(appName);
-  const shouldShowName = resolveShowAppName(showAppName);
   const logoLetter = resolvedName.charAt(0).toUpperCase() || 'D';
   const [accountSwitcherOpen, setAccountSwitcherOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -298,25 +286,25 @@ export function Header({
 
   const headerBar = (
       <header ref={headerRef} className="sticky top-0 z-50 flex items-center justify-between border-b border-primary/30 bg-background/90 px-4 py-2.5 shadow-[0_1px_0_rgb(242_161_55/0.08)] backdrop-blur-sm sm:px-6">
-      <div className="flex items-center gap-3 shrink-0">
-        {!logoSrc || logoError ? (
-          <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
-            {logoLetter}
-          </div>
-        ) : (
-          // eslint-disable-next-line @next/next/no-img-element -- next/image is avoided here intentionally: it errors in the optimizer when /logo.png is absent locally; a plain img with onError gives the same silent fallback behaviour
-          <img
-            src={logoSrc}
-            alt={localize('App Logo')}
-            className="h-10 w-auto max-w-[140px] object-contain sm:h-12"
-            onError={() => setLogoError(true)}
-          />
-        )}
-        {shouldShowName && (
-          <h1 className="hidden text-lg font-bold tracking-wide text-foreground sm:block">
-            {resolvedName}
-          </h1>
-        )}
+      <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+        <div className="brand-logo-mark flex shrink-0 items-center justify-center">
+          {!logoSrc || logoError ? (
+            <span className="flex h-8 w-8 items-center justify-center rounded bg-primary/10 text-sm font-bold text-primary">
+              {logoLetter}
+            </span>
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element -- next/image is avoided here intentionally: it errors in the optimizer when /logo.png is absent locally; a plain img with onError gives the same silent fallback behaviour
+            <img
+              src={logoSrc}
+              alt={localize('App Logo')}
+              className="h-9 w-auto max-w-[96px] object-contain sm:h-12 sm:max-w-[140px]"
+              onError={() => setLogoError(true)}
+            />
+          )}
+        </div>
+        <h1 className="brand-name block min-w-0 max-w-[104px] truncate text-sm font-bold tracking-wide sm:max-w-none sm:text-lg">
+          {resolvedName}
+        </h1>
       </div>
       <div className="flex min-w-0 items-center gap-3">
         <div className="hidden lg:flex items-center gap-3 shrink-0">

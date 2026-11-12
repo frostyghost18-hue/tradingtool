@@ -22,7 +22,6 @@ export function LiveDigits({
   onReorder,
   logoSrc: logoSrcOverride,
   appName,
-  showAppName,
 }: {
   appConfig?: DigitsAppConfig;
   editMode?: boolean;
@@ -33,7 +32,6 @@ export function LiveDigits({
   /** Override the provider logo — used by the editor to show the previewed logo. */
   logoSrc?: string;
   appName?: string;
-  showAppName?: boolean;
 }) {
   const providerLogo = useLogoSrc();
   const logoSrc = logoSrcOverride ?? providerLogo;
@@ -59,7 +57,6 @@ export function LiveDigits({
       onSwitchAccount={switchAccount}
       logoSrc={logoSrc}
       appName={appName}
-      showAppName={showAppName}
       isConnected={trading.isConnected}
       isLoading={trading.isLoading}
       error={trading.error}
