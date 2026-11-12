@@ -7,7 +7,6 @@ import { useDigitsTrading } from '../../hooks/use-digits-trading';
 import { useDerivWSContext } from '@/components/custom/deriv-ws-provider';
 import { useLogoSrc } from '@/components/custom/logo-src-provider';
 import { Header } from '@/components/custom/header';
-import { ThemeToggle } from '@/components/custom/theme-toggle';
 import { Footer } from '@/components/custom/footer';
 import { useAppTranslations } from '@/components/custom/i18n-provider';
 import Link from 'next/link';
@@ -69,7 +68,6 @@ export default function ReportsPage() {
         onLogout={logout}
         onSwitchAccount={switchAccount}
         logoSrc={logoSrc}
-        actions={<ThemeToggle />}
       />
 
       <div className="flex-1 w-full max-w-7xl mx-auto px-3 py-4 sm:px-4 sm:py-6 pb-14">

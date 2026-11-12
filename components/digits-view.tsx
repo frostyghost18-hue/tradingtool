@@ -20,7 +20,6 @@ import { RiskManagementControls } from './risk-management-controls';
 import { ConfigurableDigitsControls, ConfigurableBuyButton } from './configurable-digits-controls';
 import { TradeTypeChips } from '@/components/custom/trade-type-chips';
 import { SymbolSelector } from '@/components/custom/symbol-selector';
-import { ThemeToggle } from '@/components/custom/theme-toggle';
 import type {
   AuthState,
   DerivAccount,
@@ -309,7 +308,6 @@ export function DigitsView({
         logoSrc={logoSrc}
         appName={appName}
         showAppName={showAppName}
-        actions={<ThemeToggle />}
       />
     );
   }, [

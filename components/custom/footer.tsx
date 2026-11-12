@@ -8,7 +8,7 @@ export function Footer() {
       <p className="text-xs tracking-wide text-muted-foreground">
         <Localize i18n_default_text="Powered by" />{' '}
         <span className="font-semibold text-foreground">
-          <Localize i18n_default_text="Deriv" />
+          <Localize i18n_default_text="dbotpulse.site" />
         </span>
       </p>
     </footer>
@@ -19,7 +19,7 @@ export function Footer() {
  * The bottom band the footer lives in on the mobile no-code layout.
  *
  * Both Buy placements end in this one box, so toggling the pin never moves
- * "Powered by Deriv" or resizes the strip around it. They used to hard-code a
+ * "Powered by dbotpulse.site" or resizes the strip around it. They used to hard-code a
  * box each — the pinned bar rendered the footer flush at 24px while the
  * unpinned branch wrapped it in `py-2` — which shifted the footer by 8px as the
  * pin toggled.

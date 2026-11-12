@@ -3,7 +3,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { FocusScope } from '@radix-ui/react-focus-scope';
-import { LogOut, Menu, X } from 'lucide-react';
+import { LogOut, Menu, Settings2, X } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Localize } from '@deriv-com/translations';
 import { Button } from '@/components/ui/button';
@@ -35,8 +35,6 @@ interface HeaderProps {
    * NEXT_PUBLIC_DERIV_SHOW_APP_NAME env var (true when unset).
    */
   showAppName?: boolean;
-  /** Optional controls rendered to the left of the login/logout button (e.g. a theme toggle). */
-  actions?: React.ReactNode;
 }
 
 function AccountLabel({ type }: { type: 'demo' | 'real' }) {
@@ -269,7 +267,6 @@ export function Header({
   logoSrc,
   appName,
   showAppName,
-  actions,
 }: HeaderProps) {
   const { localize, locale } = useAppTranslations();
   const [logoError, setLogoError] = useState(false);
@@ -286,19 +283,16 @@ export function Header({
   useLayoutEffect(() => {
     if (!mobileMenuOpen) return;
     const el = headerRef.current;
+    const mq = typeof window.matchMedia === 'function' ? window.matchMedia('(min-width: 1024px)') : null;
     const sync = () => {
-      if (el) setMenuTop(el.getBoundingClientRect().bottom);
+      setMenuTop(mq?.matches ? 0 : (el?.getBoundingClientRect().bottom ?? 0));
     };
     sync();
     window.addEventListener('resize', sync);
-    const mq = typeof window.matchMedia === 'function' ? window.matchMedia('(min-width: 1024px)') : null;
-    const closeIfLg = () => {
-      if (mq?.matches) setMobileMenuOpen(false);
-    };
-    mq?.addEventListener('change', closeIfLg);
+    mq?.addEventListener('change', sync);
     return () => {
       window.removeEventListener('resize', sync);
-      mq?.removeEventListener('change', closeIfLg);
+      mq?.removeEventListener('change', sync);
     };
   }, [mobileMenuOpen]);
 
@@ -326,8 +320,12 @@ export function Header({
       </div>
       <div className="flex min-w-0 items-center gap-3">
         <div className="hidden lg:flex items-center gap-3 shrink-0">
-          {actions}
-          <LanguageSwitcher />
+          <DialogPrimitive.Trigger asChild>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Settings2 className="h-4 w-4" />
+              <Localize i18n_default_text="Settings" />
+            </Button>
+          </DialogPrimitive.Trigger>
         </div>
         {isAuthenticated && activeAccount && (
           <Popover open={accountSwitcherOpen} onOpenChange={setAccountSwitcherOpen}>
@@ -413,20 +411,37 @@ export function Header({
       <FocusScope loop trapped={mobileMenuOpen}>
       <DialogPrimitive.Content
         aria-modal="true"
-        className="fixed inset-x-0 bottom-0 z-[100] flex flex-col bg-background lg:hidden outline-none"
+        className="fixed inset-x-0 bottom-0 z-[100] flex flex-col bg-background outline-none lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[420px] lg:max-w-[100vw] lg:border-l lg:border-border lg:shadow-2xl"
         style={{ top: menuTop }}
         onPointerDownOutside={preventDismissFromPopoverOrHeader}
         onInteractOutside={preventDismissFromPopoverOrHeader}
         onFocusOutside={preventDismissFromPopoverOrHeader}
       >
         <div className="flex-1 overflow-y-auto px-6 pt-4 space-y-6">
-          <div className="space-y-2 text-left">
-            <DialogPrimitive.Title className="text-lg font-semibold leading-none tracking-tight">
-              <Localize i18n_default_text="Your preferences" />
-            </DialogPrimitive.Title>
-            <DialogPrimitive.Description className="text-sm text-muted-foreground">
-              <Localize i18n_default_text="A space that feels like you." />
-            </DialogPrimitive.Description>
+          <div className="flex items-start justify-between gap-4 text-left">
+            <div className="space-y-2">
+              <DialogPrimitive.Title className="text-lg font-semibold leading-none tracking-tight">
+                <span className="lg:hidden">
+                  <Localize i18n_default_text="Your preferences" />
+                </span>
+                <span className="hidden lg:inline">
+                  <Localize i18n_default_text="Settings" />
+                </span>
+              </DialogPrimitive.Title>
+              <DialogPrimitive.Description className="text-sm text-muted-foreground">
+                <span className="lg:hidden">
+                  <Localize i18n_default_text="A space that feels like you." />
+                </span>
+                <span className="hidden lg:inline">
+                  <Localize i18n_default_text="Manage your appearance and language preferences." />
+                </span>
+              </DialogPrimitive.Description>
+            </div>
+            <DialogPrimitive.Close asChild>
+              <Button variant="ghost" size="icon" className="hidden shrink-0 lg:inline-flex" aria-label={localize('Close settings')}>
+                <X className="h-4 w-4" />
+              </Button>
+            </DialogPrimitive.Close>
           </div>
           <AppearancePicker />
           <div className="space-y-3">
