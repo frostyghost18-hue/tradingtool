@@ -97,8 +97,6 @@ export function LiveDigits({
       setMartingaleMode={trading.setMartingaleMode}
       martingaleValues={trading.martingaleValues}
       setMartingaleValue={trading.setMartingaleValue}
-      maxSessionTrades={trading.maxSessionTrades}
-      setMaxSessionTrades={trading.setMaxSessionTrades}
       autoTradingStatus={trading.autoTradingStatus}
       autoTradingTradeCount={trading.autoTradingTradeCount}
       autoTradingProfit={trading.autoTradingProfit}

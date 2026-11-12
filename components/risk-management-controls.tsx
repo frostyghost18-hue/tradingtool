@@ -49,8 +49,6 @@ interface RiskManagementControlsProps {
   onMartingaleModeChange: (value: MartingaleMode) => void;
   martingaleValues: Record<MartingaleMode, string>;
   onMartingaleValueChange: (mode: MartingaleMode, value: string) => void;
-  maxSessionTrades: string;
-  onMaxSessionTradesChange: (value: string) => void;
   autoTradingStatus: 'idle' | 'running' | 'stopping';
   autoTradingTradeCount: number;
   autoTradingProfit: number;
@@ -67,8 +65,6 @@ export function RiskManagementControls({
   onMartingaleModeChange,
   martingaleValues,
   onMartingaleValueChange,
-  maxSessionTrades,
-  onMaxSessionTradesChange,
   autoTradingStatus,
   autoTradingTradeCount,
   autoTradingProfit,
@@ -149,7 +145,6 @@ export function RiskManagementControls({
           id="martingale-value"
           type="number"
           min={1}
-          max={10}
           step="0.1"
           value={martingaleValues[martingaleMode]}
           onChange={(event) => {
@@ -162,31 +157,14 @@ export function RiskManagementControls({
         </p>
       </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="max-session-trades" className="text-xs text-muted-foreground">
-          <Localize i18n_default_text="Maximum trades per session" />
-        </Label>
-        <Input
-          id="max-session-trades"
-          type="number"
-          min={1}
-          max={100}
-          step={1}
-          value={maxSessionTrades}
-          onChange={(event) => onMaxSessionTradesChange(event.target.value)}
-          disabled={disabled}
-        />
-      </div>
-
       {isAutoTrading && (
         <div className="rounded-md border border-primary/30 bg-primary/5 p-2 text-xs">
           <p className="font-semibold text-foreground">
             <Localize
-              i18n_default_text="{{status}} · {{count}}/{{limit}} trades · Session P/L: {{profit}} USD"
+              i18n_default_text="{{status}} · {{count}} trades · Session P/L: {{profit}} USD"
               values={{
                 status: autoTradingStatus === 'stopping' ? 'Stopping after current trade' : 'Auto-trading',
                 count: autoTradingTradeCount,
-                limit: maxSessionTrades,
                 profit: autoTradingProfit.toFixed(2),
               }}
             />
@@ -209,7 +187,7 @@ export function RiskManagementControls({
       )}
 
       <p className="text-[11px] leading-relaxed text-muted-foreground">
-        <Localize i18n_default_text="Set at least one profit or loss target. Buy then starts a session that stops at a target, a trade limit, or when you stop it. Limits are checked after each contract settles." />
+        <Localize i18n_default_text="Set at least one profit or loss target. Buy then starts a session that continues until a target is reached or you stop it. Limits are checked after each contract settles." />
       </p>
     </div>
   );

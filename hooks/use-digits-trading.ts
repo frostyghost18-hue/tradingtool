@@ -24,7 +24,6 @@ import { useAppTranslations } from '@/components/custom/i18n-provider';
 import type { ContractMode, TradeType, DigitStats, OpenPosition, ClosedPosition } from '../lib/types';
 
 const CONTRACT_TYPES = ['DIGITMATCH', 'DIGITDIFF', 'DIGITOVER', 'DIGITUNDER', 'DIGITEVEN', 'DIGITODD'];
-const MAX_AUTO_TRADE_STAKE_MULTIPLIER = 10;
 
 type AutoTradingStatus = 'idle' | 'running' | 'stopping';
 
@@ -124,8 +123,6 @@ interface UseDigitsTradingReturn {
   setMartingaleMode: (value: MartingaleMode) => void;
   martingaleValues: Record<MartingaleMode, string>;
   setMartingaleValue: (mode: MartingaleMode, value: string) => void;
-  maxSessionTrades: string;
-  setMaxSessionTrades: (value: string) => void;
   autoTradingStatus: AutoTradingStatus;
   autoTradingTradeCount: number;
   autoTradingProfit: number;
@@ -162,17 +159,16 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
   const [tradeType, setTradeTypeRaw] = useState<TradeType>('matches-differs');
   const [contractMode, setContractMode] = useState<ContractMode>('DIGITMATCH');
   const [selectedDigit, setSelectedDigit] = useState<number>(5);
-  const [stake, setStake] = useState<string>('10');
-  const [duration, setDuration] = useState<number>(5);
-  const [takeProfit, setTakeProfit] = useState('');
-  const [stopLoss, setStopLoss] = useState('');
+  const [stake, setStake] = useState<string>('2.5');
+  const [duration, setDuration] = useState<number>(2);
+  const [takeProfit, setTakeProfit] = useState('5');
+  const [stopLoss, setStopLoss] = useState('25');
   const [martingaleMode, setMartingaleMode] = useState<MartingaleMode>('classic');
   const [martingaleValues, setMartingaleValues] = useState<Record<MartingaleMode, string>>({
-    classic: '2',
-    dynamic: '2',
-    'super-hybrid': '2',
+    classic: '1.85',
+    dynamic: '1.85',
+    'super-hybrid': '1.85',
   });
-  const [maxSessionTrades, setMaxSessionTrades] = useState('20');
   const [autoTradingStatus, setAutoTradingStatus] = useState<AutoTradingStatus>('idle');
   const [autoTradingTradeCount, setAutoTradingTradeCount] = useState(0);
   const [autoTradingProfit, setAutoTradingProfit] = useState(0);
@@ -276,7 +272,6 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
     let stopLossTarget: number | null;
     const baseStake = Number(stake);
     const multiplier = Number(martingaleValues[martingaleMode]);
-    const tradeLimit = Number(maxSessionTrades);
     try {
       takeProfitTarget = parseTarget(takeProfit, localize('Take profit'));
       stopLossTarget = parseTarget(stopLoss, localize('Stop loss'));
@@ -286,13 +281,8 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
       if (!Number.isFinite(baseStake) || baseStake <= 0) {
         throw new Error(localize('Stake must be greater than zero.'));
       }
-      if (!Number.isFinite(multiplier) || multiplier < 1 || multiplier > MAX_AUTO_TRADE_STAKE_MULTIPLIER) {
-        throw new Error(localize('Martingale multiplier must be between 1 and {{max}}.', {
-          max: MAX_AUTO_TRADE_STAKE_MULTIPLIER,
-        }));
-      }
-      if (!Number.isInteger(tradeLimit) || tradeLimit < 1 || tradeLimit > 100) {
-        throw new Error(localize('Maximum trades per session must be between 1 and 100.'));
+      if (!Number.isFinite(multiplier) || multiplier < 1) {
+        throw new Error(localize('Martingale multiplier must be at least 1.'));
       }
       if (!tradingWs?.isConnected || !tradingIsConnected || !isAuthenticated) {
         throw new Error(localize('Log in and connect before starting an automatic trading session.'));
@@ -318,7 +308,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
     let stopReason = '';
 
     try {
-      while (tradeCount < tradeLimit && !session.stopRequested) {
+      while (!session.stopRequested) {
         if (!tradingWs.isConnected) throw new Error(localize('Connection lost. Auto-trading was stopped.'));
 
         const proposalParams = {
@@ -374,13 +364,14 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
           martingaleProgress
         );
         nextStake = next.stake;
+        if (!Number.isFinite(nextStake) || nextStake <= 0) {
+          throw new Error(localize('Martingale stake exceeded the supported numeric range. Auto-trading was stopped.'));
+        }
         martingaleProgress = next.progress;
       }
 
       if (session.stopRequested) {
         stopReason = localize('Auto-trading stopped after the current contract settled.');
-      } else if (!stopReason && tradeCount >= tradeLimit) {
-        stopReason = localize('Maximum trades per session reached.');
       } else if (!stopReason && tradeCount === 0) {
         stopReason = localize('Auto-trading stopped before the first trade.');
       }
@@ -407,7 +398,6 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
     localize,
     martingaleMode,
     martingaleValues,
-    maxSessionTrades,
     proposal,
     selectedDigit,
     stake,
@@ -463,8 +453,6 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
     setMartingaleMode,
     martingaleValues,
     setMartingaleValue,
-    maxSessionTrades,
-    setMaxSessionTrades,
     autoTradingStatus,
     autoTradingTradeCount,
     autoTradingProfit,

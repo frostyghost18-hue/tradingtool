@@ -117,8 +117,6 @@ export interface DigitsViewProps {
   setMartingaleMode: (value: MartingaleMode) => void;
   martingaleValues: Record<MartingaleMode, string>;
   setMartingaleValue: (mode: MartingaleMode, value: string) => void;
-  maxSessionTrades: string;
-  setMaxSessionTrades: (value: string) => void;
   autoTradingStatus: 'idle' | 'running' | 'stopping';
   autoTradingTradeCount: number;
   autoTradingProfit: number;
@@ -191,8 +189,6 @@ export function DigitsView({
   setMartingaleMode,
   martingaleValues,
   setMartingaleValue,
-  maxSessionTrades,
-  setMaxSessionTrades,
   autoTradingStatus,
   autoTradingTradeCount,
   autoTradingProfit,
@@ -267,8 +263,6 @@ export function DigitsView({
     onMartingaleModeChange: setMartingaleMode,
     martingaleValues,
     onMartingaleValueChange: setMartingaleValue,
-    maxSessionTrades,
-    onMaxSessionTradesChange: setMaxSessionTrades,
     autoTradingStatus,
     autoTradingTradeCount,
     autoTradingProfit,
@@ -418,40 +412,6 @@ export function DigitsView({
       ) : (
         headerEl
       )}
-
-      <div className="mx-auto w-full max-w-[1600px] px-3 pt-4 sm:px-6 sm:pt-5">
-        <div className="flex flex-col gap-3 rounded-xl border border-primary/35 bg-card/75 px-4 py-3 shadow-[0_8px_24px_rgb(0_0_0/0.16)] sm:flex-row sm:items-center sm:justify-between sm:px-5">
-          <div className="flex min-w-0 items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-primary/35 bg-primary/10 text-primary">
-              <Activity className="h-5 w-5" />
-            </span>
-            <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
-                <Localize i18n_default_text="Pulse Factor · Digital Markets" />
-              </p>
-              <p className="mt-0.5 truncate text-xs text-muted-foreground sm:text-sm">
-                <Localize i18n_default_text="Live tick analysis and precision trading" />
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background/70 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              <span className={`h-2 w-2 rounded-full ${isConnected ? 'animate-pulse bg-emerald-400' : 'bg-amber-400'}`} />
-              {isConnected ? (
-                <Localize i18n_default_text="Live feed" />
-              ) : (
-                <Localize i18n_default_text="Connecting" />
-              )}
-            </span>
-            {activeSymbol && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-[10px] font-semibold text-primary">
-                <BarChart3 className="h-3.5 w-3.5" />
-                {activeSymbol.underlying_symbol_name}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
 
       {appConfig ? (
         isMobile ? (
