@@ -1,0 +1,23 @@
+/* [project]/lib/roboto_f1cbf7f.module.css [app-client] (css) */
+@font-face {
+  font-family: roboto;
+  src: url("../media/roboto_latin_variable-s.p.0a0h245ktd4x0.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: roboto Fallback;
+  src: local(Arial);
+  ascent-override: 92.43%;
+  descent-override: 24.32%;
+  line-gap-override: 0.0%;
+  size-adjust: 100.37%;
+}
+
+.roboto_f1cbf7f-module__gmPi8W__className {
+  font-family: roboto, roboto Fallback;
+}
+
+/*# sourceMappingURL=lib_roboto_f1cbf7f_module_css_1igg3k2-ikub5._.single.css.map*/

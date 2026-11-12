@@ -1,5 +1,70 @@
 /* Custom CSS for this template */
-/* Add your custom styles here */
+
+.factorpulse-shell {
+  background-color: rgb(var(--background));
+  background-image:
+    radial-gradient(ellipse at 8% 0%, rgb(130 54 28 / 0.2), transparent 38rem),
+    radial-gradient(ellipse at 94% 8%, rgb(83 42 132 / 0.14), transparent 34rem);
+}
+
+.aurora .factorpulse-shell {
+  background-image:
+    radial-gradient(ellipse at 8% 0%, rgb(45 212 191 / 0.18), transparent 38rem),
+    radial-gradient(ellipse at 94% 8%, rgb(59 130 246 / 0.16), transparent 34rem);
+}
+.ocean .factorpulse-shell {
+  background-image:
+    radial-gradient(ellipse at 8% 0%, rgb(37 99 235 / 0.22), transparent 38rem),
+    radial-gradient(ellipse at 94% 8%, rgb(6 182 212 / 0.15), transparent 34rem);
+}
+.sunset .factorpulse-shell {
+  background-image:
+    radial-gradient(ellipse at 8% 0%, rgb(244 63 94 / 0.2), transparent 38rem),
+    radial-gradient(ellipse at 94% 8%, rgb(249 115 22 / 0.16), transparent 34rem);
+}
+.forest .factorpulse-shell {
+  background-image:
+    radial-gradient(ellipse at 8% 0%, rgb(34 197 94 / 0.18), transparent 38rem),
+    radial-gradient(ellipse at 94% 8%, rgb(20 184 166 / 0.14), transparent 34rem);
+}
+.amethyst .factorpulse-shell {
+  background-image:
+    radial-gradient(ellipse at 8% 0%, rgb(139 92 246 / 0.2), transparent 38rem),
+    radial-gradient(ellipse at 94% 8%, rgb(217 70 239 / 0.14), transparent 34rem);
+}
+
+.factorpulse-panel {
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.2), inset 0 1px rgb(255 255 255 / 0.025);
+}
+
+.digit-tile[data-rank='highest'] { background: #08a77d; border-color: #28d1a2; color: #fff; }
+.digit-tile[data-rank='second-highest'] { background: #2452ce; border-color: #4774f0; color: #fff; }
+.digit-tile[data-rank='lowest'] { background: #d94349; border-color: #fa686b; color: #fff; }
+.digit-tile[data-rank='second-lowest'] { background: #f3c316; border-color: #ffda36; color: #241d05; }
+.digit-tile[data-rank='none'] { background: #1b2b35; border-color: #40515a; color: #e7edf0; }
+.digit-tile[data-selected='true'] {
+  box-shadow: 0 0 0 2px #f8f6e8, 0 0 0 4px rgb(var(--primary)), 0 0 18px rgb(var(--primary) / 0.28);
+  transform: translateY(-2px);
+}
+.digit-tile[data-live-digit='true'] { animation: live-digit-flash 500ms ease-out; }
+.live-digit-pointer {
+  color: #f2a137;
+  font-size: 0.75rem;
+  line-height: 1;
+  filter: drop-shadow(0 1px 5px rgb(242 161 55 / 0.65));
+  animation: live-digit-point 700ms ease-in-out infinite;
+}
+@keyframes live-digit-point {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(-50%, 4px); }
+}
+@keyframes live-digit-flash {
+  0% { filter: brightness(1.7); }
+  100% { filter: brightness(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-digit-pointer, .digit-tile[data-live-digit='true'] { animation: none; }
+}
 
 /* No-code build mode: briefly flash the draggable blocks (3× over 1.5s) when the
    layout is unlocked, so it's clear the components can be dragged to reorder. */

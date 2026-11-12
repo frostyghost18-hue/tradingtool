@@ -1,0 +1,23 @@
+/* [project]/lib/montserrat_6660e7d4.module.css [app-client] (css) */
+@font-face {
+  font-family: montserrat;
+  src: url("../media/montserrat_latin_variable-s.p.1dqa_6e_ad4sj.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: montserrat Fallback;
+  src: local(Arial);
+  ascent-override: 87.85%;
+  descent-override: 22.78%;
+  line-gap-override: 0.0%;
+  size-adjust: 110.19%;
+}
+
+.montserrat_6660e7d4-module__c-TAka__className {
+  font-family: montserrat, montserrat Fallback;
+}
+
+/*# sourceMappingURL=lib_montserrat_6660e7d4_module_css_1igg3k2-ikub5._.single.css.map*/

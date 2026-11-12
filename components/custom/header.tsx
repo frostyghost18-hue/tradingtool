@@ -28,7 +28,7 @@ interface HeaderProps {
   logoSrc?: string;
   /** App name used for the header text and the fallback logo letter when no logoSrc
    *  is provided. Prefers the live preview / Customise name, then
-   *  NEXT_PUBLIC_DERIV_APP_NAME, then 'Deriv Trading'. */
+   *  NEXT_PUBLIC_DERIV_APP_NAME, then 'Pulse Factor'. */
   appName?: string;
   /**
    * When false, hide the name text next to the logo. Defaults to the
@@ -58,7 +58,7 @@ function AccountLabel({ type }: { type: 'demo' | 'real' }) {
 
 function resolveHeaderAppName(appName?: string): string {
   const fromEnv = process.env.NEXT_PUBLIC_DERIV_APP_NAME?.trim();
-  return appName?.trim() || fromEnv || 'Deriv Trading';
+  return appName?.trim() || fromEnv || 'Pulse Factor';
 }
 
 function resolveShowAppName(showAppName?: boolean): boolean {
@@ -119,20 +119,31 @@ function preventDismissFromPopoverOrHeader(event: {
   }
 }
 
-const APPEARANCE_OPTIONS = ['light', 'dark', 'system'] as const;
+const APPEARANCE_OPTIONS = [
+  { value: 'light', label: 'Light', swatch: 'linear-gradient(135deg, #f8fafc, #94a3b8)' },
+  { value: 'dark', label: 'Dark', swatch: 'linear-gradient(135deg, #190f0d, #f2a137)' },
+  { value: 'aurora', label: 'Aurora', swatch: 'linear-gradient(135deg, #08141f, #4fe0c4)' },
+  { value: 'ocean', label: 'Ocean', swatch: 'linear-gradient(135deg, #09132b, #5ea5ff)' },
+  { value: 'sunset', label: 'Sunset', swatch: 'linear-gradient(135deg, #220f26, #ff775f)' },
+  { value: 'forest', label: 'Forest', swatch: 'linear-gradient(135deg, #0a1d1a, #68dc9d)' },
+  { value: 'amethyst', label: 'Amethyst', swatch: 'linear-gradient(135deg, #16112a, #b991ff)' },
+] as const;
 
-function AppearanceLabel({ value }: { value: (typeof APPEARANCE_OPTIONS)[number] }) {
-  if (value === 'light') return <Localize i18n_default_text="Light" />;
-  if (value === 'dark') return <Localize i18n_default_text="Dark" />;
-  return <Localize i18n_default_text="System" />;
+type AppearanceTheme = (typeof APPEARANCE_OPTIONS)[number]['value'];
+
+function AppearanceLabel({ value }: { value: AppearanceTheme }) {
+  const option = APPEARANCE_OPTIONS.find((item) => item.value === value) ?? APPEARANCE_OPTIONS[1];
+  return <Localize i18n_default_text={option.label} />;
 }
 
 function AppearancePicker() {
   const { theme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
-  const selected = theme === 'light' || theme === 'dark' ? theme : 'system';
+  const selected = APPEARANCE_OPTIONS.some((option) => option.value === theme)
+    ? theme as AppearanceTheme
+    : 'dark';
 
-  const handleSelect = (value: (typeof APPEARANCE_OPTIONS)[number]) => {
+  const handleSelect = (value: AppearanceTheme) => {
     setTheme(value);
     setOpen(false);
   };
@@ -174,16 +185,22 @@ function AppearancePicker() {
         >
           <ul className="space-y-0.5">
             {APPEARANCE_OPTIONS.map((option) => (
-              <li key={option}>
+              <li key={option.value}>
                 <button
                   type="button"
-                  onClick={() => handleSelect(option)}
+                  aria-pressed={option.value === selected}
+                  onClick={() => handleSelect(option.value)}
                   className={cn(
-                    'flex w-full items-center rounded-md px-3 py-2 text-sm transition-colors',
-                    option === selected ? 'bg-muted font-medium' : 'hover:bg-muted/50'
+                    'flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors',
+                    option.value === selected ? 'bg-muted font-medium' : 'hover:bg-muted/50'
                   )}
                 >
-                  <AppearanceLabel value={option} />
+                  <span
+                    className="h-4 w-4 shrink-0 rounded-full border border-foreground/20"
+                    style={{ background: option.swatch }}
+                    aria-hidden="true"
+                  />
+                  <AppearanceLabel value={option.value} />
                 </button>
               </li>
             ))}
@@ -286,7 +303,7 @@ export function Header({
   }, [mobileMenuOpen]);
 
   const headerBar = (
-      <header ref={headerRef} className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 border-b bg-background/80 backdrop-blur-sm">
+      <header ref={headerRef} className="sticky top-0 z-50 flex items-center justify-between border-b border-primary/30 bg-background/90 px-4 py-2.5 shadow-[0_1px_0_rgb(242_161_55/0.08)] backdrop-blur-sm sm:px-6">
       <div className="flex items-center gap-3 shrink-0">
         {!logoSrc || logoError ? (
           <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
@@ -297,12 +314,12 @@ export function Header({
           <img
             src={logoSrc}
             alt={localize('App Logo')}
-            className="h-8 w-auto object-contain"
+            className="h-10 w-auto max-w-[140px] object-contain sm:h-12"
             onError={() => setLogoError(true)}
           />
         )}
         {shouldShowName && (
-          <h1 className="text-lg font-semibold text-foreground hidden sm:block">
+          <h1 className="hidden text-lg font-bold tracking-wide text-foreground sm:block">
             {resolvedName}
           </h1>
         )}

@@ -42,6 +42,7 @@ import { TradeTypeChips } from '@/components/custom/trade-type-chips';
 import { SymbolSelector } from '@/components/custom/symbol-selector';
 import { useAppTranslations } from '@/components/custom/i18n-provider';
 import { formatAmount, formatPercent, formatTickPrice } from '@/lib/locale-format';
+import { getDigitPercentageRanks } from '@/lib/digit-stats';
 import { getSubmarketDisplayName } from '@/lib/active-symbols-display-names';
 import { centerInScrollContainer } from '@/lib/scroll-within-frame';
 import { cn } from '@/lib/utils';
@@ -154,7 +155,7 @@ export function ConfigurableBuyButton({
     // a — pill (current)
     a: () => (
       <Button
-        className="h-10 w-full rounded-full px-6 sm:h-11 sm:px-8"
+        className="h-12 w-full rounded-lg bg-[rgb(var(--buy-background))] px-6 font-bold text-[rgb(var(--buy-foreground))] shadow-[0_0_22px_rgb(0_195_144/0.18)] hover:brightness-110"
         disabled={disabled}
         onClick={onBuy}
       >
@@ -187,6 +188,8 @@ export function ConfigurableBuyButton({
 
 export interface ConfigurableDigitsControlsProps {
   config: DigitsAppConfig;
+  /** Place a compact live-price readout beside the digit prediction heading. */
+  compactMarketLayout?: boolean;
 
   // Market data
   symbols: ActiveSymbol[];
@@ -249,6 +252,7 @@ export interface ConfigurableDigitsControlsProps {
 export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProps) {
   const {
     config,
+    compactMarketLayout = false,
     symbols,
     activeSymbol,
     selectSymbol,
@@ -284,9 +288,14 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
   } = props;
 
   const { localize, locale } = useAppTranslations();
+  const [durationDraft, setDurationDraft] = useState(String(duration));
   const blockLabels = getBlockLabels(localize);
   const digitTradeTypeOptions = getDigitTradeTypeOptions(localize);
   const contractModeOptions = getContractModeOptions(localize);
+
+  useEffect(() => {
+    setDurationDraft(String(duration));
+  }, [duration]);
 
   const rearrange = useRearrangeDrag<ControlKey>(config.order, (next) => onReorder?.(next));
 
@@ -437,6 +446,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
             lastDigit={lastDigit}
             activeSymbol={activeSymbol}
             pipSize={pipSize}
+            compact={compactMarketLayout}
           />
         </div>
       ),
@@ -471,16 +481,38 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
         </div>
       ),
     };
-    return (variants[config.styles.tick] ?? variants.a)();
+    return (
+      <div className="rounded-xl border border-primary/25 bg-gradient-to-br from-background via-background to-accent/30 p-3 shadow-inner sm:p-4">
+        {compactMarketLayout ? (
+          <CurrentTickDisplay
+            tick={currentTick}
+            lastDigit={lastDigit}
+            activeSymbol={activeSymbol}
+            pipSize={pipSize}
+            compact
+          />
+        ) : (
+          (variants[config.styles.tick] ?? variants.a)()
+        )}
+      </div>
+    );
   };
 
   // ── Digit stats + digit selection (3 styles) ────────────────────────────
   // Real control = DigitStatsBar (includes digit selection). All variants keep
   // onDigitSelect / selectedDigit, and digit stats only show for non-even/odd.
-  const renderDigitStats = () => {
+  const renderDigitStats = (showInlineTick = false) => {
     if (tradeType === 'even-odd') return null;
-    const maxPct = Math.max(...digitStats.percentages);
-    const minPct = Math.min(...digitStats.percentages);
+    const ranks = getDigitPercentageRanks(digitStats.percentages);
+    const inlineTick = showInlineTick ? (
+      <CurrentTickDisplay
+        tick={currentTick}
+        lastDigit={lastDigit}
+        activeSymbol={activeSymbol}
+        pipSize={pipSize}
+        inline
+      />
+    ) : null;
 
     const variants: Record<StyleVariant, () => React.ReactNode> = {
       // a — bars (current)
@@ -488,46 +520,50 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
         <DigitStatsBar
           digitStats={digitStats}
           selectedDigit={selectedDigit}
+          lastDigit={lastDigit}
+          headerRight={inlineTick}
           onDigitSelect={onDigitSelect}
         />
       ),
       // Compact grid of 0–9 selectable <Button>s, each with its percentage.
       b: () => (
         <div className="space-y-1.5">
-          <span className="text-xs text-muted-foreground">
-            <Localize i18n_default_text="Last digit prediction" />
-          </span>
+          <div className="flex min-w-0 items-center justify-between gap-2">
+            <span className="text-xs text-muted-foreground">
+              <Localize i18n_default_text="Last digit prediction" />
+            </span>
+            {inlineTick}
+          </div>
           <div className="grid grid-cols-5 gap-1.5">
             {digitStats.percentages.map((pct, digit) => {
               const isSelected = digit === selectedDigit;
-              const isHighest = digitStats.totalTicks > 0 && pct === maxPct;
-              const isLowest = digitStats.totalTicks > 0 && pct === minPct;
+              const rank = digitStats.totalTicks > 0 ? ranks[digit] : null;
+              const isLiveDigit = digit === lastDigit;
               return (
-                <Button
-                  key={digit}
-                  variant={isSelected ? 'default' : 'outline'}
-                  onClick={() => onDigitSelect(digit)}
-                  className={cn(
-                    'flex h-12 flex-col items-center justify-center gap-0 rounded-lg p-0',
-                    !isSelected && 'bg-muted/50 border-muted-foreground/20',
+                <div key={digit} className="relative pt-1.5 sm:pt-2">
+                  {isLiveDigit && (
+                    <span
+                      aria-label={`Latest tick digit ${digit}`}
+                      className="live-digit-pointer absolute left-1/2 top-[-0.45rem] z-10 -translate-x-1/2"
+                    >
+                      <span aria-hidden="true">▼</span>
+                    </span>
                   )}
-                >
-                  <span className="text-base font-semibold leading-none">{digit}</span>
-                  <span
-                    className={cn(
-                      'mt-0.5 font-mono text-[10px] leading-none',
-                      isSelected
-                        ? 'text-primary-foreground/80'
-                        : isHighest
-                          ? 'text-green-500 font-semibold'
-                          : isLowest
-                            ? 'text-red-500 font-semibold'
-                            : 'text-muted-foreground',
-                    )}
+                  <Button
+                    variant={isSelected ? 'default' : 'outline'}
+                    onClick={() => onDigitSelect(digit)}
+                    data-digit={digit}
+                    data-selected={isSelected}
+                    data-rank={rank ?? 'none'}
+                    data-live-digit={isLiveDigit}
+                    className="digit-tile flex h-12 w-full flex-col items-center justify-center gap-0 rounded-lg p-0 text-base font-bold shadow-sm sm:h-[4.5rem] sm:rounded-xl sm:text-xl"
                   >
-                    {formatPercent(pct, 1, locale)}
-                  </span>
-                </Button>
+                    <span className="text-base font-semibold leading-none">{digit}</span>
+                    <span className="mt-0.5 font-mono text-[10px] leading-none">
+                      {formatPercent(pct, 1, locale)}
+                    </span>
+                  </Button>
+                </div>
               );
             })}
           </div>
@@ -536,30 +572,42 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
       // Compact list — one selectable row per digit with its percentage.
       c: () => (
         <div className="space-y-1.5">
-          <span className="text-xs text-muted-foreground">
-            <Localize i18n_default_text="Last digit prediction" />
-          </span>
+          <div className="flex min-w-0 items-center justify-between gap-2">
+            <span className="text-xs text-muted-foreground">
+              <Localize i18n_default_text="Last digit prediction" />
+            </span>
+            {inlineTick}
+          </div>
           <div className="flex flex-col gap-1">
             {digitStats.percentages.map((pct, digit) => {
               const isSelected = digit === selectedDigit;
-              const isHighest = digitStats.totalTicks > 0 && pct === maxPct;
-              const isLowest = digitStats.totalTicks > 0 && pct === minPct;
+              const rank = digitStats.totalTicks > 0 ? ranks[digit] : null;
+              const isLiveDigit = digit === lastDigit;
               return (
                 <Button
                   key={digit}
                   variant={isSelected ? 'default' : 'outline'}
                   onClick={() => onDigitSelect(digit)}
+                  data-digit={digit}
+                  data-selected={isSelected}
+                  data-rank={rank ?? 'none'}
+                  data-live-digit={isLiveDigit}
                   className={cn(
-                    'flex h-8 w-full items-center justify-between px-3 text-sm font-medium',
+                    'digit-tile flex h-8 w-full items-center justify-between px-3 text-sm font-medium',
                     !isSelected && 'bg-muted/50 border-muted-foreground/20',
                   )}
                 >
-                  <span>{digit}</span>
+                  <span className="flex items-center gap-1">
+                    {isLiveDigit && <span className="live-digit-pointer" aria-hidden="true">▼</span>}
+                    {digit}
+                  </span>
                   <span
                     className={cn(
                       'font-mono text-xs',
-                      !isSelected && isHighest && 'text-green-500 font-semibold',
-                      !isSelected && isLowest && 'text-red-500 font-semibold',
+                      rank === 'highest' && 'font-bold text-emerald-300',
+                      rank === 'second-highest' && 'font-semibold text-blue-300',
+                      rank === 'lowest' && 'font-bold text-red-400',
+                      rank === 'second-lowest' && 'font-semibold text-amber-300',
                     )}
                   >
                     {formatPercent(pct, 1, locale)}
@@ -716,14 +764,31 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
   const renderDuration = () => {
     const clamp = (amount: number) => Math.min(durationLimits.max, Math.max(durationLimits.min, amount));
     const setDurationNum = (amount: number) => onDurationChange(clamp(amount));
+    const updateDurationDraft = (value: string) => {
+      setDurationDraft(value);
+      const parsed = Number(value);
+      if (value !== '' && Number.isInteger(parsed) &&
+        parsed >= durationLimits.min && parsed <= durationLimits.max) {
+        onDurationChange(parsed);
+      }
+    };
+    const commitDurationDraft = () => {
+      const parsed = Number(durationDraft);
+      const value = durationDraft.trim() !== '' && Number.isInteger(parsed)
+        ? clamp(parsed)
+        : duration;
+      setDurationDraft(String(value));
+      onDurationChange(value);
+    };
     const durationInput = (extraClass?: string) => (
       <Input
         id="duration"
         type="number"
-        value={duration}
-        onChange={(event) => {
-          const val = parseInt(event.target.value, 10);
-          if (!isNaN(val)) onDurationChange(val);
+        value={durationDraft}
+        onChange={(event) => updateDurationDraft(event.target.value)}
+        onBlur={commitDurationDraft}
+        onKeyDown={(event) => {
+          if (['e', 'E', '+', '-'].includes(event.key)) event.preventDefault();
         }}
         min={durationLimits.min}
         max={durationLimits.max}
@@ -899,6 +964,45 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
   // Filtering config.order (not iterating `keys`) keeps the configured
   // relative order authoritative inside a filtered column.
   const orderedKeys = keys ? config.order.filter((key) => keys.includes(key)) : config.order;
+
+  if (compactMarketLayout && !editMode && keys) {
+    if (tradeType === 'even-odd') {
+      return (
+        <div className="w-full space-y-3">
+          {orderedKeys
+            .filter((key) => key === 'symbol')
+            .map((key) => (
+              <div key={key}>{renderers[key]()}</div>
+            ))}
+          <div className="mx-auto w-full max-w-[240px]">
+            {orderedKeys
+              .filter((key) => key === 'tick')
+              .map((key) => (
+                <div key={key}>{renderers[key]()}</div>
+              ))}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="w-full space-y-3">
+        {orderedKeys
+          .filter((key) => key === 'symbol')
+          .map((key) => (
+            <div key={key}>{renderers[key]()}</div>
+          ))}
+        {orderedKeys.includes('digitStats') && (
+          <div className="min-w-0">
+            {renderDigitStats(orderedKeys.includes('tick'))}
+          </div>
+        )}
+        {!orderedKeys.includes('digitStats') && orderedKeys.includes('tick') && (
+          <div className="min-w-0">{renderTick()}</div>
+        )}
+      </div>
+    );
+  }
 
   if (editMode && rearrangeMode) {
     // Rearrange mode: every block is draggable. Inner content is inert so

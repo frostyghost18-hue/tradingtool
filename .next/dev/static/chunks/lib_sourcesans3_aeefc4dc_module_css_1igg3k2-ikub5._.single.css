@@ -1,0 +1,23 @@
+/* [project]/lib/sourcesans3_aeefc4dc.module.css [app-client] (css) */
+@font-face {
+  font-family: sourceSans3;
+  src: url("../media/source_sans_3_latin_variable-s.p.2adce56gso3ku.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 200 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: sourceSans3 Fallback;
+  src: local(Arial);
+  ascent-override: 114.52%;
+  descent-override: 44.74%;
+  line-gap-override: 0.0%;
+  size-adjust: 89.41%;
+}
+
+.sourcesans3_aeefc4dc-module__fy3CyW__className {
+  font-family: sourceSans3, sourceSans3 Fallback;
+}
+
+/*# sourceMappingURL=lib_sourcesans3_aeefc4dc_module_css_1igg3k2-ikub5._.single.css.map*/

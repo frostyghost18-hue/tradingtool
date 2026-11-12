@@ -1,6 +1,6 @@
-# Digits Trading App
+# Pulse Factor
 
-A self-hosted digit trading app built on the Deriv WebSocket API. Supports Matches/Differs, Over/Under, and Even/Odd contract types with real-time tick streaming and digit frequency statistics.
+A self-hosted digit trading app powered by the Deriv WebSocket API. Pulse Factor supports Matches/Differs, Over/Under, and Even/Odd contract types with real-time tick streaming and digit frequency statistics.
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@ A self-hosted digit trading app built on the Deriv WebSocket API. Supports Match
 
 1. Log in to your Deriv account and go to the [API Token page](https://app.deriv.com/account/api-token) to create a token with the required scopes.
 2. Navigate to [App Registration](https://developers.deriv.com/dashboard/) and register a new application.
-3. Set the **Redirect URI** to the URL where you will host this app (e.g. `http://localhost:3000` for local development).
+3. Set the **Redirect URI** to `https://www.pulsefactor.space` for production. Register a separate URI if you also use a local development server.
 4. Copy the **App ID** shown after registration — you will need it in the next step.
 
 ## Step 2: Configure `.env.production`
@@ -25,7 +25,7 @@ Edit `.env.production`:
 
 ```env
 NEXT_PUBLIC_DERIV_APP_ID=your_app_id_here
-# NEXT_PUBLIC_DERIV_REDIRECT_URI=https://your-app.example.com/path/  # optional
+NEXT_PUBLIC_DERIV_REDIRECT_URI=https://www.pulsefactor.space
 NEXT_PUBLIC_DERIV_APP_NAME=your_app_name_here
 NEXT_PUBLIC_DERIV_SHOW_APP_NAME=true
 NEXT_PUBLIC_DERIV_REFERRAL_LINK=your_referral_link_here

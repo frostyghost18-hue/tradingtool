@@ -2,8 +2,8 @@ import fs from 'fs';
 import path from 'path';
 
 /**
- * Returns the public URL of the logo injected by the App Builder, or null
- * when no logo file is present (letter-badge fallback in the Header applies).
+ * Returns the public URL of the logo injected by the App Builder, or the
+ * default Pulse Factor icon when no uploaded logo is present.
  *
  * Checked in priority order: png → jpg → jpeg → webp.
  * The App Builder always writes exactly one of these to public/ at deploy time.
@@ -19,5 +19,5 @@ export function getLogoSrc(): string | null {
       return `/logo.${ext}`;
     }
   }
-  return null;
+  return fs.existsSync(path.join(publicDir, 'icon.svg')) ? '/icon.svg' : null;
 }

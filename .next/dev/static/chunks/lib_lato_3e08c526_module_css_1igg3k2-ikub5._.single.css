@@ -1,0 +1,31 @@
+/* [project]/lib/lato_3e08c526.module.css [app-client] (css) */
+@font-face {
+  font-family: lato;
+  src: url("../media/lato_latin_400-s.p.27vw08z6_vw0m.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: lato;
+  src: url("../media/lato_latin_700-s.p.0zem_9y19rte6.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: lato Fallback;
+  src: local(Arial);
+  ascent-override: 100.88%;
+  descent-override: 21.77%;
+  line-gap-override: 0.0%;
+  size-adjust: 97.84%;
+}
+
+.lato_3e08c526-module__YAra7W__className {
+  font-family: lato, lato Fallback;
+}
+
+/*# sourceMappingURL=lib_lato_3e08c526_module_css_1igg3k2-ikub5._.single.css.map*/

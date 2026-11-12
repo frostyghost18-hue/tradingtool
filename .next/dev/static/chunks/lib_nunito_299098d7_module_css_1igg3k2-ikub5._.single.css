@@ -1,0 +1,23 @@
+/* [project]/lib/nunito_299098d7.module.css [app-client] (css) */
+@font-face {
+  font-family: nunito;
+  src: url("../media/nunito_latin_variable-s.p.2kjei9psvcorz.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 200 1000;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: nunito Fallback;
+  src: local(Arial);
+  ascent-override: 103.02%;
+  descent-override: 35.97%;
+  line-gap-override: 0.0%;
+  size-adjust: 98.13%;
+}
+
+.nunito_299098d7-module__feQJAW__className {
+  font-family: nunito, nunito Fallback;
+}
+
+/*# sourceMappingURL=lib_nunito_299098d7_module_css_1igg3k2-ikub5._.single.css.map*/

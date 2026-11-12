@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Ban } from 'lucide-react';
+import { Activity, ArrowUpRight, BarChart3, Ban, Radio, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { Localize } from '@deriv-com/translations';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +16,7 @@ import { formatAmount } from '@/lib/locale-format';
 import { CurrentTickDisplay } from './current-tick-display';
 import { DigitStatsBar } from './digit-stats-bar';
 import { TradeControls } from './trade-controls';
+import { RiskManagementControls } from './risk-management-controls';
 import { ConfigurableDigitsControls, ConfigurableBuyButton } from './configurable-digits-controls';
 import { TradeTypeChips } from '@/components/custom/trade-type-chips';
 import { SymbolSelector } from '@/components/custom/symbol-selector';
@@ -293,17 +294,22 @@ export function DigitsView({
 
   // The configurable controls — a reorderable column. `keys` narrows the
   // instance to one desktop column; omitted, it renders every block.
-  const renderConfigurable = (keys?: ControlKey[], showPositionsLink?: boolean) =>
+  const renderConfigurable = (
+    keys?: ControlKey[],
+    showPositionsLink?: boolean,
+    compactMarketLayout?: boolean
+  ) =>
     appConfig ? (
       <ConfigurableDigitsControls
         config={appConfig}
+        lastDigit={lastDigit}
+        compactMarketLayout={compactMarketLayout}
         keys={keys}
         showPositionsLink={showPositionsLink}
         symbols={symbols}
         activeSymbol={activeSymbol}
         selectSymbol={selectSymbol}
         currentTick={currentTick}
-        lastDigit={lastDigit}
         digitStats={digitStats}
         pipSize={pipSize}
         tradeType={tradeType}
@@ -334,8 +340,8 @@ export function DigitsView({
 
   return (
     <main
-      className={`flex flex-col max-lg:h-dvh max-lg:overflow-y-auto lg:overflow-visible ${
-        editMode ? 'bg-muted/50' : 'bg-background'
+      className={`factorpulse-shell flex flex-col max-lg:h-dvh max-lg:overflow-y-auto lg:overflow-visible ${
+      editMode ? 'bg-muted/50' : ''
       }`}
     >
       {editMode ? (
@@ -352,12 +358,78 @@ export function DigitsView({
         headerEl
       )}
 
+      <div className="mx-auto w-full max-w-[1600px] px-3 pt-4 sm:px-6 sm:pt-5">
+        <div className="flex flex-col gap-3 rounded-xl border border-primary/35 bg-card/75 px-4 py-3 shadow-[0_8px_24px_rgb(0_0_0/0.16)] sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-primary/35 bg-primary/10 text-primary">
+              <Activity className="h-5 w-5" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+                <Localize i18n_default_text="Pulse Factor · Digital Markets" />
+              </p>
+              <p className="mt-0.5 truncate text-xs text-muted-foreground sm:text-sm">
+                <Localize i18n_default_text="Live tick analysis and precision trading" />
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background/70 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              <span className={`h-2 w-2 rounded-full ${isConnected ? 'animate-pulse bg-emerald-400' : 'bg-amber-400'}`} />
+              {isConnected ? (
+                <Localize i18n_default_text="Live feed" />
+              ) : (
+                <Localize i18n_default_text="Connecting" />
+              )}
+            </span>
+            {activeSymbol && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-[10px] font-semibold text-primary">
+                <BarChart3 className="h-3.5 w-3.5" />
+                {activeSymbol.underlying_symbol_name}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
       {appConfig ? (
         isMobile ? (
           /* No-code mobile layout: a single, reorderable column of blocks. */
           <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
-            <div className="mx-auto flex w-full max-w-md flex-col gap-3 px-3 py-3">
-              {isLoading ? <Skeleton className="h-[420px] w-full rounded-xl" /> : renderConfigurable()}
+            <div className="mx-auto flex w-full max-w-md flex-col gap-3 px-3 py-3 sm:px-4">
+              {isLoading ? (
+                <Skeleton className="h-[420px] w-full rounded-xl" />
+              ) : editMode ? (
+                <Card className="factorpulse-panel overflow-hidden border-primary/40 bg-card/90">
+                  <CardContent className="p-3 sm:p-4">{renderConfigurable()}</CardContent>
+                </Card>
+              ) : (
+                <>
+                  <Card className="factorpulse-panel overflow-hidden border-primary/45 bg-card/95">
+                    <CardHeader className="flex-row items-center gap-2 border-b border-border/70 px-4 py-3">
+                      <Activity className="h-4 w-4 text-primary" />
+                      <CardTitle className="text-sm font-bold uppercase tracking-[0.12em]">
+                        <Localize i18n_default_text="Cycle Inspector" />
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4">
+                      {renderConfigurable(MARKET_COLUMN_KEYS, false, true)}
+                    </CardContent>
+                  </Card>
+                  <Card className="factorpulse-panel overflow-hidden border-primary/45 bg-card/95">
+                    <CardHeader className="flex-row items-center gap-2 border-b border-border/70 px-4 py-3">
+                      <Zap className="h-4 w-4 text-primary" />
+                      <CardTitle className="text-sm font-bold uppercase tracking-[0.12em]">
+                        <Localize i18n_default_text="Trade Terminal" />
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4">
+                      {renderConfigurable(CONTROLS_COLUMN_KEYS)}
+                      <RiskManagementControls />
+                    </CardContent>
+                  </Card>
+                </>
+              )}
             </div>
           </div>
         ) : (
@@ -384,25 +456,88 @@ export function DigitsView({
              a no-op because each instance tracks its own drag). Full reordering
              lives in the builder's phone viewport, which renders the single
              mobile column. */
-          <div className="flex w-full max-w-5xl mx-auto flex-col px-4 py-4 pb-24">
+          <div className="mx-auto flex w-full max-w-[1600px] flex-col px-3 py-4 pb-24 sm:px-6">
             {isLoading ? (
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_440px]">
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(320px,0.9fr)] xl:gap-5">
                 <Skeleton className="h-[420px] w-full rounded-xl" />
                 <Skeleton className="h-[420px] w-full rounded-xl" />
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_440px]">
-                <Card data-testid="market-column">
-                  <CardContent className="pt-4">
-                    {renderConfigurable(MARKET_COLUMN_KEYS, false)}
+              <>
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(320px,0.9fr)] xl:gap-5">
+                <Card className="factorpulse-panel overflow-hidden border-primary/45 bg-card/95" data-testid="market-column">
+                  <CardHeader className="flex-row items-center justify-between border-b border-border/70 px-4 py-3 sm:px-5">
+                    <div className="flex items-center gap-2">
+                      <Activity className="h-4 w-4 text-primary" />
+                      <CardTitle className="text-sm font-bold uppercase tracking-[0.12em] sm:text-base">
+                        <Localize i18n_default_text="Cycle Inspector" />
+                      </CardTitle>
+                    </div>
+                    <span className="rounded-md border border-primary/35 bg-primary/10 px-2 py-1 text-[9px] font-bold uppercase tracking-widest text-primary">
+                      <Localize i18n_default_text="Market data" />
+                    </span>
+                  </CardHeader>
+                  <CardContent className="space-y-4 p-4 sm:p-5">
+                    {renderConfigurable(MARKET_COLUMN_KEYS, false, true)}
                   </CardContent>
                 </Card>
-                <Card data-testid="controls-column">
-                  <CardContent className="pt-4">
+                <Card className="factorpulse-panel overflow-hidden border-primary/45 bg-card/95" data-testid="controls-column">
+                  <CardHeader className="flex-row items-center justify-between border-b border-border/70 px-4 py-3 sm:px-5">
+                    <div className="flex items-center gap-2">
+                      <Zap className="h-4 w-4 text-primary" />
+                      <CardTitle className="text-sm font-bold uppercase tracking-[0.12em] sm:text-base">
+                        <Localize i18n_default_text="Trade Terminal" />
+                      </CardTitle>
+                    </div>
+                    <span className={`rounded-md border px-2 py-1 text-[9px] font-bold uppercase tracking-widest ${isConnected ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400' : 'border-amber-500/40 bg-amber-500/10 text-amber-300'}`}>
+                      {isConnected ? (
+                        <Localize i18n_default_text="Ready" />
+                      ) : (
+                        <Localize i18n_default_text="Standby" />
+                      )}
+                    </span>
+                  </CardHeader>
+                  <CardContent className="p-4 sm:p-5">
                     {renderConfigurable(CONTROLS_COLUMN_KEYS)}
+                    <RiskManagementControls />
                   </CardContent>
                 </Card>
               </div>
+              <div className="mt-4 hidden grid-cols-2 gap-3 lg:grid">
+                <div className="flex items-center justify-between rounded-lg border border-border/80 bg-card/70 px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <Radio className={`h-4 w-4 ${isConnected ? 'text-emerald-400' : 'text-amber-300'}`} />
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        <Localize i18n_default_text="Connection status" />
+                      </p>
+                      <p className="mt-0.5 text-xs font-medium">
+                        {isConnected ? (
+                          <Localize i18n_default_text="Live market stream connected" />
+                        ) : (
+                          <Localize i18n_default_text="Waiting for live market stream" />
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <span className={`h-2 w-2 rounded-full ${isConnected ? 'animate-pulse bg-emerald-400' : 'bg-amber-400'}`} />
+                </div>
+                <div className="flex items-center justify-between rounded-lg border border-border/80 bg-card/70 px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <BarChart3 className="h-4 w-4 text-primary" />
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        <Localize i18n_default_text="Digit sample" />
+                      </p>
+                      <p className="mt-0.5 text-xs font-medium">
+                        {digitStats.totalTicks} <Localize i18n_default_text="ticks analyzed" />
+                      </p>
+                    </div>
+                  </div>
+                  <ArrowUpRight className="h-4 w-4 text-primary" />
+                </div>
+              </div>
+              </>
             )}
           </div>
         )
@@ -431,21 +566,24 @@ export function DigitsView({
 
               <Card className="shrink-0 border shadow-sm mb-12">
                 <CardContent className="flex flex-col p-3 pt-3 sm:p-6 sm:pt-4 pb-2 sm:pb-6">
-                  {/* Symbol selector + tick display */}
+                  {/* Symbol selector; price appears beside the prediction heading except in Even/Odd mode. */}
                   <div className="flex flex-col pb-4 pt-1 sm:pb-6 sm:pt-2">
                     <SymbolSelector
                       symbols={symbols}
                       activeSymbol={activeSymbol}
                       onSymbolChange={selectSymbol}
                     />
-                    <div className="flex items-center justify-center min-h-24 sm:min-h-32">
-                      <CurrentTickDisplay
-                        tick={currentTick}
-                        lastDigit={lastDigit}
-                        activeSymbol={activeSymbol}
-                        pipSize={pipSize}
-                      />
-                    </div>
+                    {tradeType === 'even-odd' && (
+                      <div className="flex min-h-24 items-center justify-center sm:min-h-32">
+                        <CurrentTickDisplay
+                          tick={currentTick}
+                          lastDigit={lastDigit}
+                          activeSymbol={activeSymbol}
+                          pipSize={pipSize}
+                          compact
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div className="border-t divide-y divide-border">
@@ -455,6 +593,16 @@ export function DigitsView({
                         <DigitStatsBar
                           digitStats={digitStats}
                           selectedDigit={selectedDigit}
+                          lastDigit={lastDigit}
+                          headerRight={
+                            <CurrentTickDisplay
+                              tick={currentTick}
+                              lastDigit={lastDigit}
+                              activeSymbol={activeSymbol}
+                              pipSize={pipSize}
+                              inline
+                            />
+                          }
                           onDigitSelect={setSelectedDigit}
                         />
                       </div>
@@ -483,6 +631,7 @@ export function DigitsView({
                         isAuthenticated={authState === 'authenticated'}
                         isMobile
                       />
+                      <RiskManagementControls />
                     </div>
                   </div>
                 </CardContent>
@@ -496,41 +645,78 @@ export function DigitsView({
            controls (trade type chips + trade controls) right — so both paths
            look identical. The `lg:` guard plays the same first-paint role as
            in the no-code grid (useIsMobile initialises to false). */
-        <div className="flex w-full max-w-5xl mx-auto flex-col px-4 py-4 pb-24">
+        <div className="mx-auto flex w-full max-w-[1600px] flex-col px-3 py-4 pb-24 sm:px-6">
           {isLoading ? (
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_440px]">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(320px,0.9fr)] xl:gap-5">
               <Skeleton className="h-[420px] w-full rounded-xl" />
               <Skeleton className="h-[420px] w-full rounded-xl" />
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_440px]">
-              <Card data-testid="market-column">
-                <CardContent className="flex flex-col gap-4 pt-4">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(320px,0.9fr)] xl:gap-5">
+              <Card className="factorpulse-panel overflow-hidden border-primary/45 bg-card/95" data-testid="market-column">
+                <CardHeader className="flex-row items-center justify-between border-b border-border/70 px-4 py-3 sm:px-5">
+                  <div className="flex items-center gap-2">
+                    <Activity className="h-4 w-4 text-primary" />
+                    <CardTitle className="text-sm font-bold uppercase tracking-[0.12em] sm:text-base">
+                      <Localize i18n_default_text="Cycle Inspector" />
+                    </CardTitle>
+                  </div>
+                  <span className="rounded-md border border-primary/35 bg-primary/10 px-2 py-1 text-[9px] font-bold uppercase tracking-widest text-primary">
+                    <Localize i18n_default_text="Market data" />
+                  </span>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-4 p-4 sm:p-5">
                   <SymbolSelector
                     symbols={symbols}
                     activeSymbol={activeSymbol}
                     onSymbolChange={selectSymbol}
                   />
-                  <div className="flex flex-1 items-center justify-center min-h-32">
-                    <CurrentTickDisplay
-                      tick={currentTick}
-                      lastDigit={lastDigit}
-                      activeSymbol={activeSymbol}
-                      pipSize={pipSize}
-                    />
+                  <div className={tradeType === 'even-odd' ? 'mx-auto w-full max-w-[240px]' : 'min-w-0'}>
+                    {tradeType !== 'even-odd' ? (
+                      <DigitStatsBar
+                        digitStats={digitStats}
+                        selectedDigit={selectedDigit}
+                        lastDigit={lastDigit}
+                        headerRight={
+                          <CurrentTickDisplay
+                            tick={currentTick}
+                            lastDigit={lastDigit}
+                            activeSymbol={activeSymbol}
+                            pipSize={pipSize}
+                            inline
+                          />
+                        }
+                        onDigitSelect={setSelectedDigit}
+                      />
+                    ) : (
+                      <CurrentTickDisplay
+                        tick={currentTick}
+                        lastDigit={lastDigit}
+                        activeSymbol={activeSymbol}
+                        pipSize={pipSize}
+                        compact
+                      />
+                    )}
                   </div>
-                  {/* Digit stats — hidden for Even/Odd */}
-                  {tradeType !== 'even-odd' && (
-                    <DigitStatsBar
-                      digitStats={digitStats}
-                      selectedDigit={selectedDigit}
-                      onDigitSelect={setSelectedDigit}
-                    />
-                  )}
                 </CardContent>
               </Card>
-              <Card data-testid="controls-column">
-                <CardContent className="flex flex-col gap-4 pt-4">
+              <Card className="factorpulse-panel overflow-hidden border-primary/45 bg-card/95" data-testid="controls-column">
+                <CardHeader className="flex-row items-center justify-between border-b border-border/70 px-4 py-3 sm:px-5">
+                  <div className="flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-primary" />
+                    <CardTitle className="text-sm font-bold uppercase tracking-[0.12em] sm:text-base">
+                      <Localize i18n_default_text="Trade Terminal" />
+                    </CardTitle>
+                  </div>
+                  <span className={`rounded-md border px-2 py-1 text-[9px] font-bold uppercase tracking-widest ${isConnected ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400' : 'border-amber-500/40 bg-amber-500/10 text-amber-300'}`}>
+                    {isConnected ? (
+                      <Localize i18n_default_text="Ready" />
+                    ) : (
+                      <Localize i18n_default_text="Standby" />
+                    )}
+                  </span>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-4 p-4 sm:p-5">
                   {/* Rendered inside the controls card, so the edge fade is
                       drawn in the card colour rather than the page background. */}
                   <TradeTypeChips
@@ -559,6 +745,7 @@ export function DigitsView({
                     onClearBuyResult={clearBuyResult}
                     isAuthenticated={authState === 'authenticated'}
                   />
+                  <RiskManagementControls />
                 </CardContent>
               </Card>
             </div>

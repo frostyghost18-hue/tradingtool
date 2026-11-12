@@ -1,0 +1,47 @@
+/* [project]/lib/poppins_e9fcc2b2.module.css [app-client] (css) */
+@font-face {
+  font-family: poppins;
+  src: url("../media/poppins_latin_400-s.p.43zbiuwnnoiok.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: poppins;
+  src: url("../media/poppins_latin_500-s.p.2o7m9ogm38dql.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: poppins;
+  src: url("../media/poppins_latin_600-s.p.3o_v2fun1jzxk.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: poppins;
+  src: url("../media/poppins_latin_700-s.p.3bh2vc0w-r-ll.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: poppins Fallback;
+  src: local(Arial);
+  ascent-override: 92.83%;
+  descent-override: 30.94%;
+  line-gap-override: 8.84%;
+  size-adjust: 113.11%;
+}
+
+.poppins_e9fcc2b2-module__NdnRoq__className {
+  font-family: poppins, poppins Fallback;
+}
+
+/*# sourceMappingURL=lib_poppins_e9fcc2b2_module_css_1igg3k2-ikub5._.single.css.map*/

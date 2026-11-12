@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["turbopack:///[project]/lib/raleway_7ab91368.module.css"],"sourcesContent":["@font-face {\n    \nfont-family: 'raleway';\n    src: url('@vercel/turbopack-next/internal/font/local/font?{%22path%22:%22../app/fonts/raleway-latin-variable.woff2%22,%22preload%22:true,%22has_size_adjust%22:true}') format('woff2');\n    font-display: swap;\n    \nfont-weight: 100 900;\nfont-style: normal;\n}\n\n@font-face {\n    font-family: 'raleway Fallback';\n    src: local(\"Arial\");\n    ascent-override: 92.39%;\ndescent-override: 23.00%;\nline-gap-override: 0.00%;\nsize-adjust: 101.74%;\n\n}\n\n.className {\n    font-family: 'raleway', 'raleway Fallback';\n    \n}\n\n"],"names":[],"mappings":"AAAA;;;;;;;;AAUA;;;;;;;;;AAUA"}}]
+}

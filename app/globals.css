@@ -7,7 +7,7 @@
     --radius: 0.5rem;
     
     /* Light mode colors from Figma tokens */
-    --primary: 25 69 164;
+    --primary: 194 126 36;
     --accent: 246 247 248;
     --background: 255 255 255;
     --border: 229 229 229;
@@ -68,31 +68,30 @@
   }
 
   .dark {
-    /* Dark mode colors from Figma tokens */
-    --primary: 25 69 164;
-    --accent-foreground: 246 247 248;
-    --background: 24 28 37;
-    --border: 255 255 255 / 0.10000000149011612;
-    --card: 23 23 23;
-    --accent: 17 20 27;
-    --card-foreground: 255 255 255;
+    --primary: 242 161 55;
+    --accent-foreground: 248 196 105;
+    --background: 25 15 13;
+    --border: 126 86 48 / 0.78;
+    --card: 8 24 31;
+    --accent: 25 38 49;
+    --card-foreground: 241 242 236;
     --destructive: 230 25 14 / 0.7200000286102295;
     --destructive-foreground: 254 252 252;
-    --foreground: 255 255 255;
-    --input: 255 255 255 / 0.07999999821186066;
-    --muted: 38 38 38;
-    --popover: 38 38 38;
-    --popover-foreground: 255 255 255;
-    --primary-foreground: 255 255 255;
-    --ring: 115 115 115;
-    --secondary: 0 0 0;
-    --secondary-foreground: 255 255 255;
-    --muted-foreground: 163 163 163;
-    --chart-1: 29 78 216;
-    --chart-2: 0 195 144;
-    --chart-3: 245 158 11;
-    --chart-4: 168 85 247;
-    --chart-5: 222 0 64;
+    --foreground: 237 239 231;
+    --input: 236 176 78 / 0.18;
+    --muted: 18 31 39;
+    --popover: 8 24 31;
+    --popover-foreground: 241 242 236;
+    --primary-foreground: 29 20 13;
+    --ring: 242 161 55;
+    --secondary: 19 39 48;
+    --secondary-foreground: 240 242 237;
+    --muted-foreground: 148 164 170;
+    --chart-1: 245 158 11;
+    --chart-2: 13 148 136;
+    --chart-3: 168 85 247;
+    --chart-4: 239 68 68;
+    --chart-5: 59 130 246;
     --button-black: 0 0 0;
     --button-black-foreground: 255 255 255;
     --button-white: 255 255 255;
@@ -106,7 +105,7 @@
     --alpha-70: 0 0 0 / 0.30000001192092896;
     --alpha-80: 0 0 0 / 0.20000000298023224;
     --alpha-90: 0 0 0 / 0.10000000149011612;
-    --ring-offset: 24 28 37;
+    --ring-offset: 25 15 13;
     --alpha-5: 0 0 0 / 0.949999988079071;
     --outline: 115 115 115 / 0.5;
     --dark:input: 0 0 0 / 0.07999999821186066;
@@ -121,8 +120,225 @@
     --border-focus-destructive: 255 77 77;
     --button-blackwhite: 255 255 255;
     --button-blackwhite-foreground: 0 0 0;
-    --checkmark-foreground: 24 28 37;
+    --checkmark-foreground: 25 15 13;
     --checkmark: 255 255 255;
+  }
+
+  .aurora,
+  .ocean,
+  .sunset,
+  .forest,
+  .amethyst {
+    color-scheme: dark;
+    --destructive: 248 113 113 / 0.78;
+    --destructive-foreground: 255 255 255;
+    --button-black: 0 0 0;
+    --button-black-foreground: 255 255 255;
+    --button-white: 255 255 255;
+    --button-white-foreground: 0 0 0;
+    --alpha-10: 0 0 0 / 0.9;
+    --alpha-20: 0 0 0 / 0.8;
+    --alpha-30: 0 0 0 / 0.7;
+    --alpha-40: 0 0 0 / 0.6;
+    --alpha-50: 0 0 0 / 0.5;
+    --alpha-60: 0 0 0 / 0.4;
+    --alpha-70: 0 0 0 / 0.3;
+    --alpha-80: 0 0 0 / 0.2;
+    --alpha-90: 0 0 0 / 0.1;
+    --alpha-5: 0 0 0 / 0.95;
+    --ring-offset: var(--background);
+    --dark\:input: 0 0 0 / 0.08;
+    --border-focus: 255 255 255;
+    --border-focus-destructive: 255 77 77;
+    --button-blackwhite: 255 255 255;
+    --button-blackwhite-foreground: 0 0 0;
+    --checkmark-foreground: var(--background);
+    --checkmark: 255 255 255;
+  }
+
+  .aurora {
+    --background: 8 20 31;
+    --foreground: 226 248 246;
+    --card: 13 32 48;
+    --card-foreground: 226 248 246;
+    --popover: 11 27 42;
+    --popover-foreground: 226 248 246;
+    --primary: 79 224 196;
+    --primary-foreground: 4 29 33;
+    --secondary: 18 42 57;
+    --secondary-foreground: 219 246 242;
+    --muted: 20 43 56;
+    --muted-foreground: 145 179 188;
+    --accent: 21 54 68;
+    --accent-foreground: 124 241 213;
+    --border: 38 86 98;
+    --input: 79 224 196 / 0.2;
+    --ring: 79 224 196;
+    --chart-1: 79 224 196;
+    --chart-2: 96 165 250;
+    --chart-3: 192 132 252;
+    --chart-4: 250 204 21;
+    --chart-5: 251 113 133;
+    --buy-background: 45 212 160;
+    --buy-foreground: 4 29 33;
+    --sell-background: 251 113 133;
+    --sell-foreground: 35 10 20;
+    --buy-20: 45 212 160 / 0.32;
+    --sell-20: 251 113 133 / 0.32;
+    --section-message: 14 116 144 / 0.3;
+    --blue-500: 56 189 248;
+    --outline: 79 224 196 / 0.45;
+    --outline-10: 79 224 196 / 0.12;
+    --destructive-20: 248 113 113 / 0.25;
+    --destructive-40: 248 113 113 / 0.45;
+  }
+
+  .ocean {
+    --background: 9 19 43;
+    --foreground: 232 241 255;
+    --card: 15 31 63;
+    --card-foreground: 232 241 255;
+    --popover: 12 27 55;
+    --popover-foreground: 232 241 255;
+    --primary: 94 165 255;
+    --primary-foreground: 7 22 46;
+    --secondary: 19 39 69;
+    --secondary-foreground: 224 236 255;
+    --muted: 20 38 66;
+    --muted-foreground: 153 177 210;
+    --accent: 23 48 81;
+    --accent-foreground: 145 200 255;
+    --border: 39 74 119;
+    --input: 94 165 255 / 0.2;
+    --ring: 94 165 255;
+    --chart-1: 94 165 255;
+    --chart-2: 45 212 191;
+    --chart-3: 167 139 250;
+    --chart-4: 251 191 36;
+    --chart-5: 251 113 133;
+    --buy-background: 45 212 191;
+    --buy-foreground: 5 31 41;
+    --sell-background: 251 113 133;
+    --sell-foreground: 42 9 23;
+    --buy-20: 45 212 191 / 0.32;
+    --sell-20: 251 113 133 / 0.32;
+    --section-message: 37 99 235 / 0.3;
+    --blue-500: 96 165 250;
+    --outline: 94 165 255 / 0.45;
+    --outline-10: 94 165 255 / 0.12;
+    --destructive-20: 248 113 113 / 0.25;
+    --destructive-40: 248 113 113 / 0.45;
+  }
+
+  .sunset {
+    --background: 34 15 38;
+    --foreground: 255 237 231;
+    --card: 51 24 48;
+    --card-foreground: 255 237 231;
+    --popover: 44 20 44;
+    --popover-foreground: 255 237 231;
+    --primary: 255 119 95;
+    --primary-foreground: 52 15 28;
+    --secondary: 67 31 57;
+    --secondary-foreground: 255 228 214;
+    --muted: 60 31 52;
+    --muted-foreground: 205 156 168;
+    --accent: 76 34 57;
+    --accent-foreground: 255 174 133;
+    --border: 115 56 74;
+    --input: 255 119 95 / 0.2;
+    --ring: 255 145 109;
+    --chart-1: 255 119 95;
+    --chart-2: 255 190 92;
+    --chart-3: 231 111 189;
+    --chart-4: 129 140 248;
+    --chart-5: 74 222 190;
+    --buy-background: 74 222 190;
+    --buy-foreground: 12 39 35;
+    --sell-background: 255 105 121;
+    --sell-foreground: 48 11 27;
+    --buy-20: 74 222 190 / 0.32;
+    --sell-20: 255 105 121 / 0.32;
+    --section-message: 190 24 93 / 0.3;
+    --blue-500: 129 140 248;
+    --outline: 255 145 109 / 0.45;
+    --outline-10: 255 145 109 / 0.12;
+    --destructive-20: 251 113 133 / 0.25;
+    --destructive-40: 251 113 133 / 0.45;
+  }
+
+  .forest {
+    --background: 10 29 26;
+    --foreground: 232 248 237;
+    --card: 15 43 37;
+    --card-foreground: 232 248 237;
+    --popover: 13 36 32;
+    --popover-foreground: 232 248 237;
+    --primary: 104 220 157;
+    --primary-foreground: 8 35 25;
+    --secondary: 20 52 43;
+    --secondary-foreground: 225 246 230;
+    --muted: 22 47 39;
+    --muted-foreground: 153 187 162;
+    --accent: 27 63 48;
+    --accent-foreground: 155 235 173;
+    --border: 48 91 64;
+    --input: 104 220 157 / 0.2;
+    --ring: 104 220 157;
+    --chart-1: 104 220 157;
+    --chart-2: 45 212 191;
+    --chart-3: 250 204 21;
+    --chart-4: 96 165 250;
+    --chart-5: 251 113 133;
+    --buy-background: 104 220 157;
+    --buy-foreground: 8 35 25;
+    --sell-background: 251 113 133;
+    --sell-foreground: 42 9 23;
+    --buy-20: 104 220 157 / 0.32;
+    --sell-20: 251 113 133 / 0.32;
+    --section-message: 21 128 61 / 0.3;
+    --blue-500: 96 165 250;
+    --outline: 104 220 157 / 0.45;
+    --outline-10: 104 220 157 / 0.12;
+    --destructive-20: 248 113 113 / 0.25;
+    --destructive-40: 248 113 113 / 0.45;
+  }
+
+  .amethyst {
+    --background: 22 17 42;
+    --foreground: 244 238 255;
+    --card: 36 27 61;
+    --card-foreground: 244 238 255;
+    --popover: 30 23 52;
+    --popover-foreground: 244 238 255;
+    --primary: 185 145 255;
+    --primary-foreground: 32 17 60;
+    --secondary: 48 37 76;
+    --secondary-foreground: 238 230 255;
+    --muted: 44 35 68;
+    --muted-foreground: 180 167 211;
+    --accent: 54 43 82;
+    --accent-foreground: 208 178 255;
+    --border: 86 72 125;
+    --input: 185 145 255 / 0.2;
+    --ring: 185 145 255;
+    --chart-1: 185 145 255;
+    --chart-2: 244 114 182;
+    --chart-3: 96 165 250;
+    --chart-4: 45 212 191;
+    --chart-5: 250 204 21;
+    --buy-background: 45 212 191;
+    --buy-foreground: 8 35 38;
+    --sell-background: 244 114 182;
+    --sell-foreground: 46 12 35;
+    --buy-20: 45 212 191 / 0.32;
+    --sell-20: 244 114 182 / 0.32;
+    --section-message: 124 58 237 / 0.3;
+    --blue-500: 129 140 248;
+    --outline: 185 145 255 / 0.45;
+    --outline-10: 185 145 255 / 0.12;
+    --destructive-20: 248 113 113 / 0.25;
+    --destructive-40: 248 113 113 / 0.45;
   }
 }
 

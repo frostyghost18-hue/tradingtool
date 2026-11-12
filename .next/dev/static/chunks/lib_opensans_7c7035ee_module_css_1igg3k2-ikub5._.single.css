@@ -1,0 +1,23 @@
+/* [project]/lib/opensans_7c7035ee.module.css [app-client] (css) */
+@font-face {
+  font-family: openSans;
+  src: url("../media/open_sans_latin_variable-s.p.1wc2mf9hp9pav.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 300 800;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: openSans Fallback;
+  src: local(Arial);
+  ascent-override: 101.58%;
+  descent-override: 27.84%;
+  line-gap-override: 0.0%;
+  size-adjust: 105.22%;
+}
+
+.opensans_7c7035ee-module__YRuzKq__className {
+  font-family: openSans, openSans Fallback;
+}
+
+/*# sourceMappingURL=lib_opensans_7c7035ee_module_css_1igg3k2-ikub5._.single.css.map*/

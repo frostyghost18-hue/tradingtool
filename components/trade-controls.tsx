@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { Localize } from '@deriv-com/translations';
@@ -112,6 +112,11 @@ export function TradeControls({
   isMobile,
 }: TradeControlsProps) {
   const { localize, locale } = useAppTranslations();
+  const [durationDraft, setDurationDraft] = useState(String(duration));
+
+  useEffect(() => {
+    setDurationDraft(String(duration));
+  }, [duration]);
 
   useEffect(() => {
     if (buyError) {
@@ -146,13 +151,13 @@ export function TradeControls({
         onValueChange={value => {
           if (value) onContractModeChange(value as ContractMode);
         }}
-        className="w-full gap-0 rounded-full bg-muted p-1"
+        className="w-full gap-0 rounded-lg border border-border bg-muted/80 p-1"
       >
         {modeOptions.map(opt => (
           <ToggleGroupItem
             key={opt.value}
             value={opt.value}
-            className="flex-1 rounded-full text-sm font-medium text-muted-foreground data-[state=on]:bg-background data-[state=on]:text-primary data-[state=on]:font-bold data-[state=on]:shadow-sm hover:text-foreground"
+            className="flex-1 rounded-md text-sm font-medium text-muted-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:font-bold data-[state=on]:shadow-sm hover:text-foreground"
           >
             {opt.label}
           </ToggleGroupItem>
@@ -184,10 +189,26 @@ export function TradeControls({
           <Input
             id="duration"
             type="number"
-            value={duration}
+            value={durationDraft}
             onChange={e => {
-              const val = parseInt(e.target.value, 10);
-              if (!isNaN(val)) onDurationChange(val);
+              const value = e.target.value;
+              setDurationDraft(value);
+              const parsed = Number(value);
+              if (value !== '' && Number.isInteger(parsed) &&
+                parsed >= durationLimits.min && parsed <= durationLimits.max) {
+                onDurationChange(parsed);
+              }
+            }}
+            onBlur={() => {
+              const parsed = Number(durationDraft);
+              const value = durationDraft.trim() !== '' && Number.isInteger(parsed)
+                ? Math.min(durationLimits.max, Math.max(durationLimits.min, parsed))
+                : duration;
+              setDurationDraft(String(value));
+              onDurationChange(value);
+            }}
+            onKeyDown={e => {
+              if (['e', 'E', '+', '-'].includes(e.key)) e.preventDefault();
             }}
             min={durationLimits.min}
             max={durationLimits.max}
@@ -240,7 +261,7 @@ export function TradeControls({
         }
       >
         <Button
-          className="w-full h-10 rounded-full px-6 sm:h-11 sm:px-8"
+          className="h-11 w-full rounded-lg bg-[rgb(var(--buy-background))] px-6 font-bold text-[rgb(var(--buy-foreground))] shadow-[0_0_22px_rgb(0_195_144/0.18)] hover:brightness-110 sm:h-12 sm:px-8"
           disabled={!isConnected || !proposal || isBuying}
           onClick={onBuy}
         >

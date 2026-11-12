@@ -8,9 +8,9 @@ import path from 'path';
  * is found its public URL ('/logo.<ext>') is returned and set as the favicon
  * via generateMetadata — the same file that the Header component displays.
  *
- * When no logo is present, an SVG letter-in-box is built from the app name
- * env var and the primary colour read from globals.css (patched by the App
- * Builder at deploy time). Base64 encoding is used instead of a
+ * When no uploaded logo is present, public/icon.svg is used as the default
+ * brand icon. If it is absent too, an SVG letter-in-box is built from the app
+ * name env var and the primary colour read from globals.css. Base64 encoding is used instead of a
  * percent-encoded raw SVG to guarantee cross-browser compatibility — Firefox
  * and Safari misparse raw '#' characters inside text-based data URIs.
  */
@@ -24,9 +24,12 @@ export function buildFaviconUri(): string | null {
       return `/logo.${ext}`;
     }
   }
+  if (fs.existsSync(path.join(publicDir, 'icon.svg'))) {
+    return '/icon.svg';
+  }
 
   const appName =
-    process.env.NEXT_PUBLIC_DERIV_APP_NAME?.trim() || 'Deriv App';
+    process.env.NEXT_PUBLIC_DERIV_APP_NAME?.trim() || 'Pulse Factor';
   const letter = appName.trim().charAt(0).toUpperCase() || 'A';
 
   // The App Builder patches globals.css with the user's chosen brand colour as

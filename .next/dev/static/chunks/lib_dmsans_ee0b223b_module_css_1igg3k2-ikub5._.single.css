@@ -1,0 +1,23 @@
+/* [project]/lib/dmsans_ee0b223b.module.css [app-client] (css) */
+@font-face {
+  font-family: dmSans;
+  src: url("../media/dm_sans_latin_variable-s.p.2_mbdogr7ni8i.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 100 1000;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: dmSans Fallback;
+  src: local(Arial);
+  ascent-override: 94.36%;
+  descent-override: 29.49%;
+  line-gap-override: 0.0%;
+  size-adjust: 105.13%;
+}
+
+.dmsans_ee0b223b-module__Px34-G__className {
+  font-family: dmSans, dmSans Fallback;
+}
+
+/*# sourceMappingURL=lib_dmsans_ee0b223b_module_css_1igg3k2-ikub5._.single.css.map*/
