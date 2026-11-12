@@ -27,6 +27,12 @@ const CONTRACT_TYPES = ['DIGITMATCH', 'DIGITDIFF', 'DIGITOVER', 'DIGITUNDER', 'D
 
 type AutoTradingStatus = 'idle' | 'running' | 'stopping';
 
+export interface AutoTradingThresholdResult {
+  outcome: 'take-profit' | 'stop-loss';
+  profit: number;
+  market: string;
+}
+
 async function waitForContractSettlement(ws: NonNullable<UseBaseTradingParams['ws']>, contractId: number): Promise<number> {
   let unsubscribe: () => Promise<void> = async () => {};
   let hasSubscription = false;
@@ -123,6 +129,8 @@ interface UseDigitsTradingReturn {
   setMartingaleMode: (value: MartingaleMode) => void;
   martingaleValues: Record<MartingaleMode, string>;
   setMartingaleValue: (mode: MartingaleMode, value: string) => void;
+  thresholdResult: AutoTradingThresholdResult | null;
+  clearThresholdResult: () => void;
   autoTradingStatus: AutoTradingStatus;
   autoTradingTradeCount: number;
   autoTradingProfit: number;
@@ -169,6 +177,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
     dynamic: '1.85',
     'super-hybrid': '1.85',
   });
+  const [thresholdResult, setThresholdResult] = useState<AutoTradingThresholdResult | null>(null);
   const [autoTradingStatus, setAutoTradingStatus] = useState<AutoTradingStatus>('idle');
   const [autoTradingTradeCount, setAutoTradingTradeCount] = useState(0);
   const [autoTradingProfit, setAutoTradingProfit] = useState(0);
@@ -176,6 +185,10 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
 
   const setMartingaleValue = useCallback((mode: MartingaleMode, value: string) => {
     setMartingaleValues((current) => ({ ...current, [mode]: value }));
+  }, []);
+
+  const clearThresholdResult = useCallback(() => {
+    setThresholdResult(null);
   }, []);
 
   const stopAutoTrading = useCallback(() => {
@@ -297,6 +310,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
 
     const session = { stopRequested: false };
     autoSessionRef.current = session;
+    setThresholdResult(null);
     setAutoTradingStatus('running');
     setAutoTradingTradeCount(0);
     setAutoTradingProfit(0);
@@ -306,6 +320,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
     let nextStake = baseStake;
     let martingaleProgress = { ...initialMartingaleProgress };
     let stopReason = '';
+    let reachedThreshold: AutoTradingThresholdResult | null = null;
 
     try {
       while (!session.stopRequested) {
@@ -350,10 +365,22 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
 
         if (takeProfitTarget !== null && sessionProfit >= takeProfitTarget) {
           stopReason = localize('Take-profit target reached.');
+          reachedThreshold = {
+            outcome: 'take-profit',
+            profit: sessionProfit,
+            market: activeSymbol.underlying_symbol_name || activeSymbol.underlying_symbol,
+          };
+          setThresholdResult(reachedThreshold);
           break;
         }
         if (stopLossTarget !== null && sessionProfit <= -stopLossTarget) {
           stopReason = localize('Stop-loss limit reached.');
+          reachedThreshold = {
+            outcome: 'stop-loss',
+            profit: sessionProfit,
+            market: activeSymbol.underlying_symbol_name || activeSymbol.underlying_symbol,
+          };
+          setThresholdResult(reachedThreshold);
           break;
         }
 
@@ -376,13 +403,15 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
       } else if (!stopReason && tradeCount === 0) {
         stopReason = localize('Auto-trading stopped before the first trade.');
       }
-      toast.success(localize('Trading session ended'), {
-        description: localize('{{reason}} Final session P/L: {{profit}} USD across {{count}} trades.', {
-          reason: stopReason,
-          profit: sessionProfit.toFixed(2),
-          count: tradeCount,
-        }),
-      });
+      if (!reachedThreshold) {
+        toast.success(localize('Trading session ended'), {
+          description: localize('{{reason}} Final session P/L: {{profit}} USD across {{count}} trades.', {
+            reason: stopReason,
+            profit: sessionProfit.toFixed(2),
+            count: tradeCount,
+          }),
+        });
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : localize('Auto-trading stopped unexpectedly.');
       toast.error(localize('Auto-trading stopped'), { description: message });
@@ -455,6 +484,8 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
     setMartingaleMode,
     martingaleValues,
     setMartingaleValue,
+    thresholdResult,
+    clearThresholdResult,
     autoTradingStatus,
     autoTradingTradeCount,
     autoTradingProfit,

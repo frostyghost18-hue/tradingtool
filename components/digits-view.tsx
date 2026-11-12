@@ -9,6 +9,7 @@ import { Footer, FooterBar } from '@/components/custom/footer';
 import { Header } from '@/components/custom/header';
 import { LoginPromptDialog } from '@/components/custom/login-prompt-dialog';
 import { PinnedBuyBar } from '@/components/custom/pinned-buy-bar';
+import { ThresholdResultDialog } from '@/components/custom/threshold-result-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useAppTranslations } from '@/components/custom/i18n-provider';
@@ -33,6 +34,7 @@ import type {
 import type { ContractMode, TradeType, DigitStats } from '../lib/types';
 import type { MartingaleMode } from '../lib/martingale';
 import type { OpenPosition } from '@/hooks/use-open-positions';
+import type { AutoTradingThresholdResult } from '@/hooks/use-digits-trading';
 import { useSessionTransactions } from '@/hooks/use-session-transactions';
 import { ALL_CONTROL_KEYS } from '../lib/app-config';
 import type { ControlKey, DigitsAppConfig } from '../lib/app-config';
@@ -120,6 +122,8 @@ export interface DigitsViewProps {
   autoTradingStatus: 'idle' | 'running' | 'stopping';
   autoTradingTradeCount: number;
   autoTradingProfit: number;
+  thresholdResult: AutoTradingThresholdResult | null;
+  clearThresholdResult: () => void;
   stopAutoTrading: () => void;
   // Branding (used by preview route; no-op in the real app)
   logoSrc?: string;
@@ -191,6 +195,8 @@ export function DigitsView({
   autoTradingStatus,
   autoTradingTradeCount,
   autoTradingProfit,
+  thresholdResult,
+  clearThresholdResult,
   stopAutoTrading,
   logoSrc,
   appName,
@@ -837,6 +843,7 @@ export function DigitsView({
         onLogin={editMode ? noopAsyncAuth : onLogin}
         onSignUp={editMode ? noopAsyncAuth : onSignUp}
       />
+      <ThresholdResultDialog result={thresholdResult} onClose={clearThresholdResult} />
     </main>
   );
 }

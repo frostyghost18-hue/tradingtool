@@ -77,6 +77,21 @@
   box-shadow: 0 12px 32px rgb(0 0 0 / 0.2), inset 0 1px rgb(255 255 255 / 0.025);
 }
 
+.threshold-result-shell {
+  background-image: linear-gradient(155deg, rgb(var(--primary) / 0.12), transparent 58%);
+  box-shadow: 0 0 36px rgb(var(--primary) / 0.2), 0 24px 70px rgb(0 0 0 / 0.55);
+}
+.threshold-result-badge {
+  animation: threshold-result-glow 2.4s ease-in-out infinite;
+}
+@keyframes threshold-result-glow {
+  0%, 100% { box-shadow: 0 0 12px rgb(var(--primary) / 0.2); }
+  50% { box-shadow: 0 0 28px rgb(var(--primary) / 0.55); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .threshold-result-badge { animation: none; }
+}
+
 .digit-tile[data-rank='highest'] { background: #08a77d; border-color: #28d1a2; color: #fff; }
 .digit-tile[data-rank='second-highest'] { background: #2452ce; border-color: #4774f0; color: #fff; }
 .digit-tile[data-rank='lowest'] { background: #d94349; border-color: #fa686b; color: #fff; }
