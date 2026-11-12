@@ -29,6 +29,7 @@ interface SymbolSelectorProps {
   prices?: number[];
   /** Decimal places for the active symbol (pip size), used to format the spot. */
   pipSize?: number;
+  disabled?: boolean;
 }
 
 interface SymbolMovement {
@@ -88,6 +89,7 @@ export function SymbolSelector({
   onSymbolChange,
   prices,
   pipSize,
+  disabled = false,
 }: SymbolSelectorProps) {
   const { localize, locale } = useAppTranslations();
   const grouped = useMemo(() => groupBySubmarket(symbols), [symbols]);
@@ -98,6 +100,7 @@ export function SymbolSelector({
     <Select
       value={activeSymbol?.underlying_symbol ?? ''}
       onValueChange={onSymbolChange}
+      disabled={disabled}
     >
       {/* The direct child is a <div> (not a <span>) so the trigger's
           `[&>span]:line-clamp-1` rule can't collapse the stacked layout. */}

@@ -20,6 +20,7 @@ interface TradeTypeChipsProps<T extends string> {
   onValueChange: (value: T) => void;
   /** Surface the row is rendered on. Defaults to the page background. */
   backdrop?: Backdrop;
+  disabled?: boolean;
   /** Applied to the scroll container, for layout at the call site. */
   className?: string;
 }
@@ -44,6 +45,7 @@ export function TradeTypeChips<T extends string>({
   options,
   onValueChange,
   backdrop = 'background',
+  disabled = false,
   className,
 }: TradeTypeChipsProps<T>) {
   const { ref, canScrollLeft, canScrollRight } = useScrollOverflow<HTMLDivElement>();
@@ -68,6 +70,7 @@ export function TradeTypeChips<T extends string>({
         <ToggleGroup
           type="single"
           value={value}
+          disabled={disabled}
           onValueChange={(v) => {
             // Use options lookup so onValueChange receives the correctly-typed T value
             const opt = options.find((o) => o.value === v);

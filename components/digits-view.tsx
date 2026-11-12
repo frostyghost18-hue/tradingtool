@@ -31,6 +31,7 @@ import type {
   BuyResult,
 } from '@deriv/core';
 import type { ContractMode, TradeType, DigitStats } from '../lib/types';
+import type { MartingaleMode } from '../lib/martingale';
 import { ALL_CONTROL_KEYS } from '../lib/app-config';
 import type { ControlKey, DigitsAppConfig } from '../lib/app-config';
 
@@ -105,6 +106,20 @@ export interface DigitsViewProps {
   buyResult: BuyResult | null;
   buyError: string | null;
   clearBuyResult: () => void;
+  takeProfit: string;
+  setTakeProfit: (value: string) => void;
+  stopLoss: string;
+  setStopLoss: (value: string) => void;
+  martingaleMode: MartingaleMode;
+  setMartingaleMode: (value: MartingaleMode) => void;
+  martingaleValues: Record<MartingaleMode, string>;
+  setMartingaleValue: (mode: MartingaleMode, value: string) => void;
+  maxSessionTrades: string;
+  setMaxSessionTrades: (value: string) => void;
+  autoTradingStatus: 'idle' | 'running' | 'stopping';
+  autoTradingTradeCount: number;
+  autoTradingProfit: number;
+  stopAutoTrading: () => void;
   // Branding (used by preview route; no-op in the real app)
   logoSrc?: string;
   appName?: string;
@@ -164,6 +179,20 @@ export function DigitsView({
   buyResult,
   buyError,
   clearBuyResult,
+  takeProfit,
+  setTakeProfit,
+  stopLoss,
+  setStopLoss,
+  martingaleMode,
+  setMartingaleMode,
+  martingaleValues,
+  setMartingaleValue,
+  maxSessionTrades,
+  setMaxSessionTrades,
+  autoTradingStatus,
+  autoTradingTradeCount,
+  autoTradingProfit,
+  stopAutoTrading,
   logoSrc,
   appName,
   showAppName,
@@ -205,6 +234,10 @@ export function DigitsView({
   // editor owns Buy clicks there, and its auth actions are already no-ops.
   const handleBuy = useCallback(async () => {
     if (editMode) return;
+    if (autoTradingStatus !== 'idle') {
+      stopAutoTrading();
+      return;
+    }
     // Mid-OAuth (the ?code= callback) the header already shows a login in
     // progress — don't stack a "please log in" prompt on top of it.
     if (authState === 'authenticating') return;
@@ -213,7 +246,25 @@ export function DigitsView({
       return;
     }
     await buyContract();
-  }, [editMode, authState, buyContract]);
+  }, [editMode, authState, autoTradingStatus, stopAutoTrading, buyContract]);
+
+  const riskManagementProps = {
+    takeProfit,
+    onTakeProfitChange: setTakeProfit,
+    stopLoss,
+    onStopLossChange: setStopLoss,
+    martingaleMode,
+    onMartingaleModeChange: setMartingaleMode,
+    martingaleValues,
+    onMartingaleValueChange: setMartingaleValue,
+    maxSessionTrades,
+    onMaxSessionTradesChange: setMaxSessionTrades,
+    autoTradingStatus,
+    autoTradingTradeCount,
+    autoTradingProfit,
+    onStopAutoTrading: stopAutoTrading,
+    disabled: autoTradingStatus !== 'idle',
+  };
 
   // Purchase feedback for the configurable layouts lives HERE, not in
   // ConfigurableDigitsControls: the desktop no-code layout mounts that
@@ -327,6 +378,7 @@ export function DigitsView({
         isProposalLoading={isProposalLoading}
         onBuy={handleBuy}
         isBuying={isBuying}
+        autoTradingStatus={autoTradingStatus}
         isConnected={isConnected}
         isAuthenticated={authState === 'authenticated'}
         editMode={editMode}
@@ -425,7 +477,7 @@ export function DigitsView({
                     </CardHeader>
                     <CardContent className="p-4">
                       {renderConfigurable(CONTROLS_COLUMN_KEYS)}
-                      <RiskManagementControls />
+                      <RiskManagementControls {...riskManagementProps} />
                     </CardContent>
                   </Card>
                 </>
@@ -499,7 +551,7 @@ export function DigitsView({
                   </CardHeader>
                   <CardContent className="p-4 sm:p-5">
                     {renderConfigurable(CONTROLS_COLUMN_KEYS)}
-                    <RiskManagementControls />
+                    <RiskManagementControls {...riskManagementProps} />
                   </CardContent>
                 </Card>
               </div>
@@ -562,6 +614,7 @@ export function DigitsView({
                 value={tradeType}
                 options={digitTradeTypeOptions}
                 onValueChange={setTradeType}
+                disabled={autoTradingStatus !== 'idle'}
               />
 
               <Card className="shrink-0 border shadow-sm mb-12">
@@ -572,6 +625,7 @@ export function DigitsView({
                       symbols={symbols}
                       activeSymbol={activeSymbol}
                       onSymbolChange={selectSymbol}
+                      disabled={autoTradingStatus !== 'idle'}
                     />
                     {tradeType === 'even-odd' && (
                       <div className="flex min-h-24 items-center justify-center sm:min-h-32">
@@ -604,6 +658,7 @@ export function DigitsView({
                             />
                           }
                           onDigitSelect={setSelectedDigit}
+                          disabled={autoTradingStatus !== 'idle'}
                         />
                       </div>
                     )}
@@ -625,13 +680,14 @@ export function DigitsView({
                         isProposalLoading={isProposalLoading}
                         onBuy={handleBuy}
                         isBuying={isBuying}
+                        autoTradingStatus={autoTradingStatus}
                         buyResult={buyResult}
                         buyError={buyError}
                         onClearBuyResult={clearBuyResult}
                         isAuthenticated={authState === 'authenticated'}
                         isMobile
                       />
-                      <RiskManagementControls />
+                      <RiskManagementControls {...riskManagementProps} />
                     </div>
                   </div>
                 </CardContent>
@@ -670,6 +726,7 @@ export function DigitsView({
                     symbols={symbols}
                     activeSymbol={activeSymbol}
                     onSymbolChange={selectSymbol}
+                    disabled={autoTradingStatus !== 'idle'}
                   />
                   <div className={tradeType === 'even-odd' ? 'mx-auto w-full max-w-[240px]' : 'min-w-0'}>
                     {tradeType !== 'even-odd' ? (
@@ -687,6 +744,7 @@ export function DigitsView({
                           />
                         }
                         onDigitSelect={setSelectedDigit}
+                        disabled={autoTradingStatus !== 'idle'}
                       />
                     ) : (
                       <CurrentTickDisplay
@@ -724,6 +782,7 @@ export function DigitsView({
                     value={tradeType}
                     options={digitTradeTypeOptions}
                     onValueChange={setTradeType}
+                    disabled={autoTradingStatus !== 'idle'}
                   />
                   <TradeControls
                     tradeType={tradeType}
@@ -740,12 +799,13 @@ export function DigitsView({
                     isProposalLoading={isProposalLoading}
                     onBuy={handleBuy}
                     isBuying={isBuying}
+                    autoTradingStatus={autoTradingStatus}
                     buyResult={buyResult}
                     buyError={buyError}
                     onClearBuyResult={clearBuyResult}
                     isAuthenticated={authState === 'authenticated'}
                   />
-                  <RiskManagementControls />
+                  <RiskManagementControls {...riskManagementProps} />
                 </CardContent>
               </Card>
             </div>
@@ -767,6 +827,7 @@ export function DigitsView({
             proposal={proposal}
             onBuy={handleBuy}
             isBuying={isBuying}
+            autoTradingStatus={autoTradingStatus}
           />
         </PinnedBuyBar>
       ) : inFlowFooter ? (

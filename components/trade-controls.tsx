@@ -37,6 +37,7 @@ interface TradeControlsProps {
   buyResult: BuyResult | null;
   buyError: string | null;
   onClearBuyResult: () => void;
+  autoTradingStatus?: 'idle' | 'running' | 'stopping';
   isAuthenticated?: boolean;
   /**
    * Pins the Buy button above the footer (fixed) instead of inline. Driven by
@@ -108,6 +109,7 @@ export function TradeControls({
   buyResult,
   buyError,
   onClearBuyResult,
+  autoTradingStatus = 'idle',
   isAuthenticated,
   isMobile,
 }: TradeControlsProps) {
@@ -142,12 +144,23 @@ export function TradeControls({
   }, [buyResult, onClearBuyResult, localize, locale]);
 
   const modeOptions = getContractModeOptions(localize)[tradeType];
+  const isAutoTrading = autoTradingStatus !== 'idle';
+  const buyButtonLabel = autoTradingStatus === 'stopping'
+    ? localize('Stopping after current contract...')
+    : autoTradingStatus === 'running'
+      ? localize('Stop auto-trading')
+      : isBuying
+        ? localize('Purchasing...')
+        : proposal
+          ? localize('Buy @ {{price}} USD', { price: formatAmount(proposal.askPrice, locale) })
+          : localize('Buy Contract');
 
   return (
     <div className="space-y-2 sm:space-y-4">
       <ToggleGroup
         type="single"
         value={contractMode}
+        disabled={isAutoTrading}
         onValueChange={value => {
           if (value) onContractModeChange(value as ContractMode);
         }}
@@ -180,6 +193,7 @@ export function TradeControls({
             min={0}
             step="0.01"
             labelRight="USD"
+            disabled={isAutoTrading}
           />
         </div>
         <div className="space-y-1.5">
@@ -214,6 +228,7 @@ export function TradeControls({
             max={durationLimits.max}
             step={1}
             labelRight={localize('Ticks')}
+            disabled={isAutoTrading}
           />
         </div>
       </div>
@@ -262,16 +277,10 @@ export function TradeControls({
       >
         <Button
           className="h-11 w-full rounded-lg bg-[rgb(var(--buy-background))] px-6 font-bold text-[rgb(var(--buy-foreground))] shadow-[0_0_22px_rgb(0_195_144/0.18)] hover:brightness-110 sm:h-12 sm:px-8"
-          disabled={!isConnected || !proposal || isBuying}
+          disabled={isAutoTrading ? autoTradingStatus === 'stopping' : !isConnected || !proposal || isBuying}
           onClick={onBuy}
         >
-          {isBuying
-            ? localize('Purchasing...')
-            : proposal
-              ? localize('Buy @ {{price}} USD', {
-                  price: formatAmount(proposal.askPrice, locale),
-                })
-              : localize('Buy Contract')}
+          {buyButtonLabel}
         </Button>
       </div>
 

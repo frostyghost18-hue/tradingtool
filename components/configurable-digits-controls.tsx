@@ -133,6 +133,7 @@ export interface ConfigurableBuyButtonProps {
   proposal: ProposalInfo | null;
   onBuy: () => void;
   isBuying: boolean;
+  autoTradingStatus?: 'idle' | 'running' | 'stopping';
 }
 
 export function ConfigurableBuyButton({
@@ -141,11 +142,17 @@ export function ConfigurableBuyButton({
   proposal,
   onBuy,
   isBuying,
+  autoTradingStatus = 'idle',
 }: ConfigurableBuyButtonProps) {
   const { localize, locale } = useAppTranslations();
 
-  const disabled = !isConnected || !proposal || isBuying;
-  const label = isBuying
+  const isAutoTrading = autoTradingStatus !== 'idle';
+  const disabled = isAutoTrading ? autoTradingStatus === 'stopping' : !isConnected || !proposal || isBuying;
+  const label = autoTradingStatus === 'stopping'
+    ? localize('Stopping after current contract...')
+    : autoTradingStatus === 'running'
+      ? localize('Stop auto-trading')
+      : isBuying
     ? localize('Purchasing...')
     : proposal
       ? localize('Buy @ {{price}} USD', { price: formatAmount(proposal.askPrice, locale) })
@@ -216,6 +223,7 @@ export interface ConfigurableDigitsControlsProps {
   isProposalLoading: boolean;
   onBuy: () => void;
   isBuying: boolean;
+  autoTradingStatus?: 'idle' | 'running' | 'stopping';
   isConnected: boolean;
   isAuthenticated?: boolean;
 
@@ -275,6 +283,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
     isProposalLoading,
     onBuy,
     isBuying,
+    autoTradingStatus = 'idle',
     isConnected,
     isAuthenticated,
     editMode,
@@ -288,6 +297,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
   } = props;
 
   const { localize, locale } = useAppTranslations();
+  const isAutoTrading = autoTradingStatus !== 'idle';
   const [durationDraft, setDurationDraft] = useState(String(duration));
   const blockLabels = getBlockLabels(localize);
   const digitTradeTypeOptions = getDigitTradeTypeOptions(localize);
@@ -330,6 +340,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
           value={tradeType}
           options={digitTradeTypeOptions}
           onValueChange={onTradeTypeChange}
+          disabled={isAutoTrading}
         />
       ),
       // Segmented — <ToggleGroup> styled like a segmented control.
@@ -337,6 +348,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
         <ToggleGroup
           type="single"
           value={tradeType}
+          disabled={isAutoTrading}
           onValueChange={(value) => {
             const opt = digitTradeTypeOptions.find((option) => option.value === value);
             if (opt) onTradeTypeChange(opt.value);
@@ -358,6 +370,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
       c: () => (
         <Select
           value={tradeType}
+          disabled={isAutoTrading}
           onValueChange={(value) => {
             const opt = digitTradeTypeOptions.find((option) => option.value === value);
             if (opt) onTradeTypeChange(opt.value);
@@ -389,6 +402,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
           symbols={symbols}
           activeSymbol={activeSymbol}
           onSymbolChange={selectSymbol}
+          disabled={isAutoTrading}
         />
       ),
       // Compact pill — a narrow <Select> trigger rounded into a pill.
@@ -396,6 +410,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
         <Select
           value={activeSymbol?.underlying_symbol ?? ''}
           onValueChange={selectSymbol}
+          disabled={isAutoTrading}
         >
           <SelectTrigger className="h-8 w-fit gap-1 rounded-full px-3 text-xs">
             <SelectValue placeholder={localize('Symbol')} />
@@ -410,6 +425,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
         <Select
           value={activeSymbol?.underlying_symbol ?? ''}
           onValueChange={selectSymbol}
+          disabled={isAutoTrading}
         >
           <SelectTrigger className="h-11 w-full gap-2">
             {/* A <div>, not a <span>, so the trigger's `[&>span]:line-clamp-1` can't stack the icon over the name. */}
@@ -523,6 +539,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
           lastDigit={lastDigit}
           headerRight={inlineTick}
           onDigitSelect={onDigitSelect}
+          disabled={isAutoTrading}
         />
       ),
       // Compact grid of 0–9 selectable <Button>s, each with its percentage.
@@ -551,6 +568,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
                   )}
                   <Button
                     variant={isSelected ? 'default' : 'outline'}
+                    disabled={isAutoTrading}
                     onClick={() => onDigitSelect(digit)}
                     data-digit={digit}
                     data-selected={isSelected}
@@ -587,6 +605,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
                 <Button
                   key={digit}
                   variant={isSelected ? 'default' : 'outline'}
+                  disabled={isAutoTrading}
                   onClick={() => onDigitSelect(digit)}
                   data-digit={digit}
                   data-selected={isSelected}
@@ -633,6 +652,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
         <ToggleGroup
           type="single"
           value={contractMode}
+          disabled={isAutoTrading}
           onValueChange={(value) => {
             if (value) onContractModeChange(value as ContractMode);
           }}
@@ -660,6 +680,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
                 'flex-1 rounded-lg font-semibold',
                 contractMode === opt.value && 'bg-primary text-primary-foreground',
               )}
+              disabled={isAutoTrading}
               onClick={() => onContractModeChange(opt.value)}
             >
               {opt.label}
@@ -678,6 +699,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
                 'flex-1 rounded-full',
                 contractMode === opt.value && 'bg-primary text-primary-foreground',
               )}
+              disabled={isAutoTrading}
               onClick={() => onContractModeChange(opt.value)}
             >
               {opt.label}
@@ -707,6 +729,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
         step="0.01"
         labelRight="USD"
         className={extraClass}
+        disabled={isAutoTrading}
       />
     );
 
@@ -727,9 +750,9 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
             <Localize i18n_default_text="Stake" />
           </Label>
           <div className="flex w-full items-center gap-2">
-            <Button variant="outline" size="icon" className="shrink-0" onClick={() => setStakeNum(current - 1)}>−</Button>
+            <Button variant="outline" size="icon" className="shrink-0" disabled={isAutoTrading} onClick={() => setStakeNum(current - 1)}>−</Button>
             <div className="flex-1">{stakeInput('text-center')}</div>
-            <Button variant="outline" size="icon" className="shrink-0" onClick={() => setStakeNum(current + 1)}>+</Button>
+            <Button variant="outline" size="icon" className="shrink-0" disabled={isAutoTrading} onClick={() => setStakeNum(current + 1)}>+</Button>
           </div>
         </div>
       ),
@@ -746,6 +769,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
                 variant={stake === preset ? 'default' : 'outline'}
                 size="sm"
                 className={cn('flex-1', stake === preset && 'bg-primary text-primary-foreground')}
+                disabled={isAutoTrading}
                 onClick={() => onStakeChange(preset)}
               >
                 {preset}
@@ -795,6 +819,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
         step={1}
         labelRight={localize('Ticks')}
         className={extraClass}
+        disabled={isAutoTrading}
       />
     );
 
@@ -815,9 +840,9 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
             <Localize i18n_default_text="Duration" />
           </Label>
           <div className="flex w-full items-center gap-2">
-            <Button variant="outline" size="icon" className="shrink-0" onClick={() => setDurationNum(duration - 1)}>−</Button>
+            <Button variant="outline" size="icon" className="shrink-0" disabled={isAutoTrading} onClick={() => setDurationNum(duration - 1)}>−</Button>
             <div className="flex-1">{durationInput('text-center')}</div>
-            <Button variant="outline" size="icon" className="shrink-0" onClick={() => setDurationNum(duration + 1)}>+</Button>
+            <Button variant="outline" size="icon" className="shrink-0" disabled={isAutoTrading} onClick={() => setDurationNum(duration + 1)}>+</Button>
           </div>
         </div>
       ),
@@ -834,6 +859,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
                 variant={duration === preset ? 'default' : 'outline'}
                 size="sm"
                 className={cn('flex-1', duration === preset && 'bg-primary text-primary-foreground')}
+                disabled={isAutoTrading}
                 onClick={() => setDurationNum(preset)}
               >
                 {preset}
@@ -946,6 +972,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
         proposal={proposal}
         onBuy={onBuy}
         isBuying={isBuying}
+        autoTradingStatus={props.autoTradingStatus}
       />
     );
 

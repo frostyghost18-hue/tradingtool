@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useRef } from 'react';
 import {
   useProposal,
   useBuy,
@@ -12,13 +12,72 @@ import type {
   ProposalParams,
   DurationLimits,
   BuyResult,
+  ProposalResponse,
 } from '@deriv/core';
+import { toast } from 'sonner';
 import { useBaseTrading } from '@/hooks/use-base-trading';
 import type { UseBaseTradingParams } from '@/hooks/use-base-trading';
 import { computeDigitStats, getLastDigit } from '../lib/digit-stats';
+import { getNextMartingaleStake, initialMartingaleProgress } from '../lib/martingale';
+import type { MartingaleMode } from '../lib/martingale';
+import { useAppTranslations } from '@/components/custom/i18n-provider';
 import type { ContractMode, TradeType, DigitStats, OpenPosition, ClosedPosition } from '../lib/types';
 
 const CONTRACT_TYPES = ['DIGITMATCH', 'DIGITDIFF', 'DIGITOVER', 'DIGITUNDER', 'DIGITEVEN', 'DIGITODD'];
+const MAX_AUTO_TRADE_STAKE_MULTIPLIER = 10;
+
+type AutoTradingStatus = 'idle' | 'running' | 'stopping';
+
+async function waitForContractSettlement(ws: NonNullable<UseBaseTradingParams['ws']>, contractId: number): Promise<number> {
+  let unsubscribe: () => Promise<void> = async () => {};
+  let hasSubscription = false;
+  let finished = false;
+  let disconnectTimer: ReturnType<typeof setInterval> | null = null;
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+
+  const settlement = new Promise<number>((resolve, reject) => {
+    void ws.subscribe(
+      { proposal_open_contract: 1, contract_id: contractId },
+      (data) => {
+        const contract = data.proposal_open_contract as Partial<OpenPosition> | undefined;
+        if (!contract) return;
+        const isClosed = contract.is_sold === 1 || contract.is_expired === 1 ||
+          (typeof contract.status === 'string' && contract.status !== 'open');
+        if (!isClosed) return;
+
+        const profit = Number(contract.profit);
+        if (!Number.isFinite(profit)) {
+          reject(new Error('The settled contract did not include a valid profit/loss value.'));
+          return;
+        }
+        resolve(profit);
+      }
+    ).then((subscription) => {
+      unsubscribe = subscription.unsubscribe;
+      hasSubscription = true;
+      if (finished) void unsubscribe();
+    }).catch(reject);
+  });
+
+  const interrupted = new Promise<never>((_, reject) => {
+    disconnectTimer = setInterval(() => {
+      if (!ws.isConnected) reject(new Error('Connection lost while waiting for the contract to settle.'));
+    }, 500);
+    timeout = setTimeout(
+      () => reject(new Error('Timed out waiting for the contract to settle. Auto-trading was stopped.')),
+      15 * 60 * 1000
+    );
+  });
+
+  try {
+    return await Promise.race([settlement, interrupted]);
+  } finally {
+    finished = true;
+    if (disconnectTimer) clearInterval(disconnectTimer);
+    if (timeout) clearTimeout(timeout);
+    if (hasSubscription) await unsubscribe();
+  }
+}
 
 interface UseDigitsTradingReturn {
   isConnected: boolean;
@@ -57,11 +116,26 @@ interface UseDigitsTradingReturn {
   sellingId: number | null;
   sellError: string | null;
   clearSellError: () => void;
+  takeProfit: string;
+  setTakeProfit: (value: string) => void;
+  stopLoss: string;
+  setStopLoss: (value: string) => void;
+  martingaleMode: MartingaleMode;
+  setMartingaleMode: (value: MartingaleMode) => void;
+  martingaleValues: Record<MartingaleMode, string>;
+  setMartingaleValue: (mode: MartingaleMode, value: string) => void;
+  maxSessionTrades: string;
+  setMaxSessionTrades: (value: string) => void;
+  autoTradingStatus: AutoTradingStatus;
+  autoTradingTradeCount: number;
+  autoTradingProfit: number;
+  stopAutoTrading: () => void;
 }
 
 export type UseDigitsTradingParams = Pick<UseBaseTradingParams, 'ws' | 'isConnected' | 'isExhausted' | 'isAuthenticated' | 'onAuthWSFailed'>;
 
 export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAuthWSFailed }: UseDigitsTradingParams): UseDigitsTradingReturn {
+  const { localize } = useAppTranslations();
   const {
     ws: tradingWs,
     isConnected: tradingIsConnected,
@@ -90,6 +164,29 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
   const [selectedDigit, setSelectedDigit] = useState<number>(5);
   const [stake, setStake] = useState<string>('10');
   const [duration, setDuration] = useState<number>(5);
+  const [takeProfit, setTakeProfit] = useState('');
+  const [stopLoss, setStopLoss] = useState('');
+  const [martingaleMode, setMartingaleMode] = useState<MartingaleMode>('classic');
+  const [martingaleValues, setMartingaleValues] = useState<Record<MartingaleMode, string>>({
+    classic: '2',
+    dynamic: '2',
+    'super-hybrid': '2',
+  });
+  const [maxSessionTrades, setMaxSessionTrades] = useState('20');
+  const [autoTradingStatus, setAutoTradingStatus] = useState<AutoTradingStatus>('idle');
+  const [autoTradingTradeCount, setAutoTradingTradeCount] = useState(0);
+  const [autoTradingProfit, setAutoTradingProfit] = useState(0);
+  const autoSessionRef = useRef<{ stopRequested: boolean } | null>(null);
+
+  const setMartingaleValue = useCallback((mode: MartingaleMode, value: string) => {
+    setMartingaleValues((current) => ({ ...current, [mode]: value }));
+  }, []);
+
+  const stopAutoTrading = useCallback(() => {
+    if (!autoSessionRef.current) return;
+    autoSessionRef.current.stopRequested = true;
+    setAutoTradingStatus('stopping');
+  }, []);
 
   // Reset contract mode to the first option of the selected trade type
   const setTradeType = useCallback((type: TradeType) => {
@@ -155,10 +252,171 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
   const { proposal } = useProposal(tradingWs, tradingIsConnected, proposalParams);
 
   const buyContract = useCallback(async () => {
-    if (proposal) {
-      await buyWithProposal(proposal);
+    if (autoSessionRef.current) {
+      stopAutoTrading();
+      return;
     }
-  }, [proposal, buyWithProposal]);
+
+    const hasRiskTarget = takeProfit.trim() !== '' || stopLoss.trim() !== '';
+    if (!hasRiskTarget) {
+      if (proposal) await buyWithProposal(proposal);
+      return;
+    }
+
+    const parseTarget = (value: string, label: string): number | null => {
+      if (value.trim() === '') return null;
+      const parsed = Number(value);
+      if (!Number.isFinite(parsed) || parsed <= 0) {
+        throw new Error(localize('{{label}} must be greater than zero.', { label }));
+      }
+      return parsed;
+    };
+
+    let takeProfitTarget: number | null;
+    let stopLossTarget: number | null;
+    const baseStake = Number(stake);
+    const multiplier = Number(martingaleValues[martingaleMode]);
+    const tradeLimit = Number(maxSessionTrades);
+    try {
+      takeProfitTarget = parseTarget(takeProfit, localize('Take profit'));
+      stopLossTarget = parseTarget(stopLoss, localize('Stop loss'));
+      if (takeProfitTarget === null && stopLossTarget === null) {
+        throw new Error(localize('Set a take-profit or stop-loss target to start an automatic session.'));
+      }
+      if (!Number.isFinite(baseStake) || baseStake <= 0) {
+        throw new Error(localize('Stake must be greater than zero.'));
+      }
+      if (!Number.isFinite(multiplier) || multiplier < 1 || multiplier > MAX_AUTO_TRADE_STAKE_MULTIPLIER) {
+        throw new Error(localize('Martingale multiplier must be between 1 and {{max}}.', {
+          max: MAX_AUTO_TRADE_STAKE_MULTIPLIER,
+        }));
+      }
+      if (!Number.isInteger(tradeLimit) || tradeLimit < 1 || tradeLimit > 100) {
+        throw new Error(localize('Maximum trades per session must be between 1 and 100.'));
+      }
+      if (!tradingWs?.isConnected || !tradingIsConnected || !isAuthenticated) {
+        throw new Error(localize('Log in and connect before starting an automatic trading session.'));
+      }
+      if (!activeSymbol) throw new Error(localize('Select a market before starting a trading session.'));
+    } catch (error) {
+      toast.error(localize('Risk settings are invalid'), {
+        description: error instanceof Error ? error.message : localize('Check your risk settings and try again.'),
+      });
+      return;
+    }
+
+    const session = { stopRequested: false };
+    autoSessionRef.current = session;
+    setAutoTradingStatus('running');
+    setAutoTradingTradeCount(0);
+    setAutoTradingProfit(0);
+
+    let sessionProfit = 0;
+    let tradeCount = 0;
+    let nextStake = baseStake;
+    let martingaleProgress = { ...initialMartingaleProgress };
+    let stopReason = '';
+
+    try {
+      while (tradeCount < tradeLimit && !session.stopRequested) {
+        if (!tradingWs.isConnected) throw new Error(localize('Connection lost. Auto-trading was stopped.'));
+
+        const proposalParams = {
+          proposal: 1,
+          amount: nextStake,
+          basis: 'stake',
+          contract_type: contractMode,
+          currency: 'USD',
+          underlying_symbol: activeSymbol.underlying_symbol,
+          duration,
+          duration_unit: 't',
+          ...(contractMode !== 'DIGITEVEN' && contractMode !== 'DIGITODD'
+            ? { barrier: selectedDigit }
+            : {}),
+        };
+        const proposalResponse = await tradingWs.send<ProposalResponse>(proposalParams);
+        if (session.stopRequested) break;
+        const quote = proposalResponse.proposal;
+        if (!quote?.id || !Number.isFinite(quote.ask_price) || quote.ask_price <= 0) {
+          throw new Error(localize('Could not get a valid proposal for the next trade.'));
+        }
+
+        const purchase = await buyWithProposal({
+          id: quote.id,
+          askPrice: quote.ask_price,
+          payout: quote.payout,
+          longcode: quote.longcode,
+          minStake: Number(quote.validation_params?.stake?.min ?? 0),
+          maxPayout: Number(quote.validation_params?.payout?.max ?? 0),
+        });
+        if (!purchase) throw new Error(localize('Trade purchase failed. Auto-trading was stopped.'));
+
+        tradeCount += 1;
+        setAutoTradingTradeCount(tradeCount);
+        const settledProfit = await waitForContractSettlement(tradingWs, purchase.contractId);
+        sessionProfit = Math.round((sessionProfit + settledProfit) * 100) / 100;
+        setAutoTradingProfit(sessionProfit);
+
+        if (takeProfitTarget !== null && sessionProfit >= takeProfitTarget) {
+          stopReason = localize('Take-profit target reached.');
+          break;
+        }
+        if (stopLossTarget !== null && sessionProfit <= -stopLossTarget) {
+          stopReason = localize('Stop-loss limit reached.');
+          break;
+        }
+
+        const next = getNextMartingaleStake(
+          baseStake,
+          multiplier,
+          martingaleMode,
+          settledProfit,
+          martingaleProgress
+        );
+        nextStake = next.stake;
+        martingaleProgress = next.progress;
+      }
+
+      if (session.stopRequested) {
+        stopReason = localize('Auto-trading stopped after the current contract settled.');
+      } else if (!stopReason && tradeCount >= tradeLimit) {
+        stopReason = localize('Maximum trades per session reached.');
+      } else if (!stopReason && tradeCount === 0) {
+        stopReason = localize('Auto-trading stopped before the first trade.');
+      }
+      toast.success(localize('Trading session ended'), {
+        description: localize('{{reason}} Final session P/L: {{profit}} USD across {{count}} trades.', {
+          reason: stopReason,
+          profit: sessionProfit.toFixed(2),
+          count: tradeCount,
+        }),
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : localize('Auto-trading stopped unexpectedly.');
+      toast.error(localize('Auto-trading stopped'), { description: message });
+    } finally {
+      autoSessionRef.current = null;
+      setAutoTradingStatus('idle');
+    }
+  }, [
+    activeSymbol,
+    buyWithProposal,
+    contractMode,
+    duration,
+    isAuthenticated,
+    localize,
+    martingaleMode,
+    martingaleValues,
+    maxSessionTrades,
+    proposal,
+    selectedDigit,
+    stake,
+    stopAutoTrading,
+    stopLoss,
+    takeProfit,
+    tradingIsConnected,
+    tradingWs,
+  ]);
 
   return {
     isConnected,
@@ -197,5 +455,19 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
     sellingId,
     sellError,
     clearSellError,
+    takeProfit,
+    setTakeProfit,
+    stopLoss,
+    setStopLoss,
+    martingaleMode,
+    setMartingaleMode,
+    martingaleValues,
+    setMartingaleValue,
+    maxSessionTrades,
+    setMaxSessionTrades,
+    autoTradingStatus,
+    autoTradingTradeCount,
+    autoTradingProfit,
+    stopAutoTrading,
   };
 }

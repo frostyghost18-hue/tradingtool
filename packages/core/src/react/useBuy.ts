@@ -5,7 +5,7 @@ import type { DerivWS } from '../ws';
 import type { ProposalInfo, BuyResponse, BuyResult } from '../types';
 
 interface UseBuyReturn {
-  buyContract: (proposal: ProposalInfo) => Promise<void>;
+  buyContract: (proposal: ProposalInfo) => Promise<BuyResult | null>;
   isBuying: boolean;
   buyResult: BuyResult | null;
   buyError: string | null;
@@ -25,8 +25,8 @@ export function useBuy(
     setBuyError(null);
   }, []);
 
-  const buyContract = useCallback(async (proposal: ProposalInfo) => {
-    if (!ws || !isConnected) return;
+  const buyContract = useCallback(async (proposal: ProposalInfo): Promise<BuyResult | null> => {
+    if (!ws || !isConnected) return null;
 
     setIsBuying(true);
     setBuyError(null);
@@ -39,16 +39,20 @@ export function useBuy(
       });
 
       if (response.buy) {
-        setBuyResult({
+        const result = {
           contractId: response.buy.contract_id,
           buyPrice: response.buy.buy_price,
           payout: response.buy.payout,
           longcode: response.buy.longcode,
           balanceAfter: response.buy.balance_after,
-        });
+        };
+        setBuyResult(result);
+        return result;
       }
+      return null;
     } catch (err) {
       setBuyError(err instanceof Error ? err.message : 'Purchase failed');
+      return null;
     } finally {
       setIsBuying(false);
     }

@@ -15,6 +15,7 @@ interface DigitStatsBarProps {
   lastDigit?: number | null;
   headerRight?: ReactNode;
   onDigitSelect: (digit: number) => void;
+  disabled?: boolean;
 }
 
 export function DigitStatsBar({
@@ -23,6 +24,7 @@ export function DigitStatsBar({
   lastDigit = null,
   headerRight,
   onDigitSelect,
+  disabled = false,
 }: DigitStatsBarProps) {
   const { locale } = useAppTranslations();
   const ranks = getDigitPercentageRanks(digitStats.percentages);
@@ -54,6 +56,7 @@ export function DigitStatsBar({
               )}
               <Button
                 variant={isSelected ? 'default' : 'outline'}
+                disabled={disabled}
                 onClick={() => onDigitSelect(digit)}
                 data-digit={digit}
                 data-selected={isSelected}
