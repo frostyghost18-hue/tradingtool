@@ -271,8 +271,7 @@ export function DigitsView({
   // Purchase feedback for the configurable layouts lives HERE, not in
   // ConfigurableDigitsControls: the desktop no-code layout mounts that
   // component once per column, and a per-instance effect would fire every
-  // toast twice. The standard layout's TradeControls owns its own toasts, so
-  // these are gated on appConfig to keep a single owner per layout.
+  // toast twice. Automatic sessions clear successful results without a toast.
   const hasAppConfig = !!appConfig;
   useEffect(() => {
     if (!hasAppConfig || !buyError) return;
@@ -281,18 +280,20 @@ export function DigitsView({
   }, [hasAppConfig, buyError, clearBuyResult, localize]);
   useEffect(() => {
     if (!hasAppConfig || !buyResult) return;
-    toast.success(localize('Contract Purchased'), {
-      description: localize(
-        'Buy price: {{buyPrice}} USD | Payout: {{payout}} USD | Balance: {{balance}} USD',
-        {
-          buyPrice: formatAmount(buyResult.buyPrice, locale),
-          payout: formatAmount(buyResult.payout, locale),
-          balance: formatAmount(buyResult.balanceAfter, locale),
-        }
-      ),
-    });
+    if (autoTradingStatus === 'idle') {
+      toast.success(localize('Contract Purchased'), {
+        description: localize(
+          'Buy price: {{buyPrice}} USD | Payout: {{payout}} USD | Balance: {{balance}} USD',
+          {
+            buyPrice: formatAmount(buyResult.buyPrice, locale),
+            payout: formatAmount(buyResult.payout, locale),
+            balance: formatAmount(buyResult.balanceAfter, locale),
+          }
+        ),
+      });
+    }
     clearBuyResult();
-  }, [hasAppConfig, buyResult, clearBuyResult, localize, locale]);
+  }, [hasAppConfig, buyResult, autoTradingStatus, clearBuyResult, localize, locale]);
 
   // In edit mode, login/sign-up/account actions are inert (no OAuth navigation
   // out of the editor) — only the theme toggle stays interactive.

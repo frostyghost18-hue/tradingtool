@@ -129,19 +129,21 @@ export function TradeControls({
 
   useEffect(() => {
     if (buyResult) {
-      toast.success(localize('Contract Purchased'), {
-        description: localize(
-          'Buy price: {{buyPrice}} USD | Payout: {{payout}} USD | Balance: {{balance}} USD',
-          {
-            buyPrice: formatAmount(buyResult.buyPrice, locale),
-            payout: formatAmount(buyResult.payout, locale),
-            balance: formatAmount(buyResult.balanceAfter, locale),
-          }
-        ),
-      });
+      if (autoTradingStatus === 'idle') {
+        toast.success(localize('Contract Purchased'), {
+          description: localize(
+            'Buy price: {{buyPrice}} USD | Payout: {{payout}} USD | Balance: {{balance}} USD',
+            {
+              buyPrice: formatAmount(buyResult.buyPrice, locale),
+              payout: formatAmount(buyResult.payout, locale),
+              balance: formatAmount(buyResult.balanceAfter, locale),
+            }
+          ),
+        });
+      }
       onClearBuyResult();
     }
-  }, [buyResult, onClearBuyResult, localize, locale]);
+  }, [buyResult, autoTradingStatus, onClearBuyResult, localize, locale]);
 
   const modeOptions = getContractModeOptions(localize)[tradeType];
   const isAutoTrading = autoTradingStatus !== 'idle';

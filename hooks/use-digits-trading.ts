@@ -340,6 +340,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
           maxPayout: Number(quote.validation_params?.payout?.max ?? 0),
         });
         if (!purchase) throw new Error(localize('Trade purchase failed. Auto-trading was stopped.'));
+        clearBuyResult();
 
         tradeCount += 1;
         setAutoTradingTradeCount(tradeCount);
@@ -392,6 +393,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
   }, [
     activeSymbol,
     buyWithProposal,
+    clearBuyResult,
     contractMode,
     duration,
     isAuthenticated,
