@@ -20,6 +20,7 @@ import { RiskManagementControls } from './risk-management-controls';
 import { ConfigurableDigitsControls, ConfigurableBuyButton } from './configurable-digits-controls';
 import { TradeTypeChips } from '@/components/custom/trade-type-chips';
 import { SymbolSelector } from '@/components/custom/symbol-selector';
+import { TransactionsPanel } from '@/components/custom/transactions-panel';
 import type {
   AuthState,
   DerivAccount,
@@ -31,6 +32,8 @@ import type {
 } from '@deriv/core';
 import type { ContractMode, TradeType, DigitStats } from '../lib/types';
 import type { MartingaleMode } from '../lib/martingale';
+import type { OpenPosition } from '@/hooks/use-open-positions';
+import type { ClosedPosition } from '@/hooks/use-closed-positions';
 import { ALL_CONTROL_KEYS } from '../lib/app-config';
 import type { ControlKey, DigitsAppConfig } from '../lib/app-config';
 
@@ -85,6 +88,8 @@ export interface DigitsViewProps {
   lastDigit: number | null;
   digitStats: DigitStats;
   pipSize: number;
+  openPositions: OpenPosition[];
+  closedPositions: ClosedPosition[];
 
   // Trade controls
   tradeType: TradeType;
@@ -160,6 +165,8 @@ export function DigitsView({
   lastDigit,
   digitStats,
   pipSize,
+  openPositions,
+  closedPositions,
   tradeType,
   setTradeType,
   contractMode,
@@ -466,6 +473,12 @@ export function DigitsView({
                       {renderConfigurable(MARKET_COLUMN_KEYS, false, true)}
                     </CardContent>
                   </Card>
+                  <TransactionsPanel
+                    openPositions={openPositions}
+                    closedPositions={closedPositions}
+                    isAuthenticated={authState === 'authenticated'}
+                    currency={activeAccount?.currency}
+                  />
                   <Card className="factorpulse-panel overflow-hidden border-primary/45 bg-card/95">
                     <CardHeader className="flex-row items-center gap-2 border-b border-border/70 px-4 py-3">
                       <Zap className="h-4 w-4 text-primary" />
@@ -483,13 +496,10 @@ export function DigitsView({
             </div>
           </div>
         ) : (
-          /* No-code desktop layout: two columns, like rise-fall and
-             accumulators — market data (symbol, tick, digit stats) left where
-             those templates put the chart, controls card right. See
-             MARKET_COLUMN_KEYS for the split. The controls column is 440px
-             (not the siblings' 400px) because the trade-type chips row lives
-             here and needs ~370px of card content in English — 400px would
-             clip it, and longer locales need the headroom.
+          /* No-code desktop layout: market data, transactions and trade
+             controls sit in that order at xl. At lg, transactions moves below
+             the two-column market/controls layout. See MARKET_COLUMN_KEYS for
+             the market-data split.
 
              The 440px track is guarded behind `lg:` because useIsMobile
              initialises to false — on SSR and the first client render every
@@ -498,24 +508,20 @@ export function DigitsView({
              (max-width: 1023px) query is the same boundary as `lg`, so the
              CSS and the JS branch agree once hydrated.
 
-             Edit mode shares this layout (as in rise-fall/accumulators), so
-             the builder's desktop viewport shows what deploys: selection works
-             across both columns, and rearrange drags reorder within a column
-             (each column keys the same full config.order, so a within-column
-             drop still produces the correct full order; a cross-column drop is
-             a no-op because each instance tracks its own drag). Full reordering
-             lives in the builder's phone viewport, which renders the single
-             mobile column. */
+             Edit mode shares the two-column version of this layout, so the
+             builder's desktop viewport shows the editable controls. Full
+             reordering lives in the builder's phone viewport. */
           <div className="mx-auto flex w-full max-w-[1600px] flex-col px-3 py-4 pb-24 sm:px-6">
             {isLoading ? (
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(320px,0.9fr)] xl:gap-5">
+              <div className={`grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(320px,0.9fr)] ${!editMode ? 'xl:grid-cols-[minmax(0,1.3fr)_minmax(320px,0.9fr)_minmax(320px,0.9fr)]' : ''} xl:gap-5`}>
                 <Skeleton className="h-[420px] w-full rounded-xl" />
                 <Skeleton className="h-[420px] w-full rounded-xl" />
+                {!editMode && <Skeleton className="h-[420px] w-full rounded-xl" />}
               </div>
             ) : (
               <>
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(320px,0.9fr)] xl:gap-5">
-                <Card className="factorpulse-panel overflow-hidden border-primary/45 bg-card/95" data-testid="market-column">
+              <div className={`grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(320px,0.9fr)] ${!editMode ? 'xl:grid-cols-[minmax(0,1.3fr)_minmax(320px,0.9fr)_minmax(320px,0.9fr)]' : ''} xl:gap-5`}>
+                <Card className="factorpulse-panel order-1 overflow-hidden border-primary/45 bg-card/95" data-testid="market-column">
                   <CardHeader className="flex-row items-center justify-between border-b border-border/70 px-4 py-3 sm:px-5">
                     <div className="flex items-center gap-2">
                       <Activity className="h-4 w-4 text-primary" />
@@ -531,7 +537,17 @@ export function DigitsView({
                     {renderConfigurable(MARKET_COLUMN_KEYS, false, true)}
                   </CardContent>
                 </Card>
-                <Card className="factorpulse-panel overflow-hidden border-primary/45 bg-card/95" data-testid="controls-column">
+                {!editMode && (
+                  <div className="h-full order-2 lg:order-3 lg:col-span-2 xl:order-2 xl:col-span-1">
+                    <TransactionsPanel
+                      openPositions={openPositions}
+                      closedPositions={closedPositions}
+                      isAuthenticated={authState === 'authenticated'}
+                      currency={activeAccount?.currency}
+                    />
+                  </div>
+                )}
+                <Card className={`factorpulse-panel overflow-hidden border-primary/45 bg-card/95 ${editMode ? 'lg:order-2' : 'order-3 lg:order-2 xl:order-3'}`} data-testid="controls-column">
                   <CardHeader className="flex-row items-center justify-between border-b border-border/70 px-4 py-3 sm:px-5">
                     <div className="flex items-center gap-2">
                       <Zap className="h-4 w-4 text-primary" />
@@ -661,6 +677,15 @@ export function DigitsView({
                       </div>
                     )}
 
+                    <div className="py-4 sm:py-6">
+                      <TransactionsPanel
+                        openPositions={openPositions}
+                        closedPositions={closedPositions}
+                        isAuthenticated={authState === 'authenticated'}
+                        currency={activeAccount?.currency}
+                      />
+                    </div>
+
                     {/* Trade controls */}
                     <div className="pt-4 sm:pt-6">
                       <TradeControls
@@ -694,20 +719,19 @@ export function DigitsView({
           )}
         </div>
       ) : (
-        /* Standard desktop layout: the SAME two-column split as the no-code
-           desktop above — market data (symbol, tick, digit stats) left,
-           controls (trade type chips + trade controls) right — so both paths
-           look identical. The `lg:` guard plays the same first-paint role as
-           in the no-code grid (useIsMobile initialises to false). */
+        /* Standard desktop layout: market data, transactions and trade
+           controls sit in that order at xl. At lg, transactions moves below
+           the two-column market/controls layout. */
         <div className="mx-auto flex w-full max-w-[1600px] flex-col px-3 py-4 pb-24 sm:px-6">
           {isLoading ? (
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(320px,0.9fr)] xl:gap-5">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(320px,0.9fr)] xl:grid-cols-[minmax(0,1.3fr)_minmax(320px,0.9fr)_minmax(320px,0.9fr)] xl:gap-5">
+              <Skeleton className="h-[420px] w-full rounded-xl" />
               <Skeleton className="h-[420px] w-full rounded-xl" />
               <Skeleton className="h-[420px] w-full rounded-xl" />
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(320px,0.9fr)] xl:gap-5">
-              <Card className="factorpulse-panel overflow-hidden border-primary/45 bg-card/95" data-testid="market-column">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(320px,0.9fr)] xl:grid-cols-[minmax(0,1.3fr)_minmax(320px,0.9fr)_minmax(320px,0.9fr)] xl:gap-5">
+              <Card className="factorpulse-panel order-1 overflow-hidden border-primary/45 bg-card/95" data-testid="market-column">
                 <CardHeader className="flex-row items-center justify-between border-b border-border/70 px-4 py-3 sm:px-5">
                   <div className="flex items-center gap-2">
                     <Activity className="h-4 w-4 text-primary" />
@@ -756,7 +780,15 @@ export function DigitsView({
                   </div>
                 </CardContent>
               </Card>
-              <Card className="factorpulse-panel overflow-hidden border-primary/45 bg-card/95" data-testid="controls-column">
+              <div className="h-full order-2 lg:order-3 lg:col-span-2 xl:order-2 xl:col-span-1">
+                <TransactionsPanel
+                  openPositions={openPositions}
+                  closedPositions={closedPositions}
+                  isAuthenticated={authState === 'authenticated'}
+                  currency={activeAccount?.currency}
+                />
+              </div>
+              <Card className="factorpulse-panel order-3 overflow-hidden border-primary/45 bg-card/95 lg:order-2 xl:order-3" data-testid="controls-column">
                 <CardHeader className="flex-row items-center justify-between border-b border-border/70 px-4 py-3 sm:px-5">
                   <div className="flex items-center gap-2">
                     <Zap className="h-4 w-4 text-primary" />
