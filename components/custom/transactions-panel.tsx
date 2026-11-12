@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
-import { Activity, ArrowUpRight } from 'lucide-react';
+import { useState } from 'react';
+import { Activity, RotateCcw } from 'lucide-react';
 import { Localize } from '@deriv-com/translations';
 import { Badge } from '@/components/ui/badge';
 import { CardTitle } from '@/components/ui/card';
@@ -15,34 +14,15 @@ import {
 } from '@/components/ui/select';
 import { getSymbolDisplayName } from '@/lib/active-symbols-display-names';
 import { formatAmount, formatSignedAmount } from '@/lib/locale-format';
-import { openPositionProfit } from '@/lib/position-amounts';
 import { useAppTranslations } from '@/components/custom/i18n-provider';
-import type { OpenPosition } from '@/hooks/use-open-positions';
-import type { ClosedPosition } from '@/hooks/use-closed-positions';
+import type { SessionTransaction } from '@/hooks/use-session-transactions';
 
 type TransactionFilter = 'all' | 'open' | 'closed';
 
-interface Transaction {
-  contractId: number;
-  contractType: string;
-  symbol: string;
-  stake: number | string;
-  value: number | string;
-  profit: number;
-  currency: string;
-  timestamp: number;
-  status: 'open' | 'closed';
-}
-
 interface TransactionsPanelProps {
-  openPositions: OpenPosition[];
-  closedPositions: ClosedPosition[];
+  transactions: SessionTransaction[];
+  onReset: () => void;
   isAuthenticated: boolean;
-  currency?: string;
-}
-
-function isOpenPosition(position: OpenPosition): boolean {
-  return position.is_sold !== 1 && position.is_expired !== 1 && position.status === 'open';
 }
 
 function formatTransactionTime(timestamp: number, locale: string): string {
@@ -57,73 +37,12 @@ function formatTransactionTime(timestamp: number, locale: string): string {
 }
 
 export function TransactionsPanel({
-  openPositions,
-  closedPositions,
+  transactions,
+  onReset,
   isAuthenticated,
-  currency = '',
 }: TransactionsPanelProps) {
   const { localize, locale } = useAppTranslations();
   const [filter, setFilter] = useState<TransactionFilter>('all');
-  const [recentlyClosed, setRecentlyClosed] = useState<OpenPosition[]>([]);
-
-  useEffect(() => {
-    const closedUpdates = openPositions.filter((position) => !isOpenPosition(position));
-    if (closedUpdates.length === 0) return;
-
-    setRecentlyClosed((current) => {
-      const positionsById = new Map(current.map((position) => [position.contract_id, position]));
-      for (const position of closedUpdates) {
-        positionsById.set(position.contract_id, position);
-      }
-      return Array.from(positionsById.values());
-    });
-  }, [openPositions]);
-
-  const transactions = useMemo(() => {
-    const closedIds = new Set(closedPositions.map((position) => position.contract_id));
-    const openTransactions: Transaction[] = openPositions
-      .filter((position) => isOpenPosition(position) && !closedIds.has(position.contract_id))
-      .map((position) => ({
-        contractId: position.contract_id,
-        contractType: position.contract_type,
-        symbol: position.underlying_symbol,
-        stake: position.buy_price,
-        value: position.bid_price,
-        profit: openPositionProfit(position),
-        currency: position.currency,
-        timestamp: position.date_start,
-        status: 'open',
-      }));
-
-    const recentClosedTransactions: Transaction[] = recentlyClosed
-      .filter((position) => !closedIds.has(position.contract_id))
-      .map((position) => ({
-        contractId: position.contract_id,
-        contractType: position.contract_type,
-        symbol: position.underlying_symbol,
-        stake: position.buy_price,
-        value: position.bid_price,
-        profit: openPositionProfit(position),
-        currency: position.currency,
-        timestamp: position.exit_spot_time ?? position.date_expiry ?? position.date_start,
-        status: 'closed',
-      }));
-
-    const historicalClosedTransactions: Transaction[] = closedPositions.map((position) => ({
-      contractId: position.contract_id,
-      contractType: position.contract_type,
-      symbol: position.underlying_symbol,
-      stake: position.buy_price,
-      value: position.sell_price,
-      profit: position.sell_price - position.buy_price,
-      currency,
-      timestamp: position.sell_time || position.purchase_time,
-      status: 'closed',
-    }));
-
-    return [...openTransactions, ...recentClosedTransactions, ...historicalClosedTransactions]
-      .sort((left, right) => right.timestamp - left.timestamp);
-  }, [openPositions, closedPositions, recentlyClosed, currency]);
 
   const visibleTransactions = transactions.filter(
     (transaction) => filter === 'all' || transaction.status === filter
@@ -134,6 +53,7 @@ export function TransactionsPanel({
     (total, transaction) => total + (Number.isFinite(transaction.profit) ? transaction.profit : 0),
     0
   );
+  const currency = transactions[0]?.currency ?? '';
   const contractTypeLabels: Record<string, string> = {
     DIGITMATCH: localize('Digit Match'),
     DIGITDIFF: localize('Digit Differs'),
@@ -155,16 +75,31 @@ export function TransactionsPanel({
             <Localize i18n_default_text="Transactions" />
           </CardTitle>
         </div>
-        <Select value={filter} onValueChange={(value) => setFilter(value as TransactionFilter)}>
-          <SelectTrigger aria-label={localize('Filter transactions')} className="h-8 w-[104px] shrink-0 text-xs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{localize('All')} · {transactions.length}</SelectItem>
-            <SelectItem value="open">{localize('Open')} · {openCount}</SelectItem>
-            <SelectItem value="closed">{localize('Closed')} · {closedCount}</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex shrink-0 items-center gap-1.5">
+          {isAuthenticated && (
+            <button
+              type="button"
+              aria-label={localize('Reset transactions')}
+              title={localize('Reset transactions')}
+              disabled={transactions.length === 0}
+              onClick={onReset}
+              className="inline-flex h-8 items-center gap-1 rounded-md border border-border px-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              <span>{localize('Reset')}</span>
+            </button>
+          )}
+          <Select value={filter} onValueChange={(value) => setFilter(value as TransactionFilter)}>
+            <SelectTrigger aria-label={localize('Filter transactions')} className="h-8 w-[98px] shrink-0 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{localize('All')} · {transactions.length}</SelectItem>
+              <SelectItem value="open">{localize('Open')} · {openCount}</SelectItem>
+              <SelectItem value="closed">{localize('Closed')} · {closedCount}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="flex items-center justify-between gap-3 border-b border-border/60 px-4 py-2.5">
@@ -221,16 +156,21 @@ export function TransactionsPanel({
                       : localize('Closed')}
                   </Badge>
                 </div>
-                <div className="mt-2 flex items-end justify-between gap-3 border-t border-border/60 pt-2">
-                  <div className="min-w-0 text-[10px] text-muted-foreground">
-                    <p>
-                      <Localize i18n_default_text="Stake" />: {formatAmount(transaction.stake, locale)} {transaction.currency}
-                    </p>
-                    <p>
-                      {transaction.status === 'open'
-                        ? localize('Current value')
-                        : localize('Sell price')}: {formatAmount(transaction.value, locale)}
-                    </p>
+                <div className="mt-3 grid grid-cols-[1fr_auto] items-center gap-3">
+                  <div className="flex min-w-0 items-center gap-2 rounded-md border border-primary/20 bg-primary/5 px-2.5 py-1.5">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                        <Localize i18n_default_text="Last digit" />
+                      </p>
+                      <p className="truncate text-[9px] text-muted-foreground">
+                        {transaction.status === 'closed'
+                          ? localize('Final contract tick')
+                          : localize('Latest contract tick')}
+                      </p>
+                    </div>
+                    <span className="ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/15 text-xl font-black tabular-nums text-primary">
+                      {transaction.lastDigit ?? '—'}
+                    </span>
                   </div>
                   <div className="shrink-0 text-right">
                     <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
@@ -241,6 +181,16 @@ export function TransactionsPanel({
                     </p>
                   </div>
                 </div>
+                <div className="mt-2 grid grid-cols-2 gap-x-3 border-t border-border/60 pt-2 text-[10px] text-muted-foreground">
+                  <p className="truncate">
+                    <Localize i18n_default_text="Stake" />: {formatAmount(transaction.stake, locale)} {transaction.currency}
+                  </p>
+                  <p className="truncate text-right">
+                    {transaction.status === 'open'
+                      ? localize('Current value')
+                      : localize('Sell price')}: {formatAmount(transaction.value, locale)} {transaction.currency}
+                  </p>
+                </div>
               </article>
             );
           })
@@ -249,21 +199,12 @@ export function TransactionsPanel({
             {!isAuthenticated
               ? localize('Log in to see your transactions.')
               : filter === 'all'
-                ? localize('Your trades will appear here.')
+                ? localize('Your session trades will appear here.')
                 : localize('No {{status}} transactions.', { status: filter })}
           </p>
         )}
       </div>
 
-      {isAuthenticated && (
-        <Link
-          href="/reports"
-          className="inline-flex items-center justify-center gap-1 border-t border-border/70 px-3 py-2 text-xs font-medium text-primary hover:bg-muted/40"
-        >
-          <Localize i18n_default_text="View full history" />
-          <ArrowUpRight className="h-3.5 w-3.5" />
-        </Link>
-      )}
     </section>
   );
 }

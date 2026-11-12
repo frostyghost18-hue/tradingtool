@@ -33,7 +33,7 @@ import type {
 import type { ContractMode, TradeType, DigitStats } from '../lib/types';
 import type { MartingaleMode } from '../lib/martingale';
 import type { OpenPosition } from '@/hooks/use-open-positions';
-import type { ClosedPosition } from '@/hooks/use-closed-positions';
+import { useSessionTransactions } from '@/hooks/use-session-transactions';
 import { ALL_CONTROL_KEYS } from '../lib/app-config';
 import type { ControlKey, DigitsAppConfig } from '../lib/app-config';
 
@@ -89,7 +89,6 @@ export interface DigitsViewProps {
   digitStats: DigitStats;
   pipSize: number;
   openPositions: OpenPosition[];
-  closedPositions: ClosedPosition[];
 
   // Trade controls
   tradeType: TradeType;
@@ -166,7 +165,6 @@ export function DigitsView({
   digitStats,
   pipSize,
   openPositions,
-  closedPositions,
   tradeType,
   setTradeType,
   contractMode,
@@ -233,6 +231,12 @@ export function DigitsView({
   const { localize, locale } = useAppTranslations();
   const digitTradeTypeOptions = getDigitTradeTypeOptions(localize);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const { transactions, resetTransactions } = useSessionTransactions(
+    openPositions,
+    symbols,
+    activeAccount?.account_id ?? null,
+    pipSize
+  );
 
   // Logged-out Buy opens the login/sign-up prompt instead of sending a buy that
   // would fail with a "Purchase Failed" toast. One gate covers every Buy
@@ -474,10 +478,9 @@ export function DigitsView({
                     </CardContent>
                   </Card>
                   <TransactionsPanel
-                    openPositions={openPositions}
-                    closedPositions={closedPositions}
+                    transactions={transactions}
+                    onReset={resetTransactions}
                     isAuthenticated={authState === 'authenticated'}
-                    currency={activeAccount?.currency}
                   />
                   <Card className="factorpulse-panel overflow-hidden border-primary/45 bg-card/95">
                     <CardHeader className="flex-row items-center gap-2 border-b border-border/70 px-4 py-3">
@@ -540,10 +543,9 @@ export function DigitsView({
                 {!editMode && (
                   <div className="h-full order-2 lg:order-3 lg:col-span-2 xl:order-2 xl:col-span-1">
                     <TransactionsPanel
-                      openPositions={openPositions}
-                      closedPositions={closedPositions}
+                      transactions={transactions}
+                      onReset={resetTransactions}
                       isAuthenticated={authState === 'authenticated'}
-                      currency={activeAccount?.currency}
                     />
                   </div>
                 )}
@@ -679,10 +681,9 @@ export function DigitsView({
 
                     <div className="py-4 sm:py-6">
                       <TransactionsPanel
-                        openPositions={openPositions}
-                        closedPositions={closedPositions}
+                        transactions={transactions}
+                        onReset={resetTransactions}
                         isAuthenticated={authState === 'authenticated'}
-                        currency={activeAccount?.currency}
                       />
                     </div>
 
@@ -782,10 +783,9 @@ export function DigitsView({
               </Card>
               <div className="h-full order-2 lg:order-3 lg:col-span-2 xl:order-2 xl:col-span-1">
                 <TransactionsPanel
-                  openPositions={openPositions}
-                  closedPositions={closedPositions}
+                  transactions={transactions}
+                  onReset={resetTransactions}
                   isAuthenticated={authState === 'authenticated'}
-                  currency={activeAccount?.currency}
                 />
               </div>
               <Card className="factorpulse-panel order-3 overflow-hidden border-primary/45 bg-card/95 lg:order-2 xl:order-3" data-testid="controls-column">
