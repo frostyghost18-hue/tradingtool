@@ -73,12 +73,31 @@
 .threshold-result-badge {
   animation: threshold-result-glow 2.4s ease-in-out infinite;
 }
+.take-profit-celebration {
+  display: flex;
+  justify-content: center;
+  gap: 0.35rem;
+  margin: -0.5rem 0 1rem;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+.take-profit-emoji {
+  display: inline-block;
+  animation: take-profit-emoji-celebrate 1.25s ease-in-out infinite;
+}
+.take-profit-emoji:nth-child(3n + 2) { animation-delay: 160ms; }
+.take-profit-emoji:nth-child(3n) { animation-delay: 320ms; }
+@keyframes take-profit-emoji-celebrate {
+  0%, 100% { transform: translateY(2px) rotate(-8deg) scale(0.92); }
+  50% { transform: translateY(-6px) rotate(8deg) scale(1.12); }
+}
 @keyframes threshold-result-glow {
   0%, 100% { box-shadow: 0 0 12px rgb(var(--primary) / 0.2); }
   50% { box-shadow: 0 0 28px rgb(var(--primary) / 0.55); }
 }
 @media (prefers-reduced-motion: reduce) {
   .threshold-result-badge { animation: none; }
+  .take-profit-emoji { animation: none; }
   .market-scanner-card { animation: none; }
   .market-scan-spinner { animation: none; }
 }

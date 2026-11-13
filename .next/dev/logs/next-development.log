@@ -41,3 +41,5 @@
 {"timestamp":"12:34:35.720","source":"Server","level":"WARN","message":"⚠ Fast Refresh had to perform a full reload when ./packages/core/src/index.ts [app-client] (ecmascript) <locals> changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload"}
 {"timestamp":"12:35:01.285","source":"Server","level":"WARN","message":"⚠ Fast Refresh had to perform a full reload when ./packages/core/src/index.ts [app-client] (ecmascript) <locals> changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload"}
 {"timestamp":"12:35:06.814","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
+{"timestamp":"12:42:21.950","source":"Server","level":"LOG","message":"✓ Compiled in 11.4s"}
+{"timestamp":"12:43:26.364","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}

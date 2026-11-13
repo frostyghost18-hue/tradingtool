@@ -73,6 +73,18 @@ export function ThresholdResultDialog({ result, onClose }: ThresholdResultDialog
               </span>
             </div>
 
+            {isTakeProfit && (
+              <div aria-hidden="true" className="take-profit-celebration">
+                {['💲', '💵', '💸', '💱', '🎉', '🎉', '🍾', '🎊', '🎊'].map(
+                  (emoji, index) => (
+                    <span className="take-profit-emoji" key={`${emoji}-${index}`}>
+                      {emoji}
+                    </span>
+                  )
+                )}
+              </div>
+            )}
+
             <div
               className={`grid grid-cols-[auto_1px_minmax(0,1fr)_1px_minmax(0,1fr)] items-center gap-2 rounded-xl border p-3 ${
                 isTakeProfit

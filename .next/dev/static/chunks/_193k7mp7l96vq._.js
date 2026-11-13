@@ -4530,6 +4530,32 @@ function ThresholdResultDialog({ result, onClose }) {
                         lineNumber: 63,
                         columnNumber: 13
                     }, this),
+                    isTakeProfit && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        "aria-hidden": "true",
+                        className: "take-profit-celebration",
+                        children: [
+                            '💲',
+                            '💵',
+                            '💸',
+                            '💱',
+                            '🎉',
+                            '🎉',
+                            '🍾',
+                            '🎊',
+                            '🎊'
+                        ].map((emoji, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                className: "take-profit-emoji",
+                                children: emoji
+                            }, `${emoji}-${index}`, false, {
+                                fileName: "[project]/components/custom/threshold-result-dialog.tsx",
+                                lineNumber: 80,
+                                columnNumber: 21
+                            }, this))
+                    }, void 0, false, {
+                        fileName: "[project]/components/custom/threshold-result-dialog.tsx",
+                        lineNumber: 77,
+                        columnNumber: 15
+                    }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: `grid grid-cols-[auto_1px_minmax(0,1fr)_1px_minmax(0,1fr)] items-center gap-2 rounded-xl border p-3 ${isTakeProfit ? 'border-emerald-400/30 bg-emerald-500/5' : 'border-rose-400/30 bg-rose-500/5'}`,
                         children: [
@@ -4537,14 +4563,14 @@ function ThresholdResultDialog({ result, onClose }) {
                                 className: `h-7 w-7 ${isTakeProfit ? 'text-emerald-400' : 'text-rose-400'}`
                             }, void 0, false, {
                                 fileName: "[project]/components/custom/threshold-result-dialog.tsx",
-                                lineNumber: 83,
+                                lineNumber: 95,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "h-10 w-px bg-border"
                             }, void 0, false, {
                                 fileName: "[project]/components/custom/threshold-result-dialog.tsx",
-                                lineNumber: 86,
+                                lineNumber: 98,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4555,7 +4581,7 @@ function ThresholdResultDialog({ result, onClose }) {
                                         children: localize('Session P/L')
                                     }, void 0, false, {
                                         fileName: "[project]/components/custom/threshold-result-dialog.tsx",
-                                        lineNumber: 88,
+                                        lineNumber: 100,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -4566,20 +4592,20 @@ function ThresholdResultDialog({ result, onClose }) {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/custom/threshold-result-dialog.tsx",
-                                        lineNumber: 91,
+                                        lineNumber: 103,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/custom/threshold-result-dialog.tsx",
-                                lineNumber: 87,
+                                lineNumber: 99,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "h-10 w-px bg-border"
                             }, void 0, false, {
                                 fileName: "[project]/components/custom/threshold-result-dialog.tsx",
-                                lineNumber: 99,
+                                lineNumber: 111,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4590,7 +4616,7 @@ function ThresholdResultDialog({ result, onClose }) {
                                         children: localize('Market')
                                     }, void 0, false, {
                                         fileName: "[project]/components/custom/threshold-result-dialog.tsx",
-                                        lineNumber: 101,
+                                        lineNumber: 113,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -4599,19 +4625,19 @@ function ThresholdResultDialog({ result, onClose }) {
                                         children: result.market
                                     }, void 0, false, {
                                         fileName: "[project]/components/custom/threshold-result-dialog.tsx",
-                                        lineNumber: 104,
+                                        lineNumber: 116,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/custom/threshold-result-dialog.tsx",
-                                lineNumber: 100,
+                                lineNumber: 112,
                                 columnNumber: 15
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/custom/threshold-result-dialog.tsx",
-                        lineNumber: 76,
+                        lineNumber: 88,
                         columnNumber: 13
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -4620,7 +4646,7 @@ function ThresholdResultDialog({ result, onClose }) {
                         children: localize('OK')
                     }, void 0, false, {
                         fileName: "[project]/components/custom/threshold-result-dialog.tsx",
-                        lineNumber: 110,
+                        lineNumber: 122,
                         columnNumber: 13
                     }, this)
                 ]
