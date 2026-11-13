@@ -20,6 +20,7 @@ import { useBaseTrading } from '@/hooks/use-base-trading';
 import type { UseBaseTradingParams } from '@/hooks/use-base-trading';
 import { computeDigitStats, getLastDigit } from '../lib/digit-stats';
 import {
+  AUTO_SCAN_CONTRACT_MODES,
   getContractBarrier,
   getScannableMarkets,
   hasPriceReversalRisk,
@@ -48,11 +49,23 @@ export interface AutoTradingScanProgress {
   totalMarkets: number;
   scanNumber: number;
   selectedMarket: string | null;
+  selectedContractMode: Exclude<ContractMode, 'DIGITMATCH'> | null;
   estimatedWinRate: number | null;
   skippedNoReturnMarkets: number;
+  skippedNegativeEvSetups: number;
 }
 
 type MarketScanProgressCallback = (scannedMarkets: number, totalMarkets: number) => void;
+
+function getScanCandidateKey(symbol: string, contractMode: ContractMode): string {
+  return `${symbol}:${contractMode}`;
+}
+
+function hasAvailableScanMode(symbol: string, excludedCandidates: Set<string>): boolean {
+  return AUTO_SCAN_CONTRACT_MODES.some(
+    (contractMode) => !excludedCandidates.has(getScanCandidateKey(symbol, contractMode))
+  );
+}
 
 async function fetchTickHistory(
   ws: NonNullable<UseBaseTradingParams['ws']>,
@@ -98,9 +111,8 @@ async function fetchTickHistory(
 async function scanMarkets(
   ws: NonNullable<UseBaseTradingParams['ws']>,
   symbols: ActiveSymbol[],
-  contractMode: ContractMode,
   shouldStop: () => boolean,
-  excludedSymbols: Set<string>,
+  excludedCandidates: Set<string>,
   onProgress: MarketScanProgressCallback
 ): Promise<MarketScanCandidate | null> {
   const candidates: MarketScanCandidate[] = [];
@@ -110,7 +122,7 @@ async function scanMarkets(
     throw new Error('No open, unsuspended markets are available to scan.');
   }
   const openSymbols = eligibleSymbols.filter(
-    (symbol) => !excludedSymbols.has(symbol.underlying_symbol)
+    (symbol) => hasAvailableScanMode(symbol.underlying_symbol, excludedCandidates)
   );
   if (openSymbols.length === 0) return null;
 
@@ -133,8 +145,13 @@ async function scanMarkets(
           shouldStop
         );
         if (prices && !shouldStop()) {
-          const candidate = scoreMarket(symbol, prices, contractMode);
-          if (candidate) candidates.push(candidate);
+          for (const contractMode of AUTO_SCAN_CONTRACT_MODES) {
+            if (excludedCandidates.has(getScanCandidateKey(symbol.underlying_symbol, contractMode))) {
+              continue;
+            }
+            const candidate = scoreMarket(symbol, prices, contractMode);
+            if (candidate) candidates.push(candidate);
+          }
         }
       } catch (error) {
         failures.push(
@@ -163,8 +180,10 @@ async function scanMarkets(
   }
 
   candidates.sort((a, b) =>
+    b.probabilityEdge - a.probabilityEdge ||
     b.estimatedWinRate - a.estimatedWinRate ||
     b.sampleCount - a.sampleCount ||
+    a.contractMode.localeCompare(b.contractMode) ||
     a.symbol.underlying_symbol.localeCompare(b.symbol.underlying_symbol)
   );
   return candidates[0] ?? null;
@@ -508,9 +527,6 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
         throw new Error(localize('Log in and connect before starting an automatic trading session.'));
       }
       if (symbols.length === 0) throw new Error(localize('No markets are available to scan.'));
-      if (contractMode === 'DIGITMATCH') {
-        throw new Error(localize('Matches contracts are not available in the market scanner.'));
-      }
     } catch (error) {
       toast.error(localize('Risk settings are invalid'), {
         description: error instanceof Error ? error.message : localize('Check your risk settings and try again.'),
@@ -535,8 +551,10 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
     let stopReason = '';
     let reachedThreshold: AutoTradingThresholdResult | null = null;
     const currentMarketRef: { current: ActiveSymbol | null } = { current: null };
-    const rejectedNoReturnSymbols = new Set<string>();
-    const skippedNoReturnSymbols = new Set<string>();
+    const currentCandidateRef: { current: MarketScanCandidate | null } = { current: null };
+    const rejectedCandidates = new Set<string>();
+    const skippedNoReturnCandidates = new Set<string>();
+    const skippedNegativeEvCandidates = new Set<string>();
     let currentBarrier = selectedDigit;
     let scanNumber = 1;
 
@@ -557,11 +575,13 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
         if (eligibleMarkets.length === 0) {
           throw new Error(localize('No open, unsuspended markets are available to scan.'));
         }
-        if (eligibleMarkets.every((symbol) => rejectedNoReturnSymbols.has(symbol.underlying_symbol))) {
-          rejectedNoReturnSymbols.clear();
+        if (eligibleMarkets.every(
+          (symbol) => !hasAvailableScanMode(symbol.underlying_symbol, rejectedCandidates)
+        )) {
+          rejectedCandidates.clear();
         }
         const totalMarkets = eligibleMarkets.filter(
-          (symbol) => !rejectedNoReturnSymbols.has(symbol.underlying_symbol)
+          (symbol) => hasAvailableScanMode(symbol.underlying_symbol, rejectedCandidates)
         ).length;
         setAutoTradingScanProgress({
           phase: 'scanning',
@@ -570,8 +590,10 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
           totalMarkets,
           scanNumber,
           selectedMarket: null,
+          selectedContractMode: null,
           estimatedWinRate: null,
-          skippedNoReturnMarkets: skippedNoReturnSymbols.size,
+          skippedNoReturnMarkets: skippedNoReturnCandidates.size,
+          skippedNegativeEvSetups: skippedNegativeEvCandidates.size,
         });
 
         let scanFailed = false;
@@ -590,9 +612,8 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
           candidate = await scanMarkets(
             tradingWs,
             symbols,
-            contractMode,
             () => session.stopRequested,
-            rejectedNoReturnSymbols,
+            rejectedCandidates,
             (scannedMarkets, marketCount) => {
               setAutoTradingScanProgress((progress) =>
                 progress?.phase === 'scanning'
@@ -609,14 +630,23 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
         const countdownComplete = await countdown;
         if (!countdownComplete || session.stopRequested) return null;
         if (candidate) return candidate;
-        if (rejectedNoReturnSymbols.size > 0) rejectedNoReturnSymbols.clear();
+        if (rejectedCandidates.size > 0) rejectedCandidates.clear();
         scanNumber += 1;
       }
       return null;
     };
 
     const useScannedMarket = (candidate: MarketScanCandidate) => {
+      currentCandidateRef.current = candidate;
       currentMarketRef.current = candidate.symbol;
+      setContractMode(candidate.contractMode);
+      setTradeTypeRaw(
+        candidate.contractMode === 'DIGITOVER' || candidate.contractMode === 'DIGITUNDER'
+          ? 'over-under'
+          : candidate.contractMode === 'DIGITEVEN' || candidate.contractMode === 'DIGITODD'
+            ? 'even-odd'
+            : 'matches-differs'
+      );
       const marketName =
         candidate.symbol.underlying_symbol_name || candidate.symbol.underlying_symbol;
       if (candidate.barrier !== null) {
@@ -633,6 +663,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
               phase: 'selected',
               countdownSeconds: 0,
               selectedMarket: marketName,
+              selectedContractMode: candidate.contractMode,
               estimatedWinRate: candidate.estimatedWinRate,
             }
           : progress
@@ -650,7 +681,8 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
 
       while (!session.stopRequested) {
         const market = currentMarketRef.current;
-        if (!market) {
+        const candidate = currentCandidateRef.current;
+        if (!market || !candidate) {
           throw new Error(localize('The market scanner did not select a market.'));
         }
         const connected = await waitForConnection(
@@ -660,12 +692,12 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
         );
         if (!connected) break;
 
-        const barrier = getContractBarrier(contractMode, currentBarrier);
+        const barrier = getContractBarrier(candidate.contractMode, currentBarrier);
         const proposalParams = {
           proposal: 1,
           amount: nextStake,
           basis: 'stake',
-          contract_type: contractMode,
+          contract_type: candidate.contractMode,
           currency: 'USD',
           underlying_symbol: market.underlying_symbol,
           duration,
@@ -701,8 +733,20 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
           throw new Error(localize('The proposal did not include a valid potential payout.'));
         }
         if (quote.payout <= quote.ask_price) {
-          rejectedNoReturnSymbols.add(market.underlying_symbol);
-          skippedNoReturnSymbols.add(market.underlying_symbol);
+          const candidateKey = getScanCandidateKey(market.underlying_symbol, candidate.contractMode);
+          rejectedCandidates.add(candidateKey);
+          skippedNoReturnCandidates.add(candidateKey);
+          scanNumber += 1;
+          const nextMarket = await scanForMarket();
+          if (!nextMarket) break;
+          useScannedMarket(nextMarket);
+          continue;
+        }
+        const expectedProfit = candidate.estimatedWinRate * quote.payout - quote.ask_price;
+        if (expectedProfit <= 0) {
+          const candidateKey = getScanCandidateKey(market.underlying_symbol, candidate.contractMode);
+          rejectedCandidates.add(candidateKey);
+          skippedNegativeEvCandidates.add(candidateKey);
           scanNumber += 1;
           const nextMarket = await scanForMarket();
           if (!nextMarket) break;
@@ -830,7 +874,6 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
   }, [
     buyWithProposal,
     clearBuyResult,
-    contractMode,
     duration,
     isAuthenticated,
     localize,

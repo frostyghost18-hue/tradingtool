@@ -5,13 +5,34 @@ import type { ContractMode } from '@/lib/types';
 export const MARKET_SCAN_TICK_COUNT = 100;
 export const MARKET_SCAN_DURATION_SECONDS = 15;
 export const MINIMUM_MARKET_SCAN_TICKS = 80;
+export const AUTO_SCAN_CONTRACT_MODES: readonly Exclude<ContractMode, 'DIGITMATCH'>[] = [
+  'DIGITDIFF',
+  'DIGITOVER',
+  'DIGITUNDER',
+  'DIGITEVEN',
+  'DIGITODD',
+];
+
+const WILSON_Z_95 = 1.6448536269514722;
 
 export interface MarketScanCandidate {
   symbol: ActiveSymbol;
-  contractMode: ContractMode;
+  contractMode: Exclude<ContractMode, 'DIGITMATCH'>;
   barrier: number | null;
   estimatedWinRate: number;
+  probabilityEdge: number;
   sampleCount: number;
+}
+
+function getWilsonLowerBound(wins: number, sampleCount: number): number {
+  const observedRate = wins / sampleCount;
+  const zSquared = WILSON_Z_95 ** 2;
+  const denominator = 1 + zSquared / sampleCount;
+  const center = observedRate + zSquared / (2 * sampleCount);
+  const margin = WILSON_Z_95 * Math.sqrt(
+    (observedRate * (1 - observedRate) + zSquared / (4 * sampleCount)) / sampleCount
+  );
+  return (center - margin) / denominator;
 }
 
 export function getScannableMarkets(symbols: ActiveSymbol[]): ActiveSymbol[] {
@@ -36,9 +57,8 @@ export function getContractBarrier(contractMode: ContractMode, differsDigit: num
 export function scoreMarket(
   symbol: ActiveSymbol,
   prices: number[],
-  contractMode: ContractMode
+  contractMode: Exclude<ContractMode, 'DIGITMATCH'>
 ): MarketScanCandidate | null {
-  if (contractMode === 'DIGITMATCH') return null;
   const pipSize = pipSizeFromPip(symbol.pip_size);
   const digits = prices
     .filter((price) => Number.isFinite(price))
@@ -80,7 +100,7 @@ export function scoreMarket(
       break;
   }
 
-  const estimatedWinRate = wins / digits.length;
+  const estimatedWinRate = getWilsonLowerBound(wins, digits.length);
   if (estimatedWinRate <= baselineWinRate) return null;
 
   return {
@@ -88,6 +108,7 @@ export function scoreMarket(
     contractMode,
     barrier,
     estimatedWinRate,
+    probabilityEdge: estimatedWinRate - baselineWinRate,
     sampleCount: digits.length,
   };
 }

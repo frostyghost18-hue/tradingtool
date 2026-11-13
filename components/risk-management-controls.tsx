@@ -180,7 +180,7 @@ export function RiskManagementControls({
           {autoTradingStatus === 'running' && autoTradingMarket && autoTradingEstimatedWinRate !== null && (
             <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
               <Localize
-                i18n_default_text="{{market}} · Recent tick hit-rate estimate: {{rate}}% (not a prediction)"
+                i18n_default_text="{{market}} · Conservative recent-tick estimate: {{rate}}% (not predictive)"
                 values={{
                   market: autoTradingMarket,
                   rate: (autoTradingEstimatedWinRate * 100).toFixed(1),
@@ -208,7 +208,7 @@ export function RiskManagementControls({
       )}
 
       <p className="text-[11px] leading-relaxed text-muted-foreground">
-        <Localize i18n_default_text="Set at least one profit or loss target. Scan & trade ranks markets with sufficient recent ticks and an observed hit rate above the contract baseline, then rescans on a reversal heuristic. Historical rates do not guarantee future results." />
+        <Localize i18n_default_text="Set at least one profit or loss target. Scan & trade compares digit strategies using a conservative recent-tick estimate and skips quotes with non-positive estimated value. Short-term tick patterns are noisy and this cannot guarantee profits; martingale can increase losses." />
       </p>
     </div>
   );

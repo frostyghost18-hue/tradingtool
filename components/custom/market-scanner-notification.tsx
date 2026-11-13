@@ -26,6 +26,22 @@ export function MarketScannerNotification({
   const statusText = isSelected
     ? localize('MARKET SELECTED')
     : localize('SCANNING LIVE');
+  const selectedContractLabel = (() => {
+    switch (progress.selectedContractMode) {
+      case 'DIGITDIFF':
+        return localize('Differs');
+      case 'DIGITOVER':
+        return localize('Over 1');
+      case 'DIGITUNDER':
+        return localize('Under 8');
+      case 'DIGITEVEN':
+        return localize('Even');
+      case 'DIGITODD':
+        return localize('Odd');
+      default:
+        return null;
+    }
+  })();
   const description = isSelected
     ? localize('Starting the first trade now.')
     : progress.countdownSeconds === 0 && progress.scannedMarkets < progress.totalMarkets
@@ -99,8 +115,15 @@ export function MarketScannerNotification({
             </p>
             {progress.skippedNoReturnMarkets > 0 && (
               <p className="mt-1 text-[11px] font-medium text-amber-600 dark:text-amber-400">
-                {localize('{{count}} no-return markets skipped', {
+                {localize('{{count}} no-return setups skipped', {
                   count: progress.skippedNoReturnMarkets,
+                })}
+              </p>
+            )}
+            {progress.skippedNegativeEvSetups > 0 && (
+              <p className="mt-1 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                {localize('{{count}} negative expected-value setups skipped', {
+                  count: progress.skippedNegativeEvSetups,
                 })}
               </p>
             )}
@@ -124,15 +147,22 @@ export function MarketScannerNotification({
           <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-primary/25 bg-primary/5 px-3 py-2">
             <div className="min-w-0">
               <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
-                {localize('Selected market')}
+                {localize('{{contract}} on selected market', {
+                  contract: selectedContractLabel ?? '',
+                })}
               </p>
               <p className="truncate text-sm font-bold" title={progress.selectedMarket}>
                 {progress.selectedMarket}
               </p>
             </div>
-            <p className="shrink-0 font-mono text-sm font-bold text-primary">
-              {(progress.estimatedWinRate * 100).toFixed(1)}%
-            </p>
+            <div className="shrink-0 text-right">
+              <p className="font-mono text-sm font-bold text-primary">
+                {(progress.estimatedWinRate * 100).toFixed(1)}%
+              </p>
+              <p className="text-[9px] font-medium text-muted-foreground">
+                {localize('Conservative estimate')}
+              </p>
+            </div>
           </div>
         )}
 
