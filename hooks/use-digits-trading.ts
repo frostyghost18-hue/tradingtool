@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
+  isDerivApiError,
   useProposal,
   useBuy,
 } from '@deriv/core';
@@ -65,6 +66,15 @@ function hasAvailableScanMode(symbol: string, excludedCandidates: Set<string>): 
   return AUTO_SCAN_CONTRACT_MODES.some(
     (contractMode) => !excludedCandidates.has(getScanCandidateKey(symbol, contractMode))
   );
+}
+
+function isNoReturnContractError(error: unknown): boolean {
+  if (!isDerivApiError(error)) return false;
+  const code = error.code.replace(/[^a-z]/gi, '').toLowerCase();
+  if (code.includes('noreturn') || code.includes('returnunavailable')) return true;
+
+  return /\bcontract\b.{0,80}\b(?:offers?\s+no\s+returns?|has\s+no\s+returns?|does\s+not\s+offer\s+(?:any\s+)?returns?)\b/i
+    .test(error.message);
 }
 
 async function fetchTickHistory(
@@ -671,6 +681,28 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
       setAutoTradingStatus('running');
     };
 
+    const rejectCandidateAndRescan = async (
+      candidate: MarketScanCandidate,
+      reason: 'no-return' | 'negative-ev'
+    ): Promise<boolean> => {
+      const candidateKey = getScanCandidateKey(
+        candidate.symbol.underlying_symbol,
+        candidate.contractMode
+      );
+      rejectedCandidates.add(candidateKey);
+      if (reason === 'no-return') {
+        skippedNoReturnCandidates.add(candidateKey);
+      } else {
+        skippedNegativeEvCandidates.add(candidateKey);
+      }
+
+      scanNumber += 1;
+      const nextCandidate = await scanForMarket();
+      if (!nextCandidate) return false;
+      useScannedMarket(nextCandidate);
+      return true;
+    };
+
     try {
       const firstMarket = await scanForMarket();
       if (!firstMarket) {
@@ -712,8 +744,13 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
         try {
           proposalResponse = await tradingWs.send<ProposalResponse>(proposalParams);
         } catch (error) {
-          if (!connectionDropped && tradingWs.isConnected) throw error;
           if (session.stopRequested) break;
+          if (isNoReturnContractError(error)) {
+            const nextCandidateFound = await rejectCandidateAndRescan(candidate, 'no-return');
+            if (!nextCandidateFound) break;
+            continue;
+          }
+          if (!connectionDropped && tradingWs.isConnected) throw error;
           const reconnected = await waitForConnection(
             tradingWs,
             Date.now() + CONTRACT_SETTLEMENT_TIMEOUT_MS,
@@ -733,24 +770,14 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
           throw new Error(localize('The proposal did not include a valid potential payout.'));
         }
         if (quote.payout <= quote.ask_price) {
-          const candidateKey = getScanCandidateKey(market.underlying_symbol, candidate.contractMode);
-          rejectedCandidates.add(candidateKey);
-          skippedNoReturnCandidates.add(candidateKey);
-          scanNumber += 1;
-          const nextMarket = await scanForMarket();
-          if (!nextMarket) break;
-          useScannedMarket(nextMarket);
+          const nextCandidateFound = await rejectCandidateAndRescan(candidate, 'no-return');
+          if (!nextCandidateFound) break;
           continue;
         }
         const expectedProfit = candidate.estimatedWinRate * quote.payout - quote.ask_price;
         if (expectedProfit <= 0) {
-          const candidateKey = getScanCandidateKey(market.underlying_symbol, candidate.contractMode);
-          rejectedCandidates.add(candidateKey);
-          skippedNegativeEvCandidates.add(candidateKey);
-          scanNumber += 1;
-          const nextMarket = await scanForMarket();
-          if (!nextMarket) break;
-          useScannedMarket(nextMarket);
+          const nextCandidateFound = await rejectCandidateAndRescan(candidate, 'negative-ev');
+          if (!nextCandidateFound) break;
           continue;
         }
 
@@ -769,6 +796,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
           if (!isConnected) connectionDroppedDuringPurchase = true;
         });
         let purchase: Awaited<ReturnType<typeof buyWithProposal>>;
+        let purchaseError: unknown = null;
         try {
           purchase = await buyWithProposal({
             id: quote.id,
@@ -777,11 +805,19 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
             longcode: quote.longcode,
             minStake: Number(quote.validation_params?.stake?.min ?? 0),
             maxPayout: Number(quote.validation_params?.payout?.max ?? 0),
+          }, (error) => {
+            purchaseError = error;
+            return isNoReturnContractError(error);
           });
         } finally {
           removePurchaseConnectionListener();
         }
         if (!purchase) {
+          if (isNoReturnContractError(purchaseError)) {
+            const nextCandidateFound = await rejectCandidateAndRescan(candidate, 'no-return');
+            if (!nextCandidateFound) break;
+            continue;
+          }
           if (connectionDroppedDuringPurchase || !tradingWs.isConnected) {
             throw new Error(localize(
               'The connection was interrupted while confirming a purchase. Check your transactions before starting another session.'
