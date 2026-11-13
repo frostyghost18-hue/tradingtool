@@ -2,7 +2,7 @@ import type { ActiveSymbol } from '@deriv/core';
 import { getLastDigit, pipSizeFromPip } from '@/lib/digit-stats';
 import type { ContractMode } from '@/lib/types';
 
-export const MARKET_SCAN_TICK_COUNT = 100;
+export const MARKET_SCAN_TICK_COUNT = 30;
 export const MARKET_SCAN_DURATION_SECONDS = 15;
 export const MINIMUM_MARKET_SCAN_TICKS = MARKET_SCAN_TICK_COUNT;
 
@@ -14,6 +14,7 @@ const CLUSTER_WINDOW_SIZE = 12;
 export interface MarketScanSignal {
   winRate: number;
   matches: number;
+  active: boolean;
 }
 
 export interface MarketScanCandidate {
@@ -27,7 +28,9 @@ export interface MarketScanCandidate {
     sequence: MarketScanSignal | null;
     analogy: MarketScanSignal | null;
     cluster: MarketScanSignal | null;
+    dominance: MarketScanSignal | null;
   };
+  activeSignalCount: number;
   eligibleForTrading: boolean;
   probabilityEdge: number;
   sampleCount: number;
@@ -65,9 +68,11 @@ function isWinningDigit(
 
 function createSignal(wins: number, matches: number, priorRate: number): MarketScanSignal | null {
   if (matches === 0) return null;
+  const winRate = (wins + priorRate * 2) / (matches + 2);
   return {
-    winRate: (wins + priorRate * 2) / (matches + 2),
+    winRate,
     matches,
+    active: winRate > priorRate,
   };
 }
 
@@ -133,7 +138,7 @@ function getAnalogySignal(
     0
   );
   const rate = (weightedWins + priorRate * 2) / (totalWeight + 2);
-  return { winRate: rate, matches: nearestAnalogs.length };
+  return { winRate: rate, matches: nearestAnalogs.length, active: rate > priorRate };
 }
 
 function getDigitCluster(digit: number): number {
@@ -193,10 +198,8 @@ function getClusterSignal(
     (sum, neighbor) => sum + (neighbor.win ? neighbor.weight : 0),
     0
   );
-  return {
-    winRate: (weightedWins + priorRate * 2) / (totalWeight + 2),
-    matches: nearestNeighbors.length,
-  };
+  const winRate = (weightedWins + priorRate * 2) / (totalWeight + 2);
+  return { winRate, matches: nearestNeighbors.length, active: winRate > priorRate };
 }
 
 export function getScannableMarkets(symbols: ActiveSymbol[]): ActiveSymbol[] {
@@ -232,7 +235,7 @@ export function scoreMarket(
   const pipSize = pipSizeFromPip(symbol.pip_size);
   const digits = predictionPrices.map((price) => getLastDigit(price, pipSize));
 
-  if (digits.length < MARKET_SCAN_TICK_COUNT) return null;
+  if (digits.length === 0) return null;
 
   const counts = Array.from({ length: 10 }, () => 0);
   for (const digit of digits) counts[digit] += 1;
@@ -274,7 +277,13 @@ export function scoreMarket(
     sequence: getSequenceSignal(digits, contractMode, barrier, baselineWinRate),
     analogy: getAnalogySignal(digits, contractMode, barrier, baselineWinRate),
     cluster: getClusterSignal(digits, contractMode, barrier, baselineWinRate),
+    dominance: createSignal(wins, digits.length, baselineWinRate),
   };
+  const activeSignalCount = Object.values(predictionModels)
+    .filter((signal) => signal?.active)
+    .length;
+  const activeSignalRates = Object.values(predictionModels)
+    .flatMap((signal) => signal?.active ? [signal.winRate] : []);
   const weightedModels = [
     { rate: observedWinRate, weight: 0.5 },
     ...(predictionModels.sequence
@@ -294,7 +303,13 @@ export function scoreMarket(
   ) / totalWeight;
   const eligibleForTrading =
     digits.length >= MINIMUM_MARKET_SCAN_TICKS &&
-    estimatedWinRate > baselineWinRate;
+    activeSignalCount >= 2;
+  const highestActiveSignalRate = activeSignalRates.length > 0
+    ? Math.max(...activeSignalRates)
+    : predictedWinRate;
+  const signalWinRate = activeSignalCount >= 2
+    ? highestActiveSignalRate
+    : predictedWinRate;
 
   return {
     symbol,
@@ -302,10 +317,11 @@ export function scoreMarket(
     barrier,
     predictionPrices: predictionPrices.slice(-MARKET_SCAN_TICK_COUNT),
     estimatedWinRate,
-    predictedWinRate,
+    predictedWinRate: signalWinRate,
     predictionModels,
+    activeSignalCount,
     eligibleForTrading,
-    probabilityEdge: predictedWinRate - baselineWinRate,
+    probabilityEdge: signalWinRate - baselineWinRate,
     sampleCount: digits.length,
   };
 }

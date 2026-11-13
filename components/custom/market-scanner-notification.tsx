@@ -172,11 +172,12 @@ export function MarketScannerNotification({
                 </p>
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-1 border-t border-border/70 pt-2">
+            <div className="grid grid-cols-4 gap-1 border-t border-border/70 pt-2">
               {([
                 ['sequence', localize('Sequence')],
                 ['analogy', localize('Analogs')],
                 ['cluster', localize('Clusters')],
+                ['dominance', localize('Dominance')],
               ] as const).map(([key, label]) => {
                 const signal = prediction.predictionModels[key];
                 return (
@@ -184,7 +185,7 @@ export function MarketScannerNotification({
                     <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
                       {label}
                     </p>
-                    <p className="font-mono text-[11px] font-semibold text-foreground">
+                    <p className={`font-mono text-[11px] font-semibold ${signal?.active ? 'text-emerald-500' : 'text-foreground'}`}>
                       {signal ? `${(signal.winRate * 100).toFixed(1)}%` : '—'}
                     </p>
                     <p className="text-[8px] text-muted-foreground">
@@ -198,14 +199,17 @@ export function MarketScannerNotification({
             </div>
             <div className="flex items-center justify-between gap-2 text-[9px] text-muted-foreground">
               <span>
-                {localize('{{ticks}} recent ticks · conservative {{rate}}%', {
+                {localize('{{ticks}} / 30 recent ticks · Wilson {{rate}}%', {
                   ticks: prediction.sampleCount,
                   rate: (prediction.estimatedWinRate * 100).toFixed(1),
                 })}
               </span>
+              <span className="shrink-0">
+                {localize('{{count}} / 4 active states', { count: prediction.activeSignalCount })}
+              </span>
               <span className={prediction.eligibleForTrading ? 'text-emerald-500' : 'text-amber-500'}>
                 {prediction.eligibleForTrading
-                  ? localize('Passes historical screen')
+                  ? localize('Active · trade candidate')
                   : localize('Forecast only')}
               </span>
             </div>
@@ -215,7 +219,7 @@ export function MarketScannerNotification({
           </div>
         ) : (
           <div className="mt-3 rounded-xl border border-border bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground">
-            {localize('Waiting for a complete 100-tick sample before issuing a signal.')}
+            {localize('No usable tick history is available yet. The scanner will retry.')}
           </div>
         )}
 

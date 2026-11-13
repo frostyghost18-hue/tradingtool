@@ -68,7 +68,9 @@ export interface AutoTradingPrediction {
     sequence: MarketScanSignal | null;
     analogy: MarketScanSignal | null;
     cluster: MarketScanSignal | null;
+    dominance: MarketScanSignal | null;
   };
+  activeSignalCount: number;
   eligibleForTrading: boolean;
 }
 
@@ -87,6 +89,7 @@ function getCandidatePrediction(
     estimatedWinRate: candidate.estimatedWinRate,
     sampleCount: candidate.sampleCount,
     predictionModels: candidate.predictionModels,
+    activeSignalCount: candidate.activeSignalCount,
     eligibleForTrading: candidate.eligibleForTrading,
   };
 }
@@ -223,9 +226,10 @@ async function scanMarkets(
   }
 
   candidates.sort((a, b) =>
+    Number(b.eligibleForTrading) - Number(a.eligibleForTrading) ||
     b.probabilityEdge - a.probabilityEdge ||
-    b.estimatedWinRate - a.estimatedWinRate ||
     b.sampleCount - a.sampleCount ||
+    b.estimatedWinRate - a.estimatedWinRate ||
     a.contractMode.localeCompare(b.contractMode) ||
     a.symbol.underlying_symbol.localeCompare(b.symbol.underlying_symbol)
   );
