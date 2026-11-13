@@ -14,6 +14,9 @@ import {
 } from '@/components/ui/select';
 import type { MartingaleMode } from '@/lib/martingale';
 
+const MARTINGALE_CHAIN_DESCRIPTION =
+  "After each loss, multiply the previous stake by this mode's multiplier. Continue the chain after consecutive losses; a winning contract resets the stake to the original amount.";
+
 const MARTINGALE_MODES: {
   value: MartingaleMode;
   label: string;
@@ -24,19 +27,19 @@ const MARTINGALE_MODES: {
     value: 'classic',
     label: 'Classic',
     valueLabel: 'Classic multiplier',
-    description: 'After a loss, multiply the original stake by this value. After a win, return to the original stake.',
+    description: MARTINGALE_CHAIN_DESCRIPTION,
   },
   {
     value: 'dynamic',
     label: 'Dynamic',
     valueLabel: 'Dynamic level',
-    description: 'Keep the original stake after a loss. After a win, use the multiplied stake for one trade, then return to the original stake.',
+    description: MARTINGALE_CHAIN_DESCRIPTION,
   },
   {
     value: 'super-hybrid',
     label: 'Super hybrid',
     valueLabel: 'Hybrid multiplier',
-    description: 'After a loss, multiply the stake and keep that level until the losses are recovered, then return to the original stake.',
+    description: MARTINGALE_CHAIN_DESCRIPTION,
   },
 ];
 

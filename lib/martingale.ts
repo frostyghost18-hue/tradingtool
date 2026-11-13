@@ -1,73 +1,33 @@
 export type MartingaleMode = 'classic' | 'dynamic' | 'super-hybrid';
 
 export interface MartingaleProgress {
-  recoveryRemaining: number;
-  dynamicLossPending: boolean;
-  dynamicBoostTrade: boolean;
+  nextStake: number | null;
 }
 
 export const initialMartingaleProgress: MartingaleProgress = {
-  recoveryRemaining: 0,
-  dynamicLossPending: false,
-  dynamicBoostTrade: false,
+  nextStake: null,
 };
 
 export function getNextMartingaleStake(
   baseStake: number,
   multiplier: number,
-  mode: MartingaleMode,
   settledProfit: number,
   progress: MartingaleProgress
 ): { stake: number; progress: MartingaleProgress } {
-  const boostedStake = Math.round(baseStake * multiplier * 100) / 100;
-
-  if (mode === 'classic') {
+  if (settledProfit > 0) {
     return {
-      stake: settledProfit < 0 ? boostedStake : baseStake,
-      progress,
+      stake: baseStake,
+      progress: { ...initialMartingaleProgress },
     };
   }
 
-  if (mode === 'dynamic') {
-    if (progress.dynamicBoostTrade) {
-      return {
-        stake: baseStake,
-        progress: {
-          ...progress,
-          dynamicLossPending: settledProfit < 0,
-          dynamicBoostTrade: false,
-        },
-      };
-    }
-
-    if (settledProfit < 0) {
-      return {
-        stake: baseStake,
-        progress: { ...progress, dynamicLossPending: true },
-      };
-    }
-
-    if (settledProfit > 0 && progress.dynamicLossPending) {
-      return {
-        stake: boostedStake,
-        progress: { ...progress, dynamicLossPending: false, dynamicBoostTrade: true },
-      };
-    }
-
-    return { stake: baseStake, progress };
-  }
-
-  const recoveryRemaining = settledProfit < 0
-    ? progress.recoveryRemaining + Math.abs(settledProfit)
-    : Math.max(0, progress.recoveryRemaining - settledProfit);
+  const stakeToMultiply = progress.nextStake ?? baseStake;
+  const nextStake = settledProfit < 0
+    ? Math.round(stakeToMultiply * multiplier * 100) / 100
+    : stakeToMultiply;
 
   return {
-    stake: recoveryRemaining > 0 ? boostedStake : baseStake,
-    progress: {
-      ...progress,
-      recoveryRemaining,
-      dynamicLossPending: false,
-      dynamicBoostTrade: false,
-    },
+    stake: nextStake,
+    progress: { nextStake },
   };
 }

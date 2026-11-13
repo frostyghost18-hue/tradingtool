@@ -822,7 +822,6 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
         const next = getNextMartingaleStake(
           baseStake,
           multiplier,
-          martingaleMode,
           settledProfit,
           martingaleProgress
         );
