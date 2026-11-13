@@ -26,8 +26,9 @@ export function MarketScannerNotification({
   const statusText = isSelected
     ? localize('MARKET SELECTED')
     : localize('SCANNING LIVE');
-  const selectedContractLabel = (() => {
-    switch (progress.selectedContractMode) {
+  const prediction = progress.prediction;
+  const predictionContractLabel = (() => {
+    switch (prediction?.contractMode) {
       case 'DIGITDIFF':
         return localize('Differs');
       case 'DIGITOVER':
@@ -143,26 +144,73 @@ export function MarketScannerNotification({
           </div>
         </div>
 
-        {isSelected && progress.selectedMarket && progress.estimatedWinRate !== null && (
-          <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-primary/25 bg-primary/5 px-3 py-2">
-            <div className="min-w-0">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
-                {localize('{{contract}} on selected market', {
-                  contract: selectedContractLabel ?? '',
+        {prediction ? (
+          <div className="mt-3 space-y-2 rounded-xl border border-primary/25 bg-primary/5 px-3 py-2.5">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
+                  {localize('Scan {{number}} model forecast', {
+                    number: prediction.scanNumber,
+                  })}
+                </p>
+                <p className="truncate text-sm font-bold" title={prediction.market}>
+                  {prediction.market} · {predictionContractLabel}
+                  {prediction.barrier !== null ? ` ${prediction.barrier}` : ''}
+                </p>
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="font-mono text-sm font-bold text-primary">
+                  {(prediction.predictedWinRate * 100).toFixed(1)}%
+                </p>
+                <p className="text-[9px] font-medium text-muted-foreground">
+                  {localize('Blended estimate')}
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-1 border-t border-border/70 pt-2">
+              {([
+                ['sequence', localize('Sequence')],
+                ['analogy', localize('Analogs')],
+                ['cluster', localize('Clusters')],
+              ] as const).map(([key, label]) => {
+                const signal = prediction.predictionModels[key];
+                return (
+                  <div key={key} className="min-w-0 text-center">
+                    <p className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
+                      {label}
+                    </p>
+                    <p className="font-mono text-[11px] font-semibold text-foreground">
+                      {signal ? `${(signal.winRate * 100).toFixed(1)}%` : '—'}
+                    </p>
+                    <p className="text-[8px] text-muted-foreground">
+                      {signal
+                        ? localize('{{count}} matches', { count: signal.matches })
+                        : localize('insufficient matches')}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex items-center justify-between gap-2 text-[9px] text-muted-foreground">
+              <span>
+                {localize('{{ticks}} recent ticks · conservative {{rate}}%', {
+                  ticks: prediction.sampleCount,
+                  rate: (prediction.estimatedWinRate * 100).toFixed(1),
                 })}
-              </p>
-              <p className="truncate text-sm font-bold" title={progress.selectedMarket}>
-                {progress.selectedMarket}
-              </p>
+              </span>
+              <span className={prediction.eligibleForTrading ? 'text-emerald-500' : 'text-amber-500'}>
+                {prediction.eligibleForTrading
+                  ? localize('Passes historical screen')
+                  : localize('Forecast only')}
+              </span>
             </div>
-            <div className="shrink-0 text-right">
-              <p className="font-mono text-sm font-bold text-primary">
-                {(progress.estimatedWinRate * 100).toFixed(1)}%
-              </p>
-              <p className="text-[9px] font-medium text-muted-foreground">
-                {localize('Conservative estimate')}
-              </p>
-            </div>
+            <p className="text-[9px] leading-relaxed text-muted-foreground">
+              {localize('These experimental estimates use past ticks and do not guarantee future results. Quotes are checked before any trade.')}
+            </p>
+          </div>
+        ) : (
+          <div className="mt-3 rounded-xl border border-border bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground">
+            {localize('No usable tick history yet; a forecast is unavailable for this scan.')}
           </div>
         )}
 

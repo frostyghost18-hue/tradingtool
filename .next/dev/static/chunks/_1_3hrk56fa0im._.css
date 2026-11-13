@@ -2392,6 +2392,10 @@ body {
   background-color: #0000;
 }
 
+.bg-muted\/30 {
+  background-color: rgb(var(--muted) / .3);
+}
+
 .bg-gradient-to-br {
   background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
 }
@@ -2957,6 +2961,11 @@ body {
 .text-sell-foreground {
   --tw-text-opacity: 1;
   color: rgb(var(--sell-foreground) / var(--tw-text-opacity, 1));
+}
+
+.text-amber-500 {
+  --tw-text-opacity: 1;
+  color: rgb(245 158 11 / var(--tw-text-opacity, 1));
 }
 
 .underline-offset-4 {

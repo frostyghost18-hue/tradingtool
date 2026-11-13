@@ -28,7 +28,7 @@ import {
   MARKET_SCAN_TICK_COUNT,
   scoreMarket,
 } from '../lib/market-scanner';
-import type { MarketScanCandidate } from '../lib/market-scanner';
+import type { MarketScanCandidate, MarketScanSignal } from '../lib/market-scanner';
 import { getNextMartingaleStake, initialMartingaleProgress } from '../lib/martingale';
 import type { MartingaleMode } from '../lib/martingale';
 import { useAppTranslations } from '@/components/custom/i18n-provider';
@@ -51,11 +51,45 @@ export interface AutoTradingScanProgress {
   selectedMarket: string | null;
   selectedContractMode: Exclude<ContractMode, 'DIGITMATCH'> | null;
   estimatedWinRate: number | null;
+  prediction: AutoTradingPrediction | null;
   skippedNoReturnMarkets: number;
   skippedNegativeEvSetups: number;
 }
 
+export interface AutoTradingPrediction {
+  scanNumber: number;
+  market: string;
+  contractMode: Exclude<ContractMode, 'DIGITMATCH'>;
+  barrier: number | null;
+  predictedWinRate: number;
+  estimatedWinRate: number;
+  sampleCount: number;
+  predictionModels: {
+    sequence: MarketScanSignal | null;
+    analogy: MarketScanSignal | null;
+    cluster: MarketScanSignal | null;
+  };
+  eligibleForTrading: boolean;
+}
+
 type MarketScanProgressCallback = (scannedMarkets: number, totalMarkets: number) => void;
+
+function getCandidatePrediction(
+  candidate: MarketScanCandidate,
+  scanNumber: number
+): AutoTradingPrediction {
+  return {
+    scanNumber,
+    market: candidate.symbol.underlying_symbol_name || candidate.symbol.underlying_symbol,
+    contractMode: candidate.contractMode,
+    barrier: candidate.barrier,
+    predictedWinRate: candidate.predictedWinRate,
+    estimatedWinRate: candidate.estimatedWinRate,
+    sampleCount: candidate.sampleCount,
+    predictionModels: candidate.predictionModels,
+    eligibleForTrading: candidate.eligibleForTrading,
+  };
+}
 
 function getScanCandidateKey(symbol: string, contractMode: ContractMode): string {
   return `${symbol}:${contractMode}`;
@@ -189,6 +223,7 @@ async function scanMarkets(
   }
 
   candidates.sort((a, b) =>
+    Number(b.eligibleForTrading) - Number(a.eligibleForTrading) ||
     b.probabilityEdge - a.probabilityEdge ||
     b.estimatedWinRate - a.estimatedWinRate ||
     b.sampleCount - a.sampleCount ||
@@ -604,6 +639,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
     const skippedNegativeEvCandidates = new Set<string>();
     let currentBarrier = selectedDigit ?? 5;
     let scanNumber = 0;
+    let latestPrediction: AutoTradingPrediction | null = null;
     let candidatesFromCurrentScan: MarketScanCandidate[] = [];
     let nextCandidateIndex = 0;
 
@@ -650,6 +686,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
           selectedMarket: null,
           selectedContractMode: null,
           estimatedWinRate: null,
+          prediction: latestPrediction,
           skippedNoReturnMarkets: skippedNoReturnCandidates.size,
           skippedNegativeEvSetups: skippedNegativeEvCandidates.size,
         });
@@ -688,7 +725,24 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
         }
         const countdownComplete = await countdown;
         if (!countdownComplete || session.stopRequested) return null;
-        if (candidates?.length) return candidates;
+        if (candidates?.length) {
+          const leadingCandidate = candidates[0];
+          if (!leadingCandidate) continue;
+          const prediction = getCandidatePrediction(leadingCandidate, scanNumber);
+          latestPrediction = prediction;
+          setAutoTradingScanProgress((progress) =>
+            progress?.phase === 'scanning'
+              ? { ...progress, prediction }
+              : progress
+          );
+          return candidates;
+        }
+        latestPrediction = null;
+        setAutoTradingScanProgress((progress) =>
+          progress?.phase === 'scanning'
+            ? { ...progress, prediction: null }
+            : progress
+        );
         if (rejectedCandidates.size > 0) rejectedCandidates.clear();
       }
       return null;
@@ -704,7 +758,9 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
             candidate.symbol.underlying_symbol,
             candidate.contractMode
           );
-          if (!rejectedCandidates.has(candidateKey)) return candidate;
+          if (!rejectedCandidates.has(candidateKey) && candidate.eligibleForTrading) {
+            return candidate;
+          }
         }
 
         const nextScanCandidates = await scanForMarket();
@@ -716,6 +772,8 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
     };
 
     const useScannedMarket = (candidate: MarketScanCandidate) => {
+      const prediction = getCandidatePrediction(candidate, scanNumber);
+      latestPrediction = prediction;
       currentCandidateRef.current = candidate;
       currentMarketRef.current = candidate.symbol;
       setContractMode(candidate.contractMode);
@@ -749,6 +807,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
               selectedMarket: marketName,
               selectedContractMode: candidate.contractMode,
               estimatedWinRate: candidate.estimatedWinRate,
+              prediction,
             }
           : progress
       );

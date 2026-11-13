@@ -183,7 +183,7 @@ export function RiskManagementControls({
           {autoTradingStatus === 'running' && autoTradingMarket && autoTradingEstimatedWinRate !== null && (
             <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
               <Localize
-                i18n_default_text="{{market}} · Conservative recent-tick estimate: {{rate}}% (not predictive)"
+                i18n_default_text="{{market}} · Conservative recent-tick estimate: {{rate}}% (not guaranteed)"
                 values={{
                   market: autoTradingMarket,
                   rate: (autoTradingEstimatedWinRate * 100).toFixed(1),

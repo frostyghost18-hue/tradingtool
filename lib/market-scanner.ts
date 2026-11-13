@@ -7,6 +7,14 @@ export const MARKET_SCAN_DURATION_SECONDS = 15;
 export const MINIMUM_MARKET_SCAN_TICKS = 80;
 
 const WILSON_Z_95 = 1.6448536269514722;
+const SEQUENCE_LENGTH = 2;
+const ANALOG_PATTERN_LENGTH = 5;
+const CLUSTER_WINDOW_SIZE = 12;
+
+export interface MarketScanSignal {
+  winRate: number;
+  matches: number;
+}
 
 export interface MarketScanCandidate {
   symbol: ActiveSymbol;
@@ -14,6 +22,13 @@ export interface MarketScanCandidate {
   barrier: number | null;
   predictionPrices: number[];
   estimatedWinRate: number;
+  predictedWinRate: number;
+  predictionModels: {
+    sequence: MarketScanSignal | null;
+    analogy: MarketScanSignal | null;
+    cluster: MarketScanSignal | null;
+  };
+  eligibleForTrading: boolean;
   probabilityEdge: number;
   sampleCount: number;
 }
@@ -27,6 +42,161 @@ function getWilsonLowerBound(wins: number, sampleCount: number): number {
     (observedRate * (1 - observedRate) + zSquared / (4 * sampleCount)) / sampleCount
   );
   return (center - margin) / denominator;
+}
+
+function isWinningDigit(
+  digit: number,
+  contractMode: Exclude<ContractMode, 'DIGITMATCH'>,
+  barrier: number | null
+): boolean {
+  switch (contractMode) {
+    case 'DIGITDIFF':
+      return digit !== barrier;
+    case 'DIGITOVER':
+      return digit > 1;
+    case 'DIGITUNDER':
+      return digit < 8;
+    case 'DIGITEVEN':
+      return digit % 2 === 0;
+    case 'DIGITODD':
+      return digit % 2 !== 0;
+  }
+}
+
+function createSignal(wins: number, matches: number, priorRate: number): MarketScanSignal | null {
+  if (matches === 0) return null;
+  return {
+    winRate: (wins + priorRate * 2) / (matches + 2),
+    matches,
+  };
+}
+
+function getSequenceSignal(
+  digits: number[],
+  contractMode: Exclude<ContractMode, 'DIGITMATCH'>,
+  barrier: number | null,
+  priorRate: number
+): MarketScanSignal | null {
+  if (digits.length <= SEQUENCE_LENGTH) return null;
+  const context = digits.slice(-SEQUENCE_LENGTH);
+  let wins = 0;
+  let matches = 0;
+
+  for (let nextIndex = SEQUENCE_LENGTH; nextIndex < digits.length - SEQUENCE_LENGTH; nextIndex += 1) {
+    const matchesContext = context.every(
+      (digit, offset) => digits[nextIndex - SEQUENCE_LENGTH + offset] === digit
+    );
+    if (!matchesContext) continue;
+    matches += 1;
+    if (isWinningDigit(digits[nextIndex]!, contractMode, barrier)) wins += 1;
+  }
+
+  return matches >= 3 ? createSignal(wins, matches, priorRate) : null;
+}
+
+function getAnalogySignal(
+  digits: number[],
+  contractMode: Exclude<ContractMode, 'DIGITMATCH'>,
+  barrier: number | null,
+  priorRate: number
+): MarketScanSignal | null {
+  if (digits.length <= ANALOG_PATTERN_LENGTH * 2) return null;
+  const target = digits.slice(-ANALOG_PATTERN_LENGTH);
+  const historicalEnd = digits.length - ANALOG_PATTERN_LENGTH;
+  const analogs: Array<{ win: boolean; similarity: number }> = [];
+
+  for (
+    let start = 0;
+    start + ANALOG_PATTERN_LENGTH < historicalEnd;
+    start += 1
+  ) {
+    let matchingDigits = 0;
+    for (let offset = 0; offset < ANALOG_PATTERN_LENGTH; offset += 1) {
+      if (digits[start + offset] === target[offset]) matchingDigits += 1;
+    }
+    if (matchingDigits < ANALOG_PATTERN_LENGTH - 2) continue;
+    const nextDigit = digits[start + ANALOG_PATTERN_LENGTH]!;
+    analogs.push({
+      win: isWinningDigit(nextDigit, contractMode, barrier),
+      similarity: matchingDigits / ANALOG_PATTERN_LENGTH,
+    });
+  }
+
+  const nearestAnalogs = analogs
+    .sort((a, b) => b.similarity - a.similarity)
+    .slice(0, 5);
+  if (nearestAnalogs.length < 2) return null;
+
+  const totalWeight = nearestAnalogs.reduce((sum, analog) => sum + analog.similarity, 0);
+  const weightedWins = nearestAnalogs.reduce(
+    (sum, analog) => sum + (analog.win ? analog.similarity : 0),
+    0
+  );
+  const rate = (weightedWins + priorRate * 2) / (totalWeight + 2);
+  return { winRate: rate, matches: nearestAnalogs.length };
+}
+
+function getDigitCluster(digit: number): number {
+  return Math.floor(digit / 5) * 2 + digit % 2;
+}
+
+function getClusterVector(digits: number[]): number[] {
+  const clusters = [0, 0, 0, 0];
+  for (const digit of digits) clusters[getDigitCluster(digit)] += 1;
+  return clusters.map((count) => count / digits.length);
+}
+
+function getClusterSignal(
+  digits: number[],
+  contractMode: Exclude<ContractMode, 'DIGITMATCH'>,
+  barrier: number | null,
+  priorRate: number
+): MarketScanSignal | null {
+  if (digits.length <= CLUSTER_WINDOW_SIZE * 2) return null;
+  const currentWindowStart = digits.length - CLUSTER_WINDOW_SIZE;
+  const currentVector = getClusterVector(digits.slice(currentWindowStart));
+  const neighbors: Array<{ win: boolean; distance: number }> = [];
+
+  for (
+    let start = 0;
+    start + CLUSTER_WINDOW_SIZE < currentWindowStart;
+    start += 1
+  ) {
+    const historicalVector = getClusterVector(
+      digits.slice(start, start + CLUSTER_WINDOW_SIZE)
+    );
+    const distance = historicalVector.reduce(
+      (sum, value, index) => sum + Math.abs(value - currentVector[index]!),
+      0
+    ) / 2;
+    neighbors.push({
+      win: isWinningDigit(
+        digits[start + CLUSTER_WINDOW_SIZE]!,
+        contractMode,
+        barrier
+      ),
+      distance,
+    });
+  }
+
+  const nearestNeighbors = neighbors
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, 5);
+  if (nearestNeighbors.length < 3) return null;
+
+  const weightedNeighbors = nearestNeighbors.map((neighbor) => ({
+    ...neighbor,
+    weight: Math.exp(-4 * neighbor.distance),
+  }));
+  const totalWeight = weightedNeighbors.reduce((sum, neighbor) => sum + neighbor.weight, 0);
+  const weightedWins = weightedNeighbors.reduce(
+    (sum, neighbor) => sum + (neighbor.win ? neighbor.weight : 0),
+    0
+  );
+  return {
+    winRate: (weightedWins + priorRate * 2) / (totalWeight + 2),
+    matches: nearestNeighbors.length,
+  };
 }
 
 export function getScannableMarkets(symbols: ActiveSymbol[]): ActiveSymbol[] {
@@ -60,7 +230,7 @@ export function scoreMarket(
   const pipSize = pipSizeFromPip(symbol.pip_size);
   const digits = predictionPrices.map((price) => getLastDigit(price, pipSize));
 
-  if (digits.length < MINIMUM_MARKET_SCAN_TICKS) return null;
+  if (digits.length === 0) return null;
 
   const counts = Array.from({ length: 10 }, () => 0);
   for (const digit of digits) counts[digit] += 1;
@@ -96,8 +266,33 @@ export function scoreMarket(
       break;
   }
 
+  const observedWinRate = (wins + baselineWinRate * 2) / (digits.length + 2);
   const estimatedWinRate = getWilsonLowerBound(wins, digits.length);
-  if (estimatedWinRate <= baselineWinRate) return null;
+  const predictionModels = {
+    sequence: getSequenceSignal(digits, contractMode, barrier, baselineWinRate),
+    analogy: getAnalogySignal(digits, contractMode, barrier, baselineWinRate),
+    cluster: getClusterSignal(digits, contractMode, barrier, baselineWinRate),
+  };
+  const weightedModels = [
+    { rate: observedWinRate, weight: 0.5 },
+    ...(predictionModels.sequence
+      ? [{ rate: predictionModels.sequence.winRate, weight: 0.2 }]
+      : []),
+    ...(predictionModels.analogy
+      ? [{ rate: predictionModels.analogy.winRate, weight: 0.15 }]
+      : []),
+    ...(predictionModels.cluster
+      ? [{ rate: predictionModels.cluster.winRate, weight: 0.15 }]
+      : []),
+  ];
+  const totalWeight = weightedModels.reduce((sum, model) => sum + model.weight, 0);
+  const predictedWinRate = weightedModels.reduce(
+    (sum, model) => sum + model.rate * model.weight,
+    0
+  ) / totalWeight;
+  const eligibleForTrading =
+    digits.length >= MINIMUM_MARKET_SCAN_TICKS &&
+    estimatedWinRate > baselineWinRate;
 
   return {
     symbol,
@@ -105,7 +300,10 @@ export function scoreMarket(
     barrier,
     predictionPrices: predictionPrices.slice(-MARKET_SCAN_TICK_COUNT),
     estimatedWinRate,
-    probabilityEdge: estimatedWinRate - baselineWinRate,
+    predictedWinRate,
+    predictionModels,
+    eligibleForTrading,
+    probabilityEdge: predictedWinRate - baselineWinRate,
     sampleCount: digits.length,
   };
 }
