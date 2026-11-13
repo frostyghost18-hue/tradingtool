@@ -162,6 +162,7 @@ async function scanMarkets(
   contractMode: Exclude<ContractMode, 'DIGITMATCH'>,
   shouldStop: () => boolean,
   excludedCandidates: Set<string>,
+  getLiveTickBuffer: () => { symbol: string | null; prices: number[] },
   onProgress: MarketScanProgressCallback
 ): Promise<MarketScanCandidate[] | null> {
   const candidates: MarketScanCandidate[] = [];
@@ -187,12 +188,17 @@ async function scanMarkets(
       if (!symbol) return;
 
       try {
-        const prices = await fetchTickHistory(
+        const historyPrices = await fetchTickHistory(
           ws,
           symbol.underlying_symbol,
           MARKET_SCAN_TICK_COUNT,
           shouldStop
         );
+        const liveTickBuffer = getLiveTickBuffer();
+        const prices = liveTickBuffer.symbol === symbol.underlying_symbol &&
+          liveTickBuffer.prices.length >= (historyPrices?.length ?? 0)
+          ? liveTickBuffer.prices
+          : historyPrices;
         if (prices && !shouldStop()) {
           if (!excludedCandidates.has(getScanCandidateKey(symbol.underlying_symbol, contractMode))) {
             const candidate = scoreMarket(symbol, prices, contractMode);
@@ -461,6 +467,17 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
   } | null>(null);
   const autoSessionRef = useRef<{ stopRequested: boolean } | null>(null);
   const selectSymbolRef = useRef(selectSymbol);
+  const liveTickSymbol = activeSymbol && currentTick?.symbol === activeSymbol.underlying_symbol
+    ? activeSymbol.underlying_symbol
+    : null;
+  const liveTickBufferRef = useRef({
+    symbol: liveTickSymbol,
+    prices,
+  });
+  liveTickBufferRef.current = {
+    symbol: liveTickSymbol,
+    prices,
+  };
 
   const setContractMode = useCallback((mode: ContractMode) => {
     setContractModeRaw(mode);
@@ -713,6 +730,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
             selectedContractMode,
             () => session.stopRequested,
             rejectedCandidates,
+            () => liveTickBufferRef.current,
             (scannedMarkets, marketCount) => {
               setAutoTradingScanProgress((progress) =>
                 progress?.phase === 'scanning'
@@ -740,10 +758,9 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
           );
           return candidates;
         }
-        latestPrediction = null;
         setAutoTradingScanProgress((progress) =>
           progress?.phase === 'scanning'
-            ? { ...progress, prediction: null }
+            ? { ...progress, prediction: latestPrediction }
             : progress
         );
         if (rejectedCandidates.size > 0) rejectedCandidates.clear();
@@ -918,7 +935,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
           if (!nextCandidateFound) break;
           continue;
         }
-        const expectedProfit = candidate.estimatedWinRate * quote.payout - quote.ask_price;
+        const expectedProfit = candidate.predictedWinRate * quote.payout - quote.ask_price;
         if (expectedProfit <= 0) {
           const nextCandidateFound = await rejectCandidateAndRescan(candidate, 'negative-ev');
           if (!nextCandidateFound) break;

@@ -3965,7 +3965,7 @@ function MarketScannerNotification({ progress, status, onStop }) {
                     columnNumber: 11
                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                     className: "mt-3 rounded-xl border border-border bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground",
-                    children: localize('No usable tick history is available yet. The scanner will retry.')
+                    children: localize('Evaluating open markets for the strongest active signal.')
                 }, void 0, false, {
                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
                     lineNumber: 221,
@@ -8844,7 +8844,7 @@ async function fetchTickHistory(ws, symbol, count, shouldStop) {
         }
     }
 }
-async function scanMarkets(ws, symbols, contractMode, shouldStop, excludedCandidates, onProgress) {
+async function scanMarkets(ws, symbols, contractMode, shouldStop, excludedCandidates, getLiveTickBuffer, onProgress) {
     const candidates = [];
     const failures = [];
     const eligibleSymbols = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$market$2d$scanner$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getScannableMarkets"])(symbols);
@@ -8863,7 +8863,9 @@ async function scanMarkets(ws, symbols, contractMode, shouldStop, excludedCandid
             const symbol = openSymbols[index];
             if (!symbol) return;
             try {
-                const prices = await fetchTickHistory(ws, symbol.underlying_symbol, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$market$2d$scanner$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["MARKET_SCAN_TICK_COUNT"], shouldStop);
+                const historyPrices = await fetchTickHistory(ws, symbol.underlying_symbol, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$market$2d$scanner$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["MARKET_SCAN_TICK_COUNT"], shouldStop);
+                const liveTickBuffer = getLiveTickBuffer();
+                const prices = liveTickBuffer.symbol === symbol.underlying_symbol && liveTickBuffer.prices.length >= (historyPrices?.length ?? 0) ? liveTickBuffer.prices : historyPrices;
                 if (prices && !shouldStop()) {
                     if (!excludedCandidates.has(getScanCandidateKey(symbol.underlying_symbol, contractMode))) {
                         const candidate = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$market$2d$scanner$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["scoreMarket"])(symbol, prices, contractMode);
@@ -9010,6 +9012,15 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
     const [scannerPredictionSeed, setScannerPredictionSeed] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
     const autoSessionRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
     const selectSymbolRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(selectSymbol);
+    const liveTickSymbol = activeSymbol && currentTick?.symbol === activeSymbol.underlying_symbol ? activeSymbol.underlying_symbol : null;
+    const liveTickBufferRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])({
+        symbol: liveTickSymbol,
+        prices
+    });
+    liveTickBufferRef.current = {
+        symbol: liveTickSymbol,
+        prices
+    };
     const setContractMode = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])((mode)=>{
         setContractModeRaw(mode);
         if (mode === 'DIGITOVER') {
@@ -9235,7 +9246,7 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
                 }, ()=>session.stopRequested || scanFailed);
                 let candidates;
                 try {
-                    candidates = await scanMarkets(tradingWs, symbols, selectedContractMode, ()=>session.stopRequested, rejectedCandidates, (scannedMarkets, marketCount)=>{
+                    candidates = await scanMarkets(tradingWs, symbols, selectedContractMode, ()=>session.stopRequested, rejectedCandidates, ()=>liveTickBufferRef.current, (scannedMarkets, marketCount)=>{
                         setAutoTradingScanProgress((progress)=>progress?.phase === 'scanning' ? {
                                 ...progress,
                                 scannedMarkets,
@@ -9260,10 +9271,9 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
                         } : progress);
                     return candidates;
                 }
-                latestPrediction = null;
                 setAutoTradingScanProgress((progress)=>progress?.phase === 'scanning' ? {
                         ...progress,
-                        prediction: null
+                        prediction: latestPrediction
                     } : progress);
                 if (rejectedCandidates.size > 0) rejectedCandidates.clear();
             }
@@ -9399,7 +9409,7 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
                     if (!nextCandidateFound) break;
                     continue;
                 }
-                const expectedProfit = candidate.estimatedWinRate * quote.payout - quote.ask_price;
+                const expectedProfit = candidate.predictedWinRate * quote.payout - quote.ask_price;
                 if (expectedProfit <= 0) {
                     const nextCandidateFound = await rejectCandidateAndRescan(candidate, 'negative-ev');
                     if (!nextCandidateFound) break;

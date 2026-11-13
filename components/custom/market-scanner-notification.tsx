@@ -219,7 +219,7 @@ export function MarketScannerNotification({
           </div>
         ) : (
           <div className="mt-3 rounded-xl border border-border bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground">
-            {localize('No usable tick history is available yet. The scanner will retry.')}
+            {localize('Evaluating open markets for the strongest active signal.')}
           </div>
         )}
 

@@ -4110,7 +4110,7 @@ function MarketScannerNotification({ progress, status, onStop }) {
                     columnNumber: 11
                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                     className: "mt-3 rounded-xl border border-border bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground",
-                    children: localize('No usable tick history is available yet. The scanner will retry.')
+                    children: localize('Evaluating open markets for the strongest active signal.')
                 }, void 0, false, {
                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
                     lineNumber: 221,
@@ -9335,7 +9335,7 @@ async function fetchTickHistory(ws, symbol, count, shouldStop) {
         }
     }
 }
-async function scanMarkets(ws, symbols, contractMode, shouldStop, excludedCandidates, onProgress) {
+async function scanMarkets(ws, symbols, contractMode, shouldStop, excludedCandidates, getLiveTickBuffer, onProgress) {
     const candidates = [];
     const failures = [];
     const eligibleSymbols = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$market$2d$scanner$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getScannableMarkets"])(symbols);
@@ -9354,7 +9354,9 @@ async function scanMarkets(ws, symbols, contractMode, shouldStop, excludedCandid
             const symbol = openSymbols[index];
             if (!symbol) return;
             try {
-                const prices = await fetchTickHistory(ws, symbol.underlying_symbol, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$market$2d$scanner$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["MARKET_SCAN_TICK_COUNT"], shouldStop);
+                const historyPrices = await fetchTickHistory(ws, symbol.underlying_symbol, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$market$2d$scanner$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["MARKET_SCAN_TICK_COUNT"], shouldStop);
+                const liveTickBuffer = getLiveTickBuffer();
+                const prices = liveTickBuffer.symbol === symbol.underlying_symbol && liveTickBuffer.prices.length >= (historyPrices?.length ?? 0) ? liveTickBuffer.prices : historyPrices;
                 if (prices && !shouldStop()) {
                     if (!excludedCandidates.has(getScanCandidateKey(symbol.underlying_symbol, contractMode))) {
                         const candidate = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$market$2d$scanner$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["scoreMarket"])(symbol, prices, contractMode);
@@ -9502,6 +9504,15 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
     const [scannerPredictionSeed, setScannerPredictionSeed] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     const autoSessionRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
     const selectSymbolRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(selectSymbol);
+    const liveTickSymbol = activeSymbol && currentTick?.symbol === activeSymbol.underlying_symbol ? activeSymbol.underlying_symbol : null;
+    const liveTickBufferRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])({
+        symbol: liveTickSymbol,
+        prices
+    });
+    liveTickBufferRef.current = {
+        symbol: liveTickSymbol,
+        prices
+    };
     const setContractMode = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
         "useDigitsTrading.useCallback[setContractMode]": (mode)=>{
             setContractModeRaw(mode);
@@ -9769,6 +9780,8 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
                             candidates = await scanMarkets(tradingWs, symbols, selectedContractMode, {
                                 "useDigitsTrading.useCallback[buyContract].scanForMarket": ()=>session.stopRequested
                             }["useDigitsTrading.useCallback[buyContract].scanForMarket"], rejectedCandidates, {
+                                "useDigitsTrading.useCallback[buyContract].scanForMarket": ()=>liveTickBufferRef.current
+                            }["useDigitsTrading.useCallback[buyContract].scanForMarket"], {
                                 "useDigitsTrading.useCallback[buyContract].scanForMarket": (scannedMarkets, marketCount)=>{
                                     setAutoTradingScanProgress({
                                         "useDigitsTrading.useCallback[buyContract].scanForMarket": (progress)=>progress?.phase === 'scanning' ? {
@@ -9799,11 +9812,10 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
                             }["useDigitsTrading.useCallback[buyContract].scanForMarket"]);
                             return candidates;
                         }
-                        latestPrediction = null;
                         setAutoTradingScanProgress({
                             "useDigitsTrading.useCallback[buyContract].scanForMarket": (progress)=>progress?.phase === 'scanning' ? {
                                     ...progress,
-                                    prediction: null
+                                    prediction: latestPrediction
                                 } : progress
                         }["useDigitsTrading.useCallback[buyContract].scanForMarket"]);
                         if (rejectedCandidates.size > 0) rejectedCandidates.clear();
@@ -9965,7 +9977,7 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
                         if (!nextCandidateFound) break;
                         continue;
                     }
-                    const expectedProfit = candidate.estimatedWinRate * quote.payout - quote.ask_price;
+                    const expectedProfit = candidate.predictedWinRate * quote.payout - quote.ask_price;
                     if (expectedProfit <= 0) {
                         const nextCandidateFound = await rejectCandidateAndRescan(candidate, 'negative-ev');
                         if (!nextCandidateFound) break;
@@ -10159,7 +10171,7 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
         stopAutoTrading
     };
 }
-_s(useDigitsTrading, "gard2FrR4GhlscgfC5l4vYqYNZc=", false, function() {
+_s(useDigitsTrading, "+vO/PJ7gri2GLRSQS1suBSF5JNI=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$custom$2f$i18n$2d$provider$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAppTranslations"],
         __TURBOPACK__imported__module__$5b$project$5d2f$hooks$2f$use$2d$base$2d$trading$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useBaseTrading"],
