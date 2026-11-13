@@ -41,6 +41,7 @@ import { TradeTypeChips } from '@/components/custom/trade-type-chips';
 import { SymbolSelector } from '@/components/custom/symbol-selector';
 import { useAppTranslations } from '@/components/custom/i18n-provider';
 import { formatAmount, formatPercent, formatTickPrice } from '@/lib/locale-format';
+import { getContractBarrier } from '@/lib/market-scanner';
 import { getDigitPercentageRanks } from '@/lib/digit-stats';
 import { getSubmarketDisplayName } from '@/lib/active-symbols-display-names';
 import { centerInScrollContainer } from '@/lib/scroll-within-frame';
@@ -70,7 +71,7 @@ function getDigitTradeTypeOptions(
   localize: (text: string) => string
 ): { value: TradeType; label: string }[] {
   return [
-    { value: 'matches-differs', label: localize('Matches/Differs') },
+    { value: 'matches-differs', label: localize('Differs') },
     { value: 'over-under', label: localize('Over/Under') },
     { value: 'even-odd', label: localize('Even/Odd') },
   ];
@@ -80,13 +81,10 @@ function getContractModeOptions(
   localize: (text: string) => string
 ): Record<TradeType, { value: ContractMode; label: string }[]> {
   return {
-    'matches-differs': [
-      { value: 'DIGITMATCH', label: localize('Matches') },
-      { value: 'DIGITDIFF', label: localize('Differs') },
-    ],
+    'matches-differs': [{ value: 'DIGITDIFF', label: localize('Differs') }],
     'over-under': [
-      { value: 'DIGITOVER', label: localize('Over') },
-      { value: 'DIGITUNDER', label: localize('Under') },
+      { value: 'DIGITOVER', label: localize('Over 1') },
+      { value: 'DIGITUNDER', label: localize('Under 8') },
     ],
     'even-odd': [
       { value: 'DIGITEVEN', label: localize('Even') },
@@ -129,33 +127,31 @@ function showDigitInPrediction(contractMode: ContractMode): boolean {
 export interface ConfigurableBuyButtonProps {
   variant: StyleVariant;
   isConnected: boolean;
-  proposal: ProposalInfo | null;
   onBuy: () => void;
   isBuying: boolean;
-  autoTradingStatus?: 'idle' | 'running' | 'stopping';
+  autoTradingStatus?: 'idle' | 'scanning' | 'running' | 'stopping';
 }
 
 export function ConfigurableBuyButton({
   variant,
   isConnected,
-  proposal,
   onBuy,
   isBuying,
   autoTradingStatus = 'idle',
 }: ConfigurableBuyButtonProps) {
-  const { localize, locale } = useAppTranslations();
+  const { localize } = useAppTranslations();
 
   const isAutoTrading = autoTradingStatus !== 'idle';
-  const disabled = isAutoTrading ? autoTradingStatus === 'stopping' : !isConnected || !proposal || isBuying;
+  const disabled = isAutoTrading ? autoTradingStatus === 'stopping' : !isConnected || isBuying;
   const label = autoTradingStatus === 'stopping'
-    ? localize('Stopping after current contract...')
-    : autoTradingStatus === 'running'
-      ? localize('Stop auto-trading')
-      : isBuying
-    ? localize('Purchasing...')
-    : proposal
-      ? localize('Buy @ {{price}} USD', { price: formatAmount(proposal.askPrice, locale) })
-      : localize('Buy Contract');
+    ? localize('Stopping...')
+    : autoTradingStatus === 'scanning'
+      ? localize('Stop scanning')
+      : autoTradingStatus === 'running'
+        ? localize('Stop auto-trading')
+        : isBuying
+          ? localize('Purchasing...')
+          : localize('Scan & trade');
 
   const variants: Record<StyleVariant, () => React.ReactNode> = {
     // a — pill (current)
@@ -212,7 +208,6 @@ export interface ConfigurableDigitsControlsProps {
   contractMode: ContractMode;
   onContractModeChange: (mode: ContractMode) => void;
   selectedDigit: number;
-  onDigitSelect: (digit: number) => void;
   stake: string;
   onStakeChange: (value: string) => void;
   duration: number;
@@ -222,7 +217,7 @@ export interface ConfigurableDigitsControlsProps {
   isProposalLoading: boolean;
   onBuy: () => void;
   isBuying: boolean;
-  autoTradingStatus?: 'idle' | 'running' | 'stopping';
+  autoTradingStatus?: 'idle' | 'scanning' | 'running' | 'stopping';
   isConnected: boolean;
 
   /** Edit mode — control blocks become selectable (click opens its accordion). */
@@ -266,7 +261,6 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
     contractMode,
     onContractModeChange,
     selectedDigit,
-    onDigitSelect,
     stake,
     onStakeChange,
     duration,
@@ -505,9 +499,8 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
     );
   };
 
-  // ── Digit stats + digit selection (3 styles) ────────────────────────────
-  // Real control = DigitStatsBar (includes digit selection). All variants keep
-  // onDigitSelect / selectedDigit, and digit stats only show for non-even/odd.
+  // ── Digit stats (3 styles) ──────────────────────────────────────────────
+  // The selected barrier comes from the scanner; the displayed digits are not selectable.
   const renderDigitStats = (showInlineTick = false) => {
     if (tradeType === 'even-odd') return null;
     const ranks = getDigitPercentageRanks(digitStats.percentages);
@@ -529,11 +522,10 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
           selectedDigit={selectedDigit}
           lastDigit={lastDigit}
           headerRight={inlineTick}
-          onDigitSelect={onDigitSelect}
           disabled={isAutoTrading}
         />
       ),
-      // Compact grid of 0–9 selectable <Button>s, each with its percentage.
+      // Compact grid of 0–9 digits, each with its percentage.
       b: () => (
         <div className="space-y-1.5">
           <div className="flex min-w-0 items-center justify-between gap-2">
@@ -559,13 +551,12 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
                   )}
                   <Button
                     variant={isSelected ? 'default' : 'outline'}
-                    disabled={isAutoTrading}
-                    onClick={() => onDigitSelect(digit)}
+                    disabled
                     data-digit={digit}
                     data-selected={isSelected}
                     data-rank={rank ?? 'none'}
                     data-live-digit={isLiveDigit}
-                    className="digit-tile flex h-12 w-full flex-col items-center justify-center gap-0 rounded-lg p-0 text-base font-bold shadow-sm sm:h-[4.5rem] sm:rounded-xl sm:text-xl"
+                    className="digit-tile flex h-12 w-full flex-col items-center justify-center gap-0 rounded-lg p-0 text-base font-bold shadow-sm disabled:opacity-100 sm:h-[4.5rem] sm:rounded-xl sm:text-xl"
                   >
                     <span className="text-base font-semibold leading-none">{digit}</span>
                     <span className="mt-0.5 font-mono text-[10px] leading-none">
@@ -578,7 +569,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
           </div>
         </div>
       ),
-      // Compact list — one selectable row per digit with its percentage.
+      // Compact list — one row per digit with its percentage.
       c: () => (
         <div className="space-y-1.5">
           <div className="flex min-w-0 items-center justify-between gap-2">
@@ -596,14 +587,13 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
                 <Button
                   key={digit}
                   variant={isSelected ? 'default' : 'outline'}
-                  disabled={isAutoTrading}
-                  onClick={() => onDigitSelect(digit)}
+                  disabled
                   data-digit={digit}
                   data-selected={isSelected}
                   data-rank={rank ?? 'none'}
                   data-live-digit={isLiveDigit}
                   className={cn(
-                    'digit-tile flex h-8 w-full items-center justify-between px-3 text-sm font-medium',
+                    'digit-tile flex h-8 w-full items-center justify-between px-3 text-sm font-medium disabled:opacity-100',
                     !isSelected && 'bg-muted/50 border-muted-foreground/20',
                   )}
                 >
@@ -892,7 +882,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
               <>
                 {' '}
                 <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                  {selectedDigit}
+                  {getContractBarrier(contractMode, selectedDigit)}
                 </span>
               </>
             )}
@@ -917,7 +907,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
               <>
                 {' '}
                 <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                  {selectedDigit}
+                  {getContractBarrier(contractMode, selectedDigit)}
                 </span>
               </>
             )}
@@ -960,7 +950,6 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
       <ConfigurableBuyButton
         variant={config.styles.buy}
         isConnected={isConnected}
-        proposal={proposal}
         onBuy={onBuy}
         isBuying={isBuying}
         autoTradingStatus={props.autoTradingStatus}

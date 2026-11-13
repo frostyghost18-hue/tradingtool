@@ -14,7 +14,7 @@ interface DigitStatsBarProps {
   selectedDigit: number;
   lastDigit?: number | null;
   headerRight?: ReactNode;
-  onDigitSelect: (digit: number) => void;
+  onDigitSelect?: (digit: number) => void;
   disabled?: boolean;
 }
 
@@ -56,14 +56,14 @@ export function DigitStatsBar({
               )}
               <Button
                 variant={isSelected ? 'default' : 'outline'}
-                disabled={disabled}
-                onClick={() => onDigitSelect(digit)}
+                disabled={disabled || !onDigitSelect}
+                onClick={() => onDigitSelect?.(digit)}
                 data-digit={digit}
                 data-selected={isSelected}
                 data-rank={rank ?? 'none'}
                 data-live-digit={isLiveDigit}
                 className={cn(
-                  'digit-tile h-12 w-full rounded-lg p-0 text-base font-bold shadow-sm sm:h-[4.5rem] sm:rounded-xl sm:text-2xl',
+                  'digit-tile h-12 w-full rounded-lg p-0 text-base font-bold shadow-sm disabled:opacity-100 sm:h-[4.5rem] sm:rounded-xl sm:text-2xl',
                 )}
               >
                 {digit}

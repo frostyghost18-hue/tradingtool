@@ -58,7 +58,7 @@ function getDigitTradeTypeOptions(
   localize: (text: string) => string
 ): { value: TradeType; label: string }[] {
   return [
-    { value: 'matches-differs', label: localize('Matches/Differs') },
+    { value: 'matches-differs', label: localize('Differs') },
     { value: 'over-under', label: localize('Over/Under') },
     { value: 'even-odd', label: localize('Even/Odd') },
   ];
@@ -99,7 +99,6 @@ export interface DigitsViewProps {
   contractMode: ContractMode;
   setContractMode: (mode: ContractMode) => void;
   selectedDigit: number;
-  setSelectedDigit: (digit: number) => void;
   stake: string;
   setStake: (value: string) => void;
   duration: number;
@@ -120,9 +119,11 @@ export interface DigitsViewProps {
   setMartingaleMode: (value: MartingaleMode) => void;
   martingaleValues: Record<MartingaleMode, string>;
   setMartingaleValue: (mode: MartingaleMode, value: string) => void;
-  autoTradingStatus: 'idle' | 'running' | 'stopping';
+  autoTradingStatus: 'idle' | 'scanning' | 'running' | 'stopping';
   autoTradingTradeCount: number;
   autoTradingProfit: number;
+  autoTradingMarket: string | null;
+  autoTradingEstimatedWinRate: number | null;
   thresholdResult: AutoTradingThresholdResult | null;
   clearThresholdResult: () => void;
   stopAutoTrading: () => void;
@@ -172,7 +173,6 @@ export function DigitsView({
   contractMode,
   setContractMode,
   selectedDigit,
-  setSelectedDigit,
   stake,
   setStake,
   duration,
@@ -196,6 +196,8 @@ export function DigitsView({
   autoTradingStatus,
   autoTradingTradeCount,
   autoTradingProfit,
+  autoTradingMarket,
+  autoTradingEstimatedWinRate,
   thresholdResult,
   clearThresholdResult,
   stopAutoTrading,
@@ -271,6 +273,8 @@ export function DigitsView({
     autoTradingStatus,
     autoTradingTradeCount,
     autoTradingProfit,
+    autoTradingMarket,
+    autoTradingEstimatedWinRate,
     onStopAutoTrading: stopAutoTrading,
     disabled: autoTradingStatus !== 'idle',
   };
@@ -373,7 +377,6 @@ export function DigitsView({
         contractMode={contractMode}
         onContractModeChange={setContractMode}
         selectedDigit={selectedDigit}
-        onDigitSelect={setSelectedDigit}
         stake={stake}
         onStakeChange={setStake}
         duration={duration}
@@ -641,7 +644,6 @@ export function DigitsView({
                               inline
                             />
                           }
-                          onDigitSelect={setSelectedDigit}
                           disabled={autoTradingStatus !== 'idle'}
                         />
                       </div>
@@ -744,7 +746,6 @@ export function DigitsView({
                             inline
                           />
                         }
-                        onDigitSelect={setSelectedDigit}
                         disabled={autoTradingStatus !== 'idle'}
                       />
                     ) : (
@@ -820,7 +821,6 @@ export function DigitsView({
           <ConfigurableBuyButton
             variant={appConfig!.styles.buy}
             isConnected={isConnected}
-            proposal={proposal}
             onBuy={handleBuy}
             isBuying={isBuying}
             autoTradingStatus={autoTradingStatus}

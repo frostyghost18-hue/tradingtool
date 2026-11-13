@@ -73,7 +73,6 @@ export function LiveDigits({
       contractMode={trading.contractMode}
       setContractMode={trading.setContractMode}
       selectedDigit={trading.selectedDigit}
-      setSelectedDigit={trading.setSelectedDigit}
       stake={trading.stake}
       setStake={trading.setStake}
       duration={trading.duration}
@@ -97,6 +96,8 @@ export function LiveDigits({
       autoTradingStatus={trading.autoTradingStatus}
       autoTradingTradeCount={trading.autoTradingTradeCount}
       autoTradingProfit={trading.autoTradingProfit}
+      autoTradingMarket={trading.autoTradingMarket}
+      autoTradingEstimatedWinRate={trading.autoTradingEstimatedWinRate}
       thresholdResult={trading.thresholdResult}
       clearThresholdResult={trading.clearThresholdResult}
       stopAutoTrading={trading.stopAutoTrading}

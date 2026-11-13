@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useAppTranslations } from '@/components/custom/i18n-provider';
 import { formatAmount } from '@/lib/locale-format';
+import { getContractBarrier } from '@/lib/market-scanner';
 import type {
   ContractMode,
   TradeType,
@@ -34,7 +35,7 @@ interface TradeControlsProps {
   buyResult: BuyResult | null;
   buyError: string | null;
   onClearBuyResult: () => void;
-  autoTradingStatus?: 'idle' | 'running' | 'stopping';
+  autoTradingStatus?: 'idle' | 'scanning' | 'running' | 'stopping';
   /**
    * Pins the Buy button above the footer (fixed) instead of inline. Driven by
    * the same useIsMobile state that picks the view's layout branch — a CSS
@@ -48,13 +49,10 @@ function getContractModeOptions(
   localize: (text: string) => string
 ): Record<TradeType, { value: ContractMode; label: string }[]> {
   return {
-    'matches-differs': [
-      { value: 'DIGITMATCH', label: localize('Matches') },
-      { value: 'DIGITDIFF', label: localize('Differs') },
-    ],
+    'matches-differs': [{ value: 'DIGITDIFF', label: localize('Differs') }],
     'over-under': [
-      { value: 'DIGITOVER', label: localize('Over') },
-      { value: 'DIGITUNDER', label: localize('Under') },
+      { value: 'DIGITOVER', label: localize('Over 1') },
+      { value: 'DIGITUNDER', label: localize('Under 8') },
     ],
     'even-odd': [
       { value: 'DIGITEVEN', label: localize('Even') },
@@ -177,14 +175,14 @@ export function TradeControls({
 
   const isAutoTrading = autoTradingStatus !== 'idle';
   const buyButtonLabel = autoTradingStatus === 'stopping'
-    ? localize('Stopping after current contract...')
-    : autoTradingStatus === 'running'
-      ? localize('Stop auto-trading')
-      : isBuying
-        ? localize('Purchasing...')
-        : proposal
-          ? localize('Buy @ {{price}} USD', { price: formatAmount(proposal.askPrice, locale) })
-          : localize('Buy Contract');
+    ? localize('Stopping...')
+    : autoTradingStatus === 'scanning'
+      ? localize('Stop scanning')
+      : autoTradingStatus === 'running'
+        ? localize('Stop auto-trading')
+        : isBuying
+          ? localize('Purchasing...')
+          : localize('Scan & trade');
 
   return (
     <div className="space-y-2 sm:space-y-4">
@@ -257,7 +255,7 @@ export function TradeControls({
             <>
               {' '}
               <span className="inline-flex w-5 h-5 rounded-full bg-primary text-primary-foreground items-center justify-center text-xs font-bold">
-                {selectedDigit}
+                {getContractBarrier(contractMode, selectedDigit)}
               </span>
             </>
           )}
@@ -288,7 +286,7 @@ export function TradeControls({
       >
         <Button
           className="h-11 w-full rounded-lg bg-[rgb(var(--buy-background))] px-6 font-bold text-[rgb(var(--buy-foreground))] shadow-[0_0_22px_rgb(0_195_144/0.18)] hover:brightness-110 sm:h-12 sm:px-8"
-          disabled={isAutoTrading ? autoTradingStatus === 'stopping' : !isConnected || !proposal || isBuying}
+          disabled={isAutoTrading ? autoTradingStatus === 'stopping' : !isConnected || isBuying}
           onClick={onBuy}
         >
           {buyButtonLabel}

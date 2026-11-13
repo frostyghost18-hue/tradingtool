@@ -49,9 +49,11 @@ interface RiskManagementControlsProps {
   onMartingaleModeChange: (value: MartingaleMode) => void;
   martingaleValues: Record<MartingaleMode, string>;
   onMartingaleValueChange: (mode: MartingaleMode, value: string) => void;
-  autoTradingStatus: 'idle' | 'running' | 'stopping';
+  autoTradingStatus: 'idle' | 'scanning' | 'running' | 'stopping';
   autoTradingTradeCount: number;
   autoTradingProfit: number;
+  autoTradingMarket: string | null;
+  autoTradingEstimatedWinRate: number | null;
   onStopAutoTrading: () => void;
   disabled?: boolean;
 }
@@ -68,6 +70,8 @@ export function RiskManagementControls({
   autoTradingStatus,
   autoTradingTradeCount,
   autoTradingProfit,
+  autoTradingMarket,
+  autoTradingEstimatedWinRate,
   onStopAutoTrading,
   disabled = false,
 }: RiskManagementControlsProps) {
@@ -163,12 +167,27 @@ export function RiskManagementControls({
             <Localize
               i18n_default_text="{{status}} · {{count}} trades · Session P/L: {{profit}} USD"
               values={{
-                status: autoTradingStatus === 'stopping' ? 'Stopping after current trade' : 'Auto-trading',
+                status: autoTradingStatus === 'stopping'
+                  ? 'Stopping'
+                  : autoTradingStatus === 'scanning'
+                    ? 'Scanning markets'
+                    : 'Auto-trading',
                 count: autoTradingTradeCount,
                 profit: autoTradingProfit.toFixed(2),
               }}
             />
           </p>
+          {autoTradingStatus === 'running' && autoTradingMarket && autoTradingEstimatedWinRate !== null && (
+            <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+              <Localize
+                i18n_default_text="{{market}} · Recent tick hit-rate estimate: {{rate}}% (not a prediction)"
+                values={{
+                  market: autoTradingMarket,
+                  rate: (autoTradingEstimatedWinRate * 100).toFixed(1),
+                }}
+              />
+            </p>
+          )}
           <Button
             type="button"
             variant="outline"
@@ -179,15 +198,17 @@ export function RiskManagementControls({
           >
             <Localize
               i18n_default_text={autoTradingStatus === 'stopping'
-                ? 'Stopping after current contract...'
-                : 'Stop auto-trading after current contract'}
+                ? 'Stopping...'
+                : autoTradingStatus === 'scanning'
+                  ? 'Stop scanning'
+                  : 'Stop auto-trading after current contract'}
             />
           </Button>
         </div>
       )}
 
       <p className="text-[11px] leading-relaxed text-muted-foreground">
-        <Localize i18n_default_text="Set at least one profit or loss target. Buy then starts a session that continues until a target is reached or you stop it. Limits are checked after each contract settles." />
+        <Localize i18n_default_text="Set at least one profit or loss target. Scan & trade ranks markets with sufficient recent ticks and an observed hit rate above the contract baseline, then rescans on a reversal heuristic. Historical rates do not guarantee future results." />
       </p>
     </div>
   );
