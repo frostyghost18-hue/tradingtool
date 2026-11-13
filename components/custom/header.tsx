@@ -6,6 +6,7 @@ import { FocusScope } from '@radix-ui/react-focus-scope';
 import { LogOut, Menu, Settings2, X } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Localize } from '@deriv-com/translations';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
@@ -438,6 +439,18 @@ export function Header({
             </p>
             <LanguageSwitcher className="w-full h-11 font-semibold" />
           </div>
+          {isAuthenticated && (
+            <div className="space-y-3">
+              <p className="text-sm font-semibold text-foreground">
+                <Localize i18n_default_text="Trading" />
+              </p>
+              <Button asChild variant="outline" className="w-full justify-start">
+                <Link href="/reports" onClick={() => setMobileMenuOpen(false)}>
+                  <Localize i18n_default_text="View your positions →" />
+                </Link>
+              </Button>
+            </div>
+          )}
         </div>
         <div className="mt-auto px-6 pb-8 pt-4 flex flex-col gap-3 border-t border-border">
           <MobileAuthButtons

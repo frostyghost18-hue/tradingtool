@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import Link from 'next/link';
 import { Localize } from '@deriv-com/translations';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,9 +19,7 @@ import type {
 } from '../lib/types';
 
 interface TradeControlsProps {
-  tradeType: TradeType;
   contractMode: ContractMode;
-  onContractModeChange: (mode: ContractMode) => void;
   selectedDigit: number;
   isConnected: boolean;
   stake: string;
@@ -38,7 +35,6 @@ interface TradeControlsProps {
   buyError: string | null;
   onClearBuyResult: () => void;
   autoTradingStatus?: 'idle' | 'running' | 'stopping';
-  isAuthenticated?: boolean;
   /**
    * Pins the Buy button above the footer (fixed) instead of inline. Driven by
    * the same useIsMobile state that picks the view's layout branch — a CSS
@@ -91,10 +87,45 @@ function showDigitInPrediction(contractMode: ContractMode): boolean {
   return contractMode !== 'DIGITEVEN' && contractMode !== 'DIGITODD';
 }
 
-export function TradeControls({
+export function ContractModeSelector({
   tradeType,
   contractMode,
   onContractModeChange,
+  disabled = false,
+}: {
+  tradeType: TradeType;
+  contractMode: ContractMode;
+  onContractModeChange: (mode: ContractMode) => void;
+  disabled?: boolean;
+}) {
+  const { localize } = useAppTranslations();
+  const modeOptions = getContractModeOptions(localize)[tradeType];
+
+  return (
+    <ToggleGroup
+      type="single"
+      value={contractMode}
+      disabled={disabled}
+      onValueChange={(value) => {
+        if (value) onContractModeChange(value as ContractMode);
+      }}
+      className="w-full gap-0 rounded-lg border border-border bg-muted/80 p-1"
+    >
+      {modeOptions.map((option) => (
+        <ToggleGroupItem
+          key={option.value}
+          value={option.value}
+          className="flex-1 rounded-md text-sm font-medium text-muted-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:font-bold data-[state=on]:shadow-sm hover:text-foreground"
+        >
+          {option.label}
+        </ToggleGroupItem>
+      ))}
+    </ToggleGroup>
+  );
+}
+
+export function TradeControls({
+  contractMode,
   selectedDigit,
   isConnected,
   stake,
@@ -110,7 +141,6 @@ export function TradeControls({
   buyError,
   onClearBuyResult,
   autoTradingStatus = 'idle',
-  isAuthenticated,
   isMobile,
 }: TradeControlsProps) {
   const { localize, locale } = useAppTranslations();
@@ -145,7 +175,6 @@ export function TradeControls({
     }
   }, [buyResult, autoTradingStatus, onClearBuyResult, localize, locale]);
 
-  const modeOptions = getContractModeOptions(localize)[tradeType];
   const isAutoTrading = autoTradingStatus !== 'idle';
   const buyButtonLabel = autoTradingStatus === 'stopping'
     ? localize('Stopping after current contract...')
@@ -159,26 +188,6 @@ export function TradeControls({
 
   return (
     <div className="space-y-2 sm:space-y-4">
-      <ToggleGroup
-        type="single"
-        value={contractMode}
-        disabled={isAutoTrading}
-        onValueChange={value => {
-          if (value) onContractModeChange(value as ContractMode);
-        }}
-        className="w-full gap-0 rounded-lg border border-border bg-muted/80 p-1"
-      >
-        {modeOptions.map(opt => (
-          <ToggleGroupItem
-            key={opt.value}
-            value={opt.value}
-            className="flex-1 rounded-md text-sm font-medium text-muted-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:font-bold data-[state=on]:shadow-sm hover:text-foreground"
-          >
-            {opt.label}
-          </ToggleGroupItem>
-        ))}
-      </ToggleGroup>
-
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label htmlFor="stake" className="text-xs text-muted-foreground">
@@ -286,13 +295,6 @@ export function TradeControls({
         </Button>
       </div>
 
-      {isAuthenticated && (
-        <Button asChild variant="ghost" className="w-full text-sm text-muted-foreground hover:text-foreground">
-          <Link href="/reports">
-            <Localize i18n_default_text="View your positions →" />
-          </Link>
-        </Button>
-      )}
     </div>
   );
 }

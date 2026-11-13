@@ -16,7 +16,7 @@ import { useAppTranslations } from '@/components/custom/i18n-provider';
 import { formatAmount } from '@/lib/locale-format';
 import { CurrentTickDisplay } from './current-tick-display';
 import { DigitStatsBar } from './digit-stats-bar';
-import { TradeControls } from './trade-controls';
+import { ContractModeSelector, TradeControls } from './trade-controls';
 import { RiskManagementControls } from './risk-management-controls';
 import { ConfigurableDigitsControls, ConfigurableBuyButton } from './configurable-digits-controls';
 import { TradeTypeChips } from '@/components/custom/trade-type-chips';
@@ -40,15 +40,16 @@ import { ALL_CONTROL_KEYS } from '../lib/app-config';
 import type { ControlKey, DigitsAppConfig } from '../lib/app-config';
 
 /**
- * Desktop no-code column split. Digits has no chart, so the market-data blocks
- * (symbol, tick, digit stats) stand in for it on the left, mirroring the
+ * Desktop no-code column split. Digits has no chart, so the market and
+ * contract-selection blocks (trade type, contract mode, symbol, tick, digit
+ * stats) stand in for it on the left, mirroring the
  * chart-left / controls-right desktop layout of rise-fall and accumulators —
  * and the 3-column desktop the standard Digits layout has always had. The
  * blocks keep their configured relative order inside each column; the
  * drag-to-reorder editor is phone-framed, so the single mobile column stays
  * the source of truth and desktop is a grouped projection of it.
  */
-const MARKET_COLUMN_KEYS: ControlKey[] = ['symbol', 'tick', 'digitStats'];
+const MARKET_COLUMN_KEYS: ControlKey[] = ['tradeType', 'contractMode', 'symbol', 'tick', 'digitStats'];
 const CONTROLS_COLUMN_KEYS: ControlKey[] = ALL_CONTROL_KEYS.filter(
   (key) => !MARKET_COLUMN_KEYS.includes(key)
 );
@@ -353,7 +354,6 @@ export function DigitsView({
   // instance to one desktop column; omitted, it renders every block.
   const renderConfigurable = (
     keys?: ControlKey[],
-    showPositionsLink?: boolean,
     compactMarketLayout?: boolean
   ) =>
     appConfig ? (
@@ -362,7 +362,6 @@ export function DigitsView({
         lastDigit={lastDigit}
         compactMarketLayout={compactMarketLayout}
         keys={keys}
-        showPositionsLink={showPositionsLink}
         symbols={symbols}
         activeSymbol={activeSymbol}
         selectSymbol={selectSymbol}
@@ -386,7 +385,6 @@ export function DigitsView({
         isBuying={isBuying}
         autoTradingStatus={autoTradingStatus}
         isConnected={isConnected}
-        isAuthenticated={authState === 'authenticated'}
         editMode={editMode}
         onSelect={onSelect}
         selectedKey={selectedKey}
@@ -437,7 +435,7 @@ export function DigitsView({
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-4">
-                      {renderConfigurable(MARKET_COLUMN_KEYS, false, true)}
+                      {renderConfigurable(MARKET_COLUMN_KEYS, true)}
                     </CardContent>
                   </Card>
                   <TransactionsPanel
@@ -462,7 +460,7 @@ export function DigitsView({
             </div>
           </div>
         ) : (
-          /* No-code desktop layout: market data, transactions and trade
+          /* No-code desktop layout: market/contract selection, transactions, and trade
              controls sit in that order at xl. At lg, transactions moves below
              the two-column market/controls layout. See MARKET_COLUMN_KEYS for
              the market-data split.
@@ -500,7 +498,7 @@ export function DigitsView({
                     </span>
                   </CardHeader>
                   <CardContent className="space-y-4 p-4 sm:p-5">
-                    {renderConfigurable(MARKET_COLUMN_KEYS, false, true)}
+                    {renderConfigurable(MARKET_COLUMN_KEYS, true)}
                   </CardContent>
                 </Card>
                 {!editMode && (
@@ -588,16 +586,23 @@ export function DigitsView({
             </>
           ) : (
             <>
-              <TradeTypeChips
-                className="shrink-0"
-                value={tradeType}
-                options={digitTradeTypeOptions}
-                onValueChange={setTradeType}
-                disabled={autoTradingStatus !== 'idle'}
-              />
-
               <Card className="shrink-0 border shadow-sm mb-12">
                 <CardContent className="flex flex-col p-3 pt-3 sm:p-6 sm:pt-4 pb-2 sm:pb-6">
+                  <div className="space-y-3 pb-4">
+                    <TradeTypeChips
+                      className="shrink-0"
+                      value={tradeType}
+                      options={digitTradeTypeOptions}
+                      onValueChange={setTradeType}
+                      disabled={autoTradingStatus !== 'idle'}
+                    />
+                    <ContractModeSelector
+                      tradeType={tradeType}
+                      contractMode={contractMode}
+                      onContractModeChange={setContractMode}
+                      disabled={autoTradingStatus !== 'idle'}
+                    />
+                  </div>
                   {/* Symbol selector; price appears beside the prediction heading except in Even/Odd mode. */}
                   <div className="flex flex-col pb-4 pt-1 sm:pb-6 sm:pt-2">
                     <SymbolSelector
@@ -653,9 +658,7 @@ export function DigitsView({
                     {/* Trade controls */}
                     <div className="pt-4 sm:pt-6">
                       <TradeControls
-                        tradeType={tradeType}
                         contractMode={contractMode}
-                        onContractModeChange={setContractMode}
                         selectedDigit={selectedDigit}
                         isConnected={isConnected}
                         stake={stake}
@@ -671,7 +674,6 @@ export function DigitsView({
                         buyResult={buyResult}
                         buyError={buyError}
                         onClearBuyResult={clearBuyResult}
-                        isAuthenticated={authState === 'authenticated'}
                         isMobile
                       />
                       <RiskManagementControls {...riskManagementProps} />
@@ -708,6 +710,19 @@ export function DigitsView({
                   </span>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-4 p-4 sm:p-5">
+                  <TradeTypeChips
+                    backdrop="card"
+                    value={tradeType}
+                    options={digitTradeTypeOptions}
+                    onValueChange={setTradeType}
+                    disabled={autoTradingStatus !== 'idle'}
+                  />
+                  <ContractModeSelector
+                    tradeType={tradeType}
+                    contractMode={contractMode}
+                    onContractModeChange={setContractMode}
+                    disabled={autoTradingStatus !== 'idle'}
+                  />
                   <SymbolSelector
                     symbols={symbols}
                     activeSymbol={activeSymbol}
@@ -768,19 +783,8 @@ export function DigitsView({
                   </span>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-4 p-4 sm:p-5">
-                  {/* Rendered inside the controls card, so the edge fade is
-                      drawn in the card colour rather than the page background. */}
-                  <TradeTypeChips
-                    backdrop="card"
-                    value={tradeType}
-                    options={digitTradeTypeOptions}
-                    onValueChange={setTradeType}
-                    disabled={autoTradingStatus !== 'idle'}
-                  />
                   <TradeControls
-                    tradeType={tradeType}
                     contractMode={contractMode}
-                    onContractModeChange={setContractMode}
                     selectedDigit={selectedDigit}
                     isConnected={isConnected}
                     stake={stake}
@@ -796,7 +800,6 @@ export function DigitsView({
                     buyResult={buyResult}
                     buyError={buyError}
                     onClearBuyResult={clearBuyResult}
-                    isAuthenticated={authState === 'authenticated'}
                   />
                   <RiskManagementControls {...riskManagementProps} />
                 </CardContent>

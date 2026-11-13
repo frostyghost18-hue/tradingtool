@@ -20,7 +20,6 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
 import { GripVertical, LineChart } from 'lucide-react';
 import { Localize } from '@deriv-com/translations';
 import { useRearrangeDrag } from '@/hooks/use-rearrange-drag';
@@ -225,7 +224,6 @@ export interface ConfigurableDigitsControlsProps {
   isBuying: boolean;
   autoTradingStatus?: 'idle' | 'running' | 'stopping';
   isConnected: boolean;
-  isAuthenticated?: boolean;
 
   /** Edit mode — control blocks become selectable (click opens its accordion). */
   editMode?: boolean;
@@ -250,11 +248,6 @@ export interface ConfigurableDigitsControlsProps {
    * render every block.
    */
   keys?: ControlKey[];
-  /**
-   * Hide the "View your positions" link. When the desktop layout splits into
-   * two columns only the controls column keeps the link, so it renders once.
-   */
-  showPositionsLink?: boolean;
 }
 
 export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProps) {
@@ -285,7 +278,6 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
     isBuying,
     autoTradingStatus = 'idle',
     isConnected,
-    isAuthenticated,
     editMode,
     onSelect,
     selectedKey,
@@ -293,7 +285,6 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
     onReorder,
     pinBuy,
     keys,
-    showPositionsLink = true,
   } = props;
 
   const { localize, locale } = useAppTranslations();
@@ -991,11 +982,17 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
   // Filtering config.order (not iterating `keys`) keeps the configured
   // relative order authoritative inside a filtered column.
   const orderedKeys = keys ? config.order.filter((key) => keys.includes(key)) : config.order;
+  const marketSelectionKeys = orderedKeys.filter(
+    (key) => key === 'tradeType' || key === 'contractMode'
+  );
+  const renderMarketSelectionControls = () =>
+    marketSelectionKeys.map((key) => <div key={key}>{renderers[key]()}</div>);
 
   if (compactMarketLayout && !editMode && keys) {
     if (tradeType === 'even-odd') {
       return (
         <div className="w-full space-y-3">
+          {renderMarketSelectionControls()}
           {orderedKeys
             .filter((key) => key === 'symbol')
             .map((key) => (
@@ -1014,6 +1011,7 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
 
     return (
       <div className="w-full space-y-3">
+        {renderMarketSelectionControls()}
         {orderedKeys
           .filter((key) => key === 'symbol')
           .map((key) => (
@@ -1129,13 +1127,6 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
         if (content === null) return null;
         return <div key={key}>{content}</div>;
       })}
-      {isAuthenticated && showPositionsLink && (
-        <Button asChild variant="ghost" className="w-full text-sm text-muted-foreground hover:text-foreground">
-          <Link href="/reports">
-            <Localize i18n_default_text="View your positions →" />
-          </Link>
-        </Button>
-      )}
     </div>
   );
 }

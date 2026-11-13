@@ -157,6 +157,7 @@ export class DerivWS {
         this.isConnecting = false;
         this.stopPing();
         this.subscriptionHandlers.clear();
+        this.rejectPendingRequests(new Error('WebSocket connection closed before the request completed.'));
         this.notifyConnectionState(false);
         this.attemptReconnect();
       };
@@ -252,7 +253,7 @@ export class DerivWS {
       this.ws.close();
       this.ws = null;
     }
-    this.pendingRequests.clear();
+    this.rejectPendingRequests(new Error('WebSocket disconnected before the request completed.'));
     this.subscriptionHandlers.clear();
   }
 
@@ -290,6 +291,12 @@ export class DerivWS {
       this.pendingRequests.delete(reqId);
       pending.resolve(data);
     }
+  }
+
+  private rejectPendingRequests(error: Error): void {
+    const pending = Array.from(this.pendingRequests.values());
+    this.pendingRequests.clear();
+    for (const request of pending) request.reject(error);
   }
 
   private extractSubscriptionId(data: Record<string, unknown>): string | null {

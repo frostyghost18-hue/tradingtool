@@ -26,6 +26,9 @@ import type { ContractMode, TradeType, DigitStats, OpenPosition, ClosedPosition 
 const CONTRACT_TYPES = ['DIGITMATCH', 'DIGITDIFF', 'DIGITOVER', 'DIGITUNDER', 'DIGITEVEN', 'DIGITODD'];
 
 type AutoTradingStatus = 'idle' | 'running' | 'stopping';
+const CONTRACT_SETTLEMENT_TIMEOUT_MS = 15 * 60 * 1000;
+const CONNECTION_POLL_INTERVAL_MS = 250;
+const CONNECTION_LOST = Symbol('connection-lost');
 
 export interface AutoTradingThresholdResult {
   outcome: 'take-profit' | 'stop-loss';
@@ -33,54 +36,89 @@ export interface AutoTradingThresholdResult {
   market: string;
 }
 
-async function waitForContractSettlement(ws: NonNullable<UseBaseTradingParams['ws']>, contractId: number): Promise<number> {
-  let unsubscribe: () => Promise<void> = async () => {};
-  let hasSubscription = false;
-  let finished = false;
-  let disconnectTimer: ReturnType<typeof setInterval> | null = null;
-  let timeout: ReturnType<typeof setTimeout> | null = null;
+async function waitForConnection(
+  ws: NonNullable<UseBaseTradingParams['ws']>,
+  deadline: number,
+  shouldStop: () => boolean = () => false
+): Promise<boolean> {
+  while (!ws.isConnected) {
+    if (shouldStop()) return false;
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) {
+      throw new Error('Timed out waiting for the WebSocket connection to recover.');
+    }
+    await new Promise((resolve) => setTimeout(resolve, Math.min(CONNECTION_POLL_INTERVAL_MS, remaining)));
+  }
+  return true;
+}
 
-  const settlement = new Promise<number>((resolve, reject) => {
-    void ws.subscribe(
-      { proposal_open_contract: 1, contract_id: contractId },
-      (data) => {
-        const contract = data.proposal_open_contract as Partial<OpenPosition> | undefined;
-        if (!contract) return;
-        const isClosed = contract.is_sold === 1 || contract.is_expired === 1 ||
-          (typeof contract.status === 'string' && contract.status !== 'open');
-        if (!isClosed) return;
+async function waitForContractSettlement(
+  ws: NonNullable<UseBaseTradingParams['ws']>,
+  contractId: number
+): Promise<number> {
+  const deadline = Date.now() + CONTRACT_SETTLEMENT_TIMEOUT_MS;
 
-        const profit = Number(contract.profit);
-        if (!Number.isFinite(profit)) {
-          reject(new Error('The settled contract did not include a valid profit/loss value.'));
-          return;
+  while (true) {
+    await waitForConnection(ws, deadline);
+
+    let unsubscribe: () => Promise<void> = async () => {};
+    let hasSubscription = false;
+    let finished = false;
+    let connectionDropped = false;
+    let removeConnectionListener = () => {};
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+
+    const settlement = new Promise<number>((resolve, reject) => {
+      void ws.subscribe(
+        { proposal_open_contract: 1, contract_id: contractId },
+        (data) => {
+          const contract = data.proposal_open_contract as Partial<OpenPosition> | undefined;
+          if (!contract) return;
+          const isClosed = contract.is_sold === 1 || contract.is_expired === 1 ||
+            (typeof contract.status === 'string' && contract.status !== 'open');
+          if (!isClosed) return;
+
+          const profit = Number(contract.profit);
+          if (!Number.isFinite(profit)) {
+            reject(new Error('The settled contract did not include a valid profit/loss value.'));
+            return;
+          }
+          resolve(profit);
         }
-        resolve(profit);
-      }
-    ).then((subscription) => {
-      unsubscribe = subscription.unsubscribe;
-      hasSubscription = true;
-      if (finished) void unsubscribe();
-    }).catch(reject);
-  });
+      ).then((subscription) => {
+        unsubscribe = subscription.unsubscribe;
+        hasSubscription = true;
+        if (finished) void unsubscribe();
+      }).catch(reject);
+    });
 
-  const interrupted = new Promise<never>((_, reject) => {
-    disconnectTimer = setInterval(() => {
-      if (!ws.isConnected) reject(new Error('Connection lost while waiting for the contract to settle.'));
-    }, 500);
-    timeout = setTimeout(
-      () => reject(new Error('Timed out waiting for the contract to settle. Auto-trading was stopped.')),
-      15 * 60 * 1000
-    );
-  });
+    const connectionLost = new Promise<typeof CONNECTION_LOST>((resolve) => {
+      removeConnectionListener = ws.onConnectionStateChange((connected) => {
+        if (connected) return;
+        connectionDropped = true;
+        resolve(CONNECTION_LOST);
+      });
+    });
 
-  try {
-    return await Promise.race([settlement, interrupted]);
-  } finally {
-    finished = true;
-    if (disconnectTimer) clearInterval(disconnectTimer);
-    if (timeout) clearTimeout(timeout);
-    if (hasSubscription) await unsubscribe();
+    const remaining = deadline - Date.now();
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeout = setTimeout(
+        () => reject(new Error('Timed out waiting for the contract to settle. Auto-trading was stopped.')),
+        Math.max(0, remaining)
+      );
+    });
+
+    try {
+      const result = await Promise.race([settlement, connectionLost, timeoutPromise]);
+      if (result !== CONNECTION_LOST) return result;
+    } catch (error) {
+      if (!connectionDropped && ws.isConnected) throw error;
+    } finally {
+      finished = true;
+      removeConnectionListener();
+      if (timeout) clearTimeout(timeout);
+      if (hasSubscription) await unsubscribe();
+    }
   }
 }
 
@@ -324,7 +362,12 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
 
     try {
       while (!session.stopRequested) {
-        if (!tradingWs.isConnected) throw new Error(localize('Connection lost. Auto-trading was stopped.'));
+        const connected = await waitForConnection(
+          tradingWs,
+          Date.now() + CONTRACT_SETTLEMENT_TIMEOUT_MS,
+          () => session.stopRequested
+        );
+        if (!connected) break;
 
         const proposalParams = {
           proposal: 1,
@@ -339,22 +382,67 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
             ? { barrier: selectedDigit }
             : {}),
         };
-        const proposalResponse = await tradingWs.send<ProposalResponse>(proposalParams);
+        let proposalResponse: ProposalResponse;
+        let connectionDropped = false;
+        const removeConnectionListener = tradingWs.onConnectionStateChange((isConnected) => {
+          if (!isConnected) connectionDropped = true;
+        });
+        try {
+          proposalResponse = await tradingWs.send<ProposalResponse>(proposalParams);
+        } catch (error) {
+          if (!connectionDropped && tradingWs.isConnected) throw error;
+          if (session.stopRequested) break;
+          const reconnected = await waitForConnection(
+            tradingWs,
+            Date.now() + CONTRACT_SETTLEMENT_TIMEOUT_MS,
+            () => session.stopRequested
+          );
+          if (!reconnected) break;
+          continue;
+        } finally {
+          removeConnectionListener();
+        }
         if (session.stopRequested) break;
         const quote = proposalResponse.proposal;
         if (!quote?.id || !Number.isFinite(quote.ask_price) || quote.ask_price <= 0) {
           throw new Error(localize('Could not get a valid proposal for the next trade.'));
         }
 
-        const purchase = await buyWithProposal({
-          id: quote.id,
-          askPrice: quote.ask_price,
-          payout: quote.payout,
-          longcode: quote.longcode,
-          minStake: Number(quote.validation_params?.stake?.min ?? 0),
-          maxPayout: Number(quote.validation_params?.payout?.max ?? 0),
+        if (!tradingWs.isConnected) {
+          const reconnected = await waitForConnection(
+            tradingWs,
+            Date.now() + CONTRACT_SETTLEMENT_TIMEOUT_MS,
+            () => session.stopRequested
+          );
+          if (!reconnected) break;
+          continue;
+        }
+
+        let connectionDroppedDuringPurchase = false;
+        const removePurchaseConnectionListener = tradingWs.onConnectionStateChange((isConnected) => {
+          if (!isConnected) connectionDroppedDuringPurchase = true;
         });
-        if (!purchase) throw new Error(localize('Trade purchase failed. Auto-trading was stopped.'));
+        let purchase: Awaited<ReturnType<typeof buyWithProposal>>;
+        try {
+          purchase = await buyWithProposal({
+            id: quote.id,
+            askPrice: quote.ask_price,
+            payout: quote.payout,
+            longcode: quote.longcode,
+            minStake: Number(quote.validation_params?.stake?.min ?? 0),
+            maxPayout: Number(quote.validation_params?.payout?.max ?? 0),
+          });
+        } finally {
+          removePurchaseConnectionListener();
+        }
+        if (!purchase) {
+          if (connectionDroppedDuringPurchase || !tradingWs.isConnected) {
+            throw new Error(localize(
+              'The connection was interrupted while confirming a purchase. Check your transactions before starting another session.'
+            ));
+          }
+          throw new Error(localize('Trade purchase failed. Auto-trading was stopped.'));
+        }
         clearBuyResult();
 
         tradeCount += 1;
