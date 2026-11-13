@@ -39,7 +39,6 @@ const CONTRACT_TYPES = ['DIGITDIFF', 'DIGITOVER', 'DIGITUNDER', 'DIGITEVEN', 'DI
 type AutoTradingStatus = 'idle' | 'scanning' | 'running' | 'stopping';
 const CONTRACT_SETTLEMENT_TIMEOUT_MS = 15 * 60 * 1000;
 const CONNECTION_POLL_INTERVAL_MS = 250;
-const MARKET_SCAN_CONCURRENCY = 12;
 const INITIAL_ACTIVE_STATE_REQUIREMENT = 2;
 const RESUME_ACTIVE_STATE_REQUIREMENT = 3;
 const CONNECTION_LOST = Symbol('connection-lost');
@@ -167,7 +166,6 @@ async function scanMarkets(
   symbols: ActiveSymbol[],
   contractMode: Exclude<ContractMode, 'DIGITMATCH'>,
   shouldStop: () => boolean,
-  excludedCandidates: Set<string>,
   getLiveTickBuffer: () => { symbol: string | null; prices: number[] },
   onProgress: MarketScanProgressCallback
 ): Promise<MarketScanCandidate[] | null> {
@@ -177,9 +175,7 @@ async function scanMarkets(
   if (eligibleSymbols.length === 0) {
     throw new Error('No open, unsuspended continuous indices are available to scan.');
   }
-  const openSymbols = eligibleSymbols.filter(
-    (symbol) => hasAvailableScanMode(symbol.underlying_symbol, contractMode, excludedCandidates)
-  );
+  const openSymbols = eligibleSymbols;
   if (openSymbols.length === 0) return [];
 
   let nextIndex = 0;
@@ -206,10 +202,8 @@ async function scanMarkets(
           ? liveTickBuffer.prices
           : historyPrices;
         if (prices && !shouldStop()) {
-          if (!excludedCandidates.has(getScanCandidateKey(symbol.underlying_symbol, contractMode))) {
-            const candidate = scoreMarket(symbol, prices, contractMode);
-            if (candidate) candidates.push(candidate);
-          }
+          const candidate = scoreMarket(symbol, prices, contractMode);
+          if (candidate) candidates.push(candidate);
         }
       } catch (error) {
         failures.push(
@@ -223,10 +217,7 @@ async function scanMarkets(
   };
 
   await Promise.all(
-    Array.from(
-      { length: Math.min(MARKET_SCAN_CONCURRENCY, openSymbols.length) },
-      () => scanWorker()
-    )
+    Array.from({ length: openSymbols.length }, () => scanWorker())
   );
 
   if (shouldStop()) return null;
@@ -700,13 +691,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
         )) {
           rejectedCandidates.clear();
         }
-        const totalMarkets = eligibleMarkets.filter(
-          (symbol) => hasAvailableScanMode(
-            symbol.underlying_symbol,
-            selectedContractMode,
-            rejectedCandidates
-          )
-        ).length;
+        const totalMarkets = eligibleMarkets.length;
         setAutoTradingScanProgress({
           phase: 'scanning',
           countdownSeconds: MARKET_SCAN_DURATION_SECONDS,
@@ -739,7 +724,6 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
             symbols,
             selectedContractMode,
             () => session.stopRequested,
-            rejectedCandidates,
             () => liveTickBufferRef.current,
             (scannedMarkets, marketCount) => {
               setAutoTradingScanProgress((progress) =>
@@ -757,11 +741,16 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
         const countdownComplete = await countdown;
         if (!countdownComplete || session.stopRequested) return null;
         if (candidates?.length) {
-          const leadingCandidate = candidates.find(
+          const availableCandidates = candidates.filter(
+            (candidate) => !rejectedCandidates.has(
+              getScanCandidateKey(candidate.symbol.underlying_symbol, candidate.contractMode)
+            )
+          );
+          const leadingCandidate = availableCandidates.find(
             (candidate) =>
               candidate.eligibleForTrading &&
               candidate.activeSignalCount >= activeStateRequirement
-          ) ?? candidates[0];
+          ) ?? availableCandidates[0];
           if (!leadingCandidate) continue;
           const prediction = getCandidatePrediction(
             leadingCandidate,
