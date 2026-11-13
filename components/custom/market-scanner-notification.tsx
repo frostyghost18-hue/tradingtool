@@ -37,10 +37,10 @@ export function MarketScannerNotification({
           : localize('Checking recent tick history across open markets.');
 
   return (
-    <div className="pointer-events-none fixed bottom-24 right-3 z-[80] w-[min(24rem,calc(100vw-1.5rem))] sm:bottom-6 sm:right-6">
+    <div className="pointer-events-none fixed inset-0 z-[80] flex items-center justify-center p-4">
       <section
         aria-label={localize('Market scanner progress')}
-        className="market-scanner-card pointer-events-auto overflow-hidden rounded-2xl border border-primary/45 bg-card p-4 text-foreground sm:p-5"
+        className="market-scanner-card pointer-events-auto max-h-[calc(100dvh-2rem)] w-full max-w-sm overflow-y-auto rounded-2xl border border-primary/45 bg-card/95 p-4 text-foreground shadow-2xl backdrop-blur-xl sm:p-5"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
