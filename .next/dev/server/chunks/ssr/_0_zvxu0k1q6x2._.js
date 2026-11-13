@@ -8926,7 +8926,7 @@ async function scanMarkets(ws, symbols, contractMode, shouldStop, excludedCandid
     if (candidates.length === 0 && failures.length === openSymbols.length) {
         throw new Error('The market scanner could not retrieve tick history for any available market.');
     }
-    candidates.sort((a, b)=>Number(b.eligibleForTrading) - Number(a.eligibleForTrading) || b.probabilityEdge - a.probabilityEdge || b.sampleCount - a.sampleCount || b.estimatedWinRate - a.estimatedWinRate || a.contractMode.localeCompare(b.contractMode) || a.symbol.underlying_symbol.localeCompare(b.symbol.underlying_symbol));
+    candidates.sort((a, b)=>Number(b.eligibleForTrading) - Number(a.eligibleForTrading) || b.probabilityEdge - a.probabilityEdge || b.activeSignalCount - a.activeSignalCount || b.sampleCount - a.sampleCount || b.estimatedWinRate - a.estimatedWinRate || a.contractMode.localeCompare(b.contractMode) || a.symbol.underlying_symbol.localeCompare(b.symbol.underlying_symbol));
     return candidates;
 }
 async function runMarketScanCountdown(onCountdown, shouldStop) {
@@ -10704,6 +10704,7 @@ const WILSON_Z_95 = 1.6448536269514722;
 const SEQUENCE_LENGTH = 2;
 const ANALOG_PATTERN_LENGTH = 5;
 const CLUSTER_WINDOW_SIZE = 12;
+const PREDICTION_PRIOR_MATCHES = 2;
 function getWilsonLowerBound(wins, sampleCount) {
     const observedRate = wins / sampleCount;
     const zSquared = WILSON_Z_95 ** 2;
@@ -10728,7 +10729,7 @@ function isWinningDigit(digit, contractMode, barrier) {
 }
 function createSignal(wins, matches, priorRate) {
     if (matches === 0) return null;
-    const winRate = (wins + priorRate * 2) / (matches + 2);
+    const winRate = (wins + priorRate * PREDICTION_PRIOR_MATCHES) / (matches + PREDICTION_PRIOR_MATCHES);
     return {
         winRate,
         matches,
@@ -10769,7 +10770,7 @@ function getAnalogySignal(digits, contractMode, barrier, priorRate) {
     if (nearestAnalogs.length < 2) return null;
     const totalWeight = nearestAnalogs.reduce((sum, analog)=>sum + analog.similarity, 0);
     const weightedWins = nearestAnalogs.reduce((sum, analog)=>sum + (analog.win ? analog.similarity : 0), 0);
-    const rate = (weightedWins + priorRate * 2) / (totalWeight + 2);
+    const rate = (weightedWins + priorRate * PREDICTION_PRIOR_MATCHES) / (totalWeight + PREDICTION_PRIOR_MATCHES);
     return {
         winRate: rate,
         matches: nearestAnalogs.length,
@@ -10810,7 +10811,7 @@ function getClusterSignal(digits, contractMode, barrier, priorRate) {
         }));
     const totalWeight = weightedNeighbors.reduce((sum, neighbor)=>sum + neighbor.weight, 0);
     const weightedWins = weightedNeighbors.reduce((sum, neighbor)=>sum + (neighbor.win ? neighbor.weight : 0), 0);
-    const winRate = (weightedWins + priorRate * 2) / (totalWeight + 2);
+    const winRate = (weightedWins + priorRate * PREDICTION_PRIOR_MATCHES) / (totalWeight + PREDICTION_PRIOR_MATCHES);
     return {
         winRate,
         matches: nearestNeighbors.length,
@@ -10872,7 +10873,7 @@ function scoreMarket(symbol, prices, contractMode) {
             wins = digits.filter((digit)=>digit % 2 !== 0).length;
             break;
     }
-    const observedWinRate = (wins + baselineWinRate * 2) / (digits.length + 2);
+    const observedWinRate = (wins + baselineWinRate * PREDICTION_PRIOR_MATCHES) / (digits.length + PREDICTION_PRIOR_MATCHES);
     const estimatedWinRate = getWilsonLowerBound(wins, digits.length);
     const predictionModels = {
         sequence: getSequenceSignal(digits, contractMode, barrier, baselineWinRate),
@@ -10881,49 +10882,31 @@ function scoreMarket(symbol, prices, contractMode) {
         dominance: createSignal(wins, digits.length, baselineWinRate)
     };
     const activeSignalCount = Object.values(predictionModels).filter((signal)=>signal?.active).length;
-    const activeSignalRates = Object.values(predictionModels).flatMap((signal)=>signal?.active ? [
-            signal.winRate
-        ] : []);
+    const signalModels = Object.values(predictionModels).filter((signal)=>signal !== null);
     const weightedModels = [
         {
             rate: observedWinRate,
-            weight: 0.5
+            weight: 0.4
         },
-        ...predictionModels.sequence ? [
-            {
-                rate: predictionModels.sequence.winRate,
-                weight: 0.2
-            }
-        ] : [],
-        ...predictionModels.analogy ? [
-            {
-                rate: predictionModels.analogy.winRate,
-                weight: 0.15
-            }
-        ] : [],
-        ...predictionModels.cluster ? [
-            {
-                rate: predictionModels.cluster.winRate,
-                weight: 0.15
-            }
-        ] : []
+        ...signalModels.map((signal)=>({
+                rate: signal.winRate,
+                weight: 0.15 * signal.matches / (signal.matches + PREDICTION_PRIOR_MATCHES)
+            }))
     ];
     const totalWeight = weightedModels.reduce((sum, model)=>sum + model.weight, 0);
     const predictedWinRate = weightedModels.reduce((sum, model)=>sum + model.rate * model.weight, 0) / totalWeight;
     const eligibleForTrading = digits.length >= MINIMUM_MARKET_SCAN_TICKS && activeSignalCount >= 2;
-    const highestActiveSignalRate = activeSignalRates.length > 0 ? Math.max(...activeSignalRates) : predictedWinRate;
-    const signalWinRate = activeSignalCount >= 2 ? highestActiveSignalRate : predictedWinRate;
     return {
         symbol,
         contractMode,
         barrier,
         predictionPrices: predictionPrices.slice(-MARKET_SCAN_TICK_COUNT),
         estimatedWinRate,
-        predictedWinRate: signalWinRate,
+        predictedWinRate,
         predictionModels,
         activeSignalCount,
         eligibleForTrading,
-        probabilityEdge: signalWinRate - baselineWinRate,
+        probabilityEdge: predictedWinRate - baselineWinRate,
         sampleCount: digits.length
     };
 }

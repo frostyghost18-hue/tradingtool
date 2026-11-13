@@ -10,6 +10,7 @@ const WILSON_Z_95 = 1.6448536269514722;
 const SEQUENCE_LENGTH = 2;
 const ANALOG_PATTERN_LENGTH = 5;
 const CLUSTER_WINDOW_SIZE = 12;
+const PREDICTION_PRIOR_MATCHES = 2;
 
 export interface MarketScanSignal {
   winRate: number;
@@ -68,7 +69,9 @@ function isWinningDigit(
 
 function createSignal(wins: number, matches: number, priorRate: number): MarketScanSignal | null {
   if (matches === 0) return null;
-  const winRate = (wins + priorRate * 2) / (matches + 2);
+  const winRate =
+    (wins + priorRate * PREDICTION_PRIOR_MATCHES) /
+    (matches + PREDICTION_PRIOR_MATCHES);
   return {
     winRate,
     matches,
@@ -137,7 +140,9 @@ function getAnalogySignal(
     (sum, analog) => sum + (analog.win ? analog.similarity : 0),
     0
   );
-  const rate = (weightedWins + priorRate * 2) / (totalWeight + 2);
+  const rate =
+    (weightedWins + priorRate * PREDICTION_PRIOR_MATCHES) /
+    (totalWeight + PREDICTION_PRIOR_MATCHES);
   return { winRate: rate, matches: nearestAnalogs.length, active: rate > priorRate };
 }
 
@@ -198,7 +203,9 @@ function getClusterSignal(
     (sum, neighbor) => sum + (neighbor.win ? neighbor.weight : 0),
     0
   );
-  const winRate = (weightedWins + priorRate * 2) / (totalWeight + 2);
+  const winRate =
+    (weightedWins + priorRate * PREDICTION_PRIOR_MATCHES) /
+    (totalWeight + PREDICTION_PRIOR_MATCHES);
   return { winRate, matches: nearestNeighbors.length, active: winRate > priorRate };
 }
 
@@ -271,7 +278,9 @@ export function scoreMarket(
       break;
   }
 
-  const observedWinRate = (wins + baselineWinRate * 2) / (digits.length + 2);
+  const observedWinRate =
+    (wins + baselineWinRate * PREDICTION_PRIOR_MATCHES) /
+    (digits.length + PREDICTION_PRIOR_MATCHES);
   const estimatedWinRate = getWilsonLowerBound(wins, digits.length);
   const predictionModels = {
     sequence: getSequenceSignal(digits, contractMode, barrier, baselineWinRate),
@@ -282,19 +291,15 @@ export function scoreMarket(
   const activeSignalCount = Object.values(predictionModels)
     .filter((signal) => signal?.active)
     .length;
-  const activeSignalRates = Object.values(predictionModels)
-    .flatMap((signal) => signal?.active ? [signal.winRate] : []);
+  const signalModels = Object.values(predictionModels).filter(
+    (signal): signal is MarketScanSignal => signal !== null
+  );
   const weightedModels = [
-    { rate: observedWinRate, weight: 0.5 },
-    ...(predictionModels.sequence
-      ? [{ rate: predictionModels.sequence.winRate, weight: 0.2 }]
-      : []),
-    ...(predictionModels.analogy
-      ? [{ rate: predictionModels.analogy.winRate, weight: 0.15 }]
-      : []),
-    ...(predictionModels.cluster
-      ? [{ rate: predictionModels.cluster.winRate, weight: 0.15 }]
-      : []),
+    { rate: observedWinRate, weight: 0.4 },
+    ...signalModels.map((signal) => ({
+      rate: signal.winRate,
+      weight: 0.15 * signal.matches / (signal.matches + PREDICTION_PRIOR_MATCHES),
+    })),
   ];
   const totalWeight = weightedModels.reduce((sum, model) => sum + model.weight, 0);
   const predictedWinRate = weightedModels.reduce(
@@ -304,12 +309,6 @@ export function scoreMarket(
   const eligibleForTrading =
     digits.length >= MINIMUM_MARKET_SCAN_TICKS &&
     activeSignalCount >= 2;
-  const highestActiveSignalRate = activeSignalRates.length > 0
-    ? Math.max(...activeSignalRates)
-    : predictedWinRate;
-  const signalWinRate = activeSignalCount >= 2
-    ? highestActiveSignalRate
-    : predictedWinRate;
 
   return {
     symbol,
@@ -317,11 +316,11 @@ export function scoreMarket(
     barrier,
     predictionPrices: predictionPrices.slice(-MARKET_SCAN_TICK_COUNT),
     estimatedWinRate,
-    predictedWinRate: signalWinRate,
+    predictedWinRate,
     predictionModels,
     activeSignalCount,
     eligibleForTrading,
-    probabilityEdge: signalWinRate - baselineWinRate,
+    probabilityEdge: predictedWinRate - baselineWinRate,
     sampleCount: digits.length,
   };
 }

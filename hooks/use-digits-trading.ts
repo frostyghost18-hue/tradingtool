@@ -240,6 +240,7 @@ async function scanMarkets(
   candidates.sort((a, b) =>
     Number(b.eligibleForTrading) - Number(a.eligibleForTrading) ||
     b.probabilityEdge - a.probabilityEdge ||
+    b.activeSignalCount - a.activeSignalCount ||
     b.sampleCount - a.sampleCount ||
     b.estimatedWinRate - a.estimatedWinRate ||
     a.contractMode.localeCompare(b.contractMode) ||
