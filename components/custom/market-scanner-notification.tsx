@@ -47,16 +47,12 @@ export function MarketScannerNotification({
     }
   })();
   const description = isSelected
-    ? localize('Starting the first trade now.')
-    : hasSignal
-      ? localize('Showing the latest market signal while scanning continues.')
+    ? localize('Starting trade')
     : progress.countdownSeconds === 0 && progress.scannedMarkets < progress.totalMarkets
-      ? localize('Finishing market checks before selecting.')
+      ? localize('Finalizing scan')
       : progress.countdownSeconds === 0
-        ? localize('Selecting the highest-qualified market.')
-        : progress.scannedMarkets === progress.totalMarkets
-          ? localize('Markets checked. Waiting for the scan timer.')
-          : localize('Checking recent tick history across open markets.');
+        ? localize('Selecting market')
+        : localize('Scanning markets');
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[80] flex items-center justify-center p-4">
@@ -168,7 +164,7 @@ export function MarketScannerNotification({
                   {(prediction.predictedWinRate * 100).toFixed(1)}%
                 </p>
                 <p className="text-[9px] font-medium text-muted-foreground">
-                  {localize('Blended estimate')}
+                  {localize('Consensus')}
                 </p>
               </div>
             </div>
@@ -188,22 +184,11 @@ export function MarketScannerNotification({
                     <p className={`font-mono text-[11px] font-semibold ${signal?.active ? 'text-emerald-500' : 'text-foreground'}`}>
                       {signal ? `${(signal.winRate * 100).toFixed(1)}%` : '—'}
                     </p>
-                    <p className="text-[8px] text-muted-foreground">
-                      {signal
-                        ? localize('{{count}} matches', { count: signal.matches })
-                        : localize('insufficient matches')}
-                    </p>
                   </div>
                 );
               })}
             </div>
             <div className="mt-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-[9px] text-muted-foreground">
-              <span>
-                {localize('{{ticks}} / 30 recent ticks · Wilson {{rate}}%', {
-                  ticks: prediction.sampleCount,
-                  rate: (prediction.estimatedWinRate * 100).toFixed(1),
-                })}
-              </span>
               <span>
                 {localize('{{count}} / 4 active · {{required}} required', {
                   count: prediction.activeSignalCount,
@@ -216,9 +201,6 @@ export function MarketScannerNotification({
                   : localize('Forecast only')}
               </span>
             </div>
-            <p className="text-[9px] leading-relaxed text-muted-foreground">
-              {localize('These experimental estimates use past ticks and do not guarantee future results. Quotes are checked before any trade.')}
-            </p>
           </div>
         ) : (
           <div className="mt-3 rounded-xl border border-border bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground">
