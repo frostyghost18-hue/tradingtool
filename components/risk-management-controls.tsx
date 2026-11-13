@@ -211,7 +211,7 @@ export function RiskManagementControls({
       )}
 
       <p className="text-[11px] leading-relaxed text-muted-foreground">
-        <Localize i18n_default_text="Set at least one profit or loss target. Scan & trade compares digit strategies using a conservative recent-tick estimate and skips quotes with non-positive estimated value. Short-term tick patterns are noisy and this cannot guarantee profits; martingale can increase losses." />
+        <Localize i18n_default_text="Set at least one profit or loss target. Scan & trade checks open markets using only the selected contract type, then skips quotes with non-positive estimated value. Short-term tick patterns are noisy and this cannot guarantee profits; martingale can increase losses." />
       </p>
     </div>
   );

@@ -21,7 +21,6 @@ import { useBaseTrading } from '@/hooks/use-base-trading';
 import type { UseBaseTradingParams } from '@/hooks/use-base-trading';
 import { computeDigitStats, getLastDigit } from '../lib/digit-stats';
 import {
-  AUTO_SCAN_CONTRACT_MODES,
   getContractBarrier,
   getScannableMarkets,
   hasPriceReversalRisk,
@@ -62,10 +61,12 @@ function getScanCandidateKey(symbol: string, contractMode: ContractMode): string
   return `${symbol}:${contractMode}`;
 }
 
-function hasAvailableScanMode(symbol: string, excludedCandidates: Set<string>): boolean {
-  return AUTO_SCAN_CONTRACT_MODES.some(
-    (contractMode) => !excludedCandidates.has(getScanCandidateKey(symbol, contractMode))
-  );
+function hasAvailableScanMode(
+  symbol: string,
+  contractMode: Exclude<ContractMode, 'DIGITMATCH'>,
+  excludedCandidates: Set<string>
+): boolean {
+  return !excludedCandidates.has(getScanCandidateKey(symbol, contractMode));
 }
 
 function isNoReturnContractError(error: unknown): boolean {
@@ -121,10 +122,11 @@ async function fetchTickHistory(
 async function scanMarkets(
   ws: NonNullable<UseBaseTradingParams['ws']>,
   symbols: ActiveSymbol[],
+  contractMode: Exclude<ContractMode, 'DIGITMATCH'>,
   shouldStop: () => boolean,
   excludedCandidates: Set<string>,
   onProgress: MarketScanProgressCallback
-): Promise<MarketScanCandidate | null> {
+): Promise<MarketScanCandidate[] | null> {
   const candidates: MarketScanCandidate[] = [];
   const failures: string[] = [];
   const eligibleSymbols = getScannableMarkets(symbols);
@@ -132,9 +134,9 @@ async function scanMarkets(
     throw new Error('No open, unsuspended markets are available to scan.');
   }
   const openSymbols = eligibleSymbols.filter(
-    (symbol) => hasAvailableScanMode(symbol.underlying_symbol, excludedCandidates)
+    (symbol) => hasAvailableScanMode(symbol.underlying_symbol, contractMode, excludedCandidates)
   );
-  if (openSymbols.length === 0) return null;
+  if (openSymbols.length === 0) return [];
 
   let nextIndex = 0;
   let scannedMarkets = 0;
@@ -155,10 +157,7 @@ async function scanMarkets(
           shouldStop
         );
         if (prices && !shouldStop()) {
-          for (const contractMode of AUTO_SCAN_CONTRACT_MODES) {
-            if (excludedCandidates.has(getScanCandidateKey(symbol.underlying_symbol, contractMode))) {
-              continue;
-            }
+          if (!excludedCandidates.has(getScanCandidateKey(symbol.underlying_symbol, contractMode))) {
             const candidate = scoreMarket(symbol, prices, contractMode);
             if (candidate) candidates.push(candidate);
           }
@@ -196,7 +195,7 @@ async function scanMarkets(
     a.contractMode.localeCompare(b.contractMode) ||
     a.symbol.underlying_symbol.localeCompare(b.symbol.underlying_symbol)
   );
-  return candidates[0] ?? null;
+  return candidates;
 }
 
 async function runMarketScanCountdown(
@@ -508,6 +507,14 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
       return;
     }
 
+    const selectedContractMode = contractMode;
+    if (selectedContractMode === 'DIGITMATCH') {
+      toast.error(localize('Unsupported scanner contract'), {
+        description: localize('Select Differs, Over 1, Under 8, Even, or Odd before starting the scanner.'),
+      });
+      return;
+    }
+
     const parseTarget = (value: string, label: string): number | null => {
       if (value.trim() === '') return null;
       const parsed = Number(value);
@@ -566,9 +573,11 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
     const skippedNoReturnCandidates = new Set<string>();
     const skippedNegativeEvCandidates = new Set<string>();
     let currentBarrier = selectedDigit;
-    let scanNumber = 1;
+    let scanNumber = 0;
+    let candidatesFromCurrentScan: MarketScanCandidate[] = [];
+    let nextCandidateIndex = 0;
 
-    const scanForMarket = async (): Promise<MarketScanCandidate | null> => {
+    const scanForMarket = async (): Promise<MarketScanCandidate[] | null> => {
       setAutoTradingStatus('scanning');
       setAutoTradingMarket(null);
       setAutoTradingEstimatedWinRate(null);
@@ -580,18 +589,27 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
           () => session.stopRequested
         );
         if (!connected) return null;
+        scanNumber += 1;
 
         const eligibleMarkets = getScannableMarkets(symbols);
         if (eligibleMarkets.length === 0) {
           throw new Error(localize('No open, unsuspended markets are available to scan.'));
         }
         if (eligibleMarkets.every(
-          (symbol) => !hasAvailableScanMode(symbol.underlying_symbol, rejectedCandidates)
+          (symbol) => !hasAvailableScanMode(
+            symbol.underlying_symbol,
+            selectedContractMode,
+            rejectedCandidates
+          )
         )) {
           rejectedCandidates.clear();
         }
         const totalMarkets = eligibleMarkets.filter(
-          (symbol) => hasAvailableScanMode(symbol.underlying_symbol, rejectedCandidates)
+          (symbol) => hasAvailableScanMode(
+            symbol.underlying_symbol,
+            selectedContractMode,
+            rejectedCandidates
+          )
         ).length;
         setAutoTradingScanProgress({
           phase: 'scanning',
@@ -617,11 +635,12 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
           },
           () => session.stopRequested || scanFailed
         );
-        let candidate: MarketScanCandidate | null;
+        let candidates: MarketScanCandidate[] | null;
         try {
-          candidate = await scanMarkets(
+          candidates = await scanMarkets(
             tradingWs,
             symbols,
+            selectedContractMode,
             () => session.stopRequested,
             rejectedCandidates,
             (scannedMarkets, marketCount) => {
@@ -639,9 +658,29 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
         }
         const countdownComplete = await countdown;
         if (!countdownComplete || session.stopRequested) return null;
-        if (candidate) return candidate;
+        if (candidates?.length) return candidates;
         if (rejectedCandidates.size > 0) rejectedCandidates.clear();
-        scanNumber += 1;
+      }
+      return null;
+    };
+
+    const selectNextCandidate = async (): Promise<MarketScanCandidate | null> => {
+      while (!session.stopRequested) {
+        while (nextCandidateIndex < candidatesFromCurrentScan.length) {
+          const candidate = candidatesFromCurrentScan[nextCandidateIndex];
+          nextCandidateIndex += 1;
+          if (!candidate) continue;
+          const candidateKey = getScanCandidateKey(
+            candidate.symbol.underlying_symbol,
+            candidate.contractMode
+          );
+          if (!rejectedCandidates.has(candidateKey)) return candidate;
+        }
+
+        const nextScanCandidates = await scanForMarket();
+        if (!nextScanCandidates) return null;
+        candidatesFromCurrentScan = nextScanCandidates;
+        nextCandidateIndex = 0;
       }
       return null;
     };
@@ -696,15 +735,23 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
         skippedNegativeEvCandidates.add(candidateKey);
       }
 
-      scanNumber += 1;
-      const nextCandidate = await scanForMarket();
+      setAutoTradingScanProgress((progress) =>
+        progress
+          ? {
+              ...progress,
+              skippedNoReturnMarkets: skippedNoReturnCandidates.size,
+              skippedNegativeEvSetups: skippedNegativeEvCandidates.size,
+            }
+          : progress
+      );
+      const nextCandidate = await selectNextCandidate();
       if (!nextCandidate) return false;
       useScannedMarket(nextCandidate);
       return true;
     };
 
     try {
-      const firstMarket = await scanForMarket();
+      const firstMarket = await selectNextCandidate();
       if (!firstMarket) {
         stopReason = localize('Market scan stopped before a qualifying market was found.');
       } else {
@@ -877,7 +924,9 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
           if (session.stopRequested) break;
 
           if (recentPrices && hasPriceReversalRisk(recentPrices)) {
-            const nextMarket = await scanForMarket();
+            candidatesFromCurrentScan = [];
+            nextCandidateIndex = 0;
+            const nextMarket = await selectNextCandidate();
             if (!nextMarket) break;
             useScannedMarket(nextMarket);
           }

@@ -5,13 +5,6 @@ import type { ContractMode } from '@/lib/types';
 export const MARKET_SCAN_TICK_COUNT = 100;
 export const MARKET_SCAN_DURATION_SECONDS = 15;
 export const MINIMUM_MARKET_SCAN_TICKS = 80;
-export const AUTO_SCAN_CONTRACT_MODES: readonly Exclude<ContractMode, 'DIGITMATCH'>[] = [
-  'DIGITDIFF',
-  'DIGITOVER',
-  'DIGITUNDER',
-  'DIGITEVEN',
-  'DIGITODD',
-];
 
 const WILSON_Z_95 = 1.6448536269514722;
 

@@ -349,7 +349,16 @@ function Providers({ children }) {
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2d$themes$2f$dist$2f$index$2e$module$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["ThemeProvider"], {
         attribute: "class",
         defaultTheme: "dark",
-        enableSystem: true,
+        themes: [
+            'light',
+            'dark',
+            'aurora',
+            'ocean',
+            'sunset',
+            'forest',
+            'amethyst'
+        ],
+        enableSystem: false,
         disableTransitionOnChange: true,
         children: children
     }, void 0, false, {
@@ -374,9 +383,10 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$di
 ;
 ;
 const Toaster = ({ ...props })=>{
-    const { theme = "system" } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2d$themes$2f$dist$2f$index$2e$module$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useTheme"])();
+    const { theme = "dark" } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2d$themes$2f$dist$2f$index$2e$module$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useTheme"])();
+    const toasterTheme = theme === "light" ? "light" : "dark";
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Toaster"], {
-        theme: theme,
+        theme: toasterTheme,
         className: "toaster group",
         toastOptions: {
             classNames: {
@@ -389,7 +399,7 @@ const Toaster = ({ ...props })=>{
         ...props
     }, void 0, false, {
         fileName: "[project]/components/ui/sonner.tsx",
-        lineNumber: 12,
+        lineNumber: 13,
         columnNumber: 5
     }, ("TURBOPACK compile-time value", void 0));
 };
@@ -1834,8 +1844,8 @@ function useBuy(ws, isConnected) {
         setBuyResult(null);
         setBuyError(null);
     }, []);
-    const buyContract = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])(async (proposal)=>{
-        if (!ws || !isConnected) return;
+    const buyContract = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])(async (proposal, suppressError)=>{
+        if (!ws || !isConnected) return null;
         setIsBuying(true);
         setBuyError(null);
         setBuyResult(null);
@@ -1845,16 +1855,22 @@ function useBuy(ws, isConnected) {
                 price: String(proposal.askPrice)
             });
             if (response.buy) {
-                setBuyResult({
+                const result = {
                     contractId: response.buy.contract_id,
                     buyPrice: response.buy.buy_price,
                     payout: response.buy.payout,
                     longcode: response.buy.longcode,
                     balanceAfter: response.buy.balance_after
-                });
+                };
+                setBuyResult(result);
+                return result;
             }
+            return null;
         } catch (err) {
-            setBuyError(err instanceof Error ? err.message : 'Purchase failed');
+            if (!suppressError?.(err)) {
+                setBuyError(err instanceof Error ? err.message : 'Purchase failed');
+            }
+            return null;
         } finally{
             setIsBuying(false);
         }
@@ -2448,6 +2464,7 @@ class DerivWS {
                 this.isConnecting = false;
                 this.stopPing();
                 this.subscriptionHandlers.clear();
+                this.rejectPendingRequests(new Error('WebSocket connection closed before the request completed.'));
                 this.notifyConnectionState(false);
                 this.attemptReconnect();
             };
@@ -2534,7 +2551,7 @@ class DerivWS {
             this.ws.close();
             this.ws = null;
         }
-        this.pendingRequests.clear();
+        this.rejectPendingRequests(new Error('WebSocket disconnected before the request completed.'));
         this.subscriptionHandlers.clear();
     }
     get isConnected() {
@@ -2566,6 +2583,11 @@ class DerivWS {
             this.pendingRequests.delete(reqId);
             pending.resolve(data);
         }
+    }
+    rejectPendingRequests(error) {
+        const pending = Array.from(this.pendingRequests.values());
+        this.pendingRequests.clear();
+        for (const request of pending)request.reject(error);
     }
     extractSubscriptionId(data) {
         // Subscription ID can be in tick.id, subscription.id, or proposal.id
