@@ -102,7 +102,7 @@ export interface DigitsViewProps {
   setTradeType: (type: TradeType) => void;
   contractMode: ContractMode;
   setContractMode: (mode: ContractMode) => void;
-  selectedDigit: number;
+  selectedDigit: number | null;
   stake: string;
   setStake: (value: string) => void;
   duration: number;

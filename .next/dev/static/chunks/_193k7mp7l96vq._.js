@@ -1288,12 +1288,14 @@ function ConfigurableDigitsControls(props) {
     // Real control = the bordered prediction box. Same data in every variant.
     const renderPrediction = ()=>{
         const predictionText = getPredictionText(contractMode, localize);
-        const showDigit = showDigitInPrediction(contractMode);
+        const predictionBarrier = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$market$2d$scanner$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getContractBarrier"])(contractMode, selectedDigit);
+        const showDigit = showDigitInPrediction(contractMode) && predictionBarrier !== undefined;
+        const awaitingDiffersScan = contractMode === 'DIGITDIFF' && predictionBarrier === undefined;
         const payoutEl = proposal || isProposalLoading ? isProposalLoading ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$skeleton$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Skeleton"], {
             className: "h-4 w-24"
         }, void 0, false, {
             fileName: "[project]/components/configurable-digits-controls.tsx",
-            lineNumber: 865,
+            lineNumber: 867,
             columnNumber: 11
         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
             className: "text-sm font-bold text-foreground",
@@ -1303,7 +1305,7 @@ function ConfigurableDigitsControls(props) {
             ]
         }, void 0, true, {
             fileName: "[project]/components/configurable-digits-controls.tsx",
-            lineNumber: 867,
+            lineNumber: 869,
             columnNumber: 11
         }, this) : null;
         const variants = {
@@ -1317,12 +1319,12 @@ function ConfigurableDigitsControls(props) {
                                 i18n_default_text: "Prediction"
                             }, void 0, false, {
                                 fileName: "[project]/components/configurable-digits-controls.tsx",
-                                lineNumber: 876,
+                                lineNumber: 878,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/components/configurable-digits-controls.tsx",
-                            lineNumber: 875,
+                            lineNumber: 877,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1332,7 +1334,7 @@ function ConfigurableDigitsControls(props) {
                                     i18n_default_text: "Last digit of the price will"
                                 }, void 0, false, {
                                     fileName: "[project]/components/configurable-digits-controls.tsx",
-                                    lineNumber: 879,
+                                    lineNumber: 881,
                                     columnNumber: 13
                                 }, this),
                                 ' ',
@@ -1341,7 +1343,7 @@ function ConfigurableDigitsControls(props) {
                                     children: predictionText
                                 }, void 0, false, {
                                     fileName: "[project]/components/configurable-digits-controls.tsx",
-                                    lineNumber: 880,
+                                    lineNumber: 882,
                                     columnNumber: 13
                                 }, this),
                                 showDigit && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
@@ -1349,22 +1351,45 @@ function ConfigurableDigitsControls(props) {
                                         ' ',
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                             className: "inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground",
-                                            children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$market$2d$scanner$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getContractBarrier"])(contractMode, selectedDigit)
+                                            children: predictionBarrier
                                         }, void 0, false, {
                                             fileName: "[project]/components/configurable-digits-controls.tsx",
-                                            lineNumber: 884,
+                                            lineNumber: 886,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/configurable-digits-controls.tsx",
-                                    lineNumber: 882,
+                                    lineNumber: 884,
+                                    columnNumber: 15
+                                }, this),
+                                awaitingDiffersScan && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                                    children: [
+                                        ' ',
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                            className: "text-muted-foreground",
+                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$deriv$2d$com$2f$translations$2f$dist$2f$components$2f$localize$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Localize$3e$__["Localize"], {
+                                                i18n_default_text: "Awaiting scan"
+                                            }, void 0, false, {
+                                                fileName: "[project]/components/configurable-digits-controls.tsx",
+                                                lineNumber: 895,
+                                                columnNumber: 19
+                                            }, this)
+                                        }, void 0, false, {
+                                            fileName: "[project]/components/configurable-digits-controls.tsx",
+                                            lineNumber: 894,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "[project]/components/configurable-digits-controls.tsx",
+                                    lineNumber: 892,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/configurable-digits-controls.tsx",
-                            lineNumber: 878,
+                            lineNumber: 880,
                             columnNumber: 11
                         }, this),
                         (proposal || isProposalLoading) && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1376,25 +1401,25 @@ function ConfigurableDigitsControls(props) {
                                         i18n_default_text: "Payout"
                                     }, void 0, false, {
                                         fileName: "[project]/components/configurable-digits-controls.tsx",
-                                        lineNumber: 893,
+                                        lineNumber: 903,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/components/configurable-digits-controls.tsx",
-                                    lineNumber: 892,
+                                    lineNumber: 902,
                                     columnNumber: 15
                                 }, this),
                                 payoutEl
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/configurable-digits-controls.tsx",
-                            lineNumber: 891,
+                            lineNumber: 901,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/components/configurable-digits-controls.tsx",
-                    lineNumber: 874,
+                    lineNumber: 876,
                     columnNumber: 9
                 }, this),
             // Inline one-line — prediction on the left, payout on the right.
@@ -1408,7 +1433,7 @@ function ConfigurableDigitsControls(props) {
                                     i18n_default_text: "Last digit will"
                                 }, void 0, false, {
                                     fileName: "[project]/components/configurable-digits-controls.tsx",
-                                    lineNumber: 904,
+                                    lineNumber: 914,
                                     columnNumber: 13
                                 }, this),
                                 ' ',
@@ -1417,7 +1442,7 @@ function ConfigurableDigitsControls(props) {
                                     children: predictionText
                                 }, void 0, false, {
                                     fileName: "[project]/components/configurable-digits-controls.tsx",
-                                    lineNumber: 905,
+                                    lineNumber: 915,
                                     columnNumber: 13
                                 }, this),
                                 showDigit && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
@@ -1425,60 +1450,30 @@ function ConfigurableDigitsControls(props) {
                                         ' ',
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                             className: "inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground",
-                                            children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$market$2d$scanner$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getContractBarrier"])(contractMode, selectedDigit)
+                                            children: predictionBarrier
                                         }, void 0, false, {
                                             fileName: "[project]/components/configurable-digits-controls.tsx",
-                                            lineNumber: 909,
+                                            lineNumber: 919,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/configurable-digits-controls.tsx",
-                                    lineNumber: 907,
+                                    lineNumber: 917,
                                     columnNumber: 15
-                                }, this)
-                            ]
-                        }, void 0, true, {
-                            fileName: "[project]/components/configurable-digits-controls.tsx",
-                            lineNumber: 903,
-                            columnNumber: 11
-                        }, this),
-                        payoutEl
-                    ]
-                }, void 0, true, {
-                    fileName: "[project]/components/configurable-digits-controls.tsx",
-                    lineNumber: 902,
-                    columnNumber: 9
-                }, this),
-            // Minimal — a full-width compact bar: prediction (digit) left, payout right.
-            c: ()=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                    className: "flex w-full items-center justify-between gap-2 rounded-md bg-muted/40 px-3 py-2 text-xs",
-                    children: [
-                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                            className: "font-medium",
-                            children: [
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$deriv$2d$com$2f$translations$2f$dist$2f$components$2f$localize$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Localize$3e$__["Localize"], {
-                                    i18n_default_text: "Will"
-                                }, void 0, false, {
-                                    fileName: "[project]/components/configurable-digits-controls.tsx",
-                                    lineNumber: 922,
-                                    columnNumber: 13
                                 }, this),
-                                ' ',
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                    className: "text-primary font-bold",
-                                    children: predictionText
-                                }, void 0, false, {
-                                    fileName: "[project]/components/configurable-digits-controls.tsx",
-                                    lineNumber: 923,
-                                    columnNumber: 13
-                                }, this),
-                                showDigit && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                                awaitingDiffersScan && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
                                     children: [
                                         ' ',
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                            className: "inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground",
-                                            children: selectedDigit
+                                            className: "text-muted-foreground",
+                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$deriv$2d$com$2f$translations$2f$dist$2f$components$2f$localize$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Localize$3e$__["Localize"], {
+                                                i18n_default_text: "Awaiting scan"
+                                            }, void 0, false, {
+                                                fileName: "[project]/components/configurable-digits-controls.tsx",
+                                                lineNumber: 928,
+                                                columnNumber: 19
+                                            }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/components/configurable-digits-controls.tsx",
                                             lineNumber: 927,
@@ -1493,7 +1488,83 @@ function ConfigurableDigitsControls(props) {
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/configurable-digits-controls.tsx",
-                            lineNumber: 921,
+                            lineNumber: 913,
+                            columnNumber: 11
+                        }, this),
+                        payoutEl
+                    ]
+                }, void 0, true, {
+                    fileName: "[project]/components/configurable-digits-controls.tsx",
+                    lineNumber: 912,
+                    columnNumber: 9
+                }, this),
+            // Minimal — a full-width compact bar: prediction (digit) left, payout right.
+            c: ()=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "flex w-full items-center justify-between gap-2 rounded-md bg-muted/40 px-3 py-2 text-xs",
+                    children: [
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                            className: "font-medium",
+                            children: [
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$deriv$2d$com$2f$translations$2f$dist$2f$components$2f$localize$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Localize$3e$__["Localize"], {
+                                    i18n_default_text: "Will"
+                                }, void 0, false, {
+                                    fileName: "[project]/components/configurable-digits-controls.tsx",
+                                    lineNumber: 940,
+                                    columnNumber: 13
+                                }, this),
+                                ' ',
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                    className: "text-primary font-bold",
+                                    children: predictionText
+                                }, void 0, false, {
+                                    fileName: "[project]/components/configurable-digits-controls.tsx",
+                                    lineNumber: 941,
+                                    columnNumber: 13
+                                }, this),
+                                showDigit && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                                    children: [
+                                        ' ',
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                            className: "inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground",
+                                            children: predictionBarrier
+                                        }, void 0, false, {
+                                            fileName: "[project]/components/configurable-digits-controls.tsx",
+                                            lineNumber: 945,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "[project]/components/configurable-digits-controls.tsx",
+                                    lineNumber: 943,
+                                    columnNumber: 15
+                                }, this),
+                                awaitingDiffersScan && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                                    children: [
+                                        ' ',
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                            className: "text-muted-foreground",
+                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$deriv$2d$com$2f$translations$2f$dist$2f$components$2f$localize$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Localize$3e$__["Localize"], {
+                                                i18n_default_text: "Awaiting scan"
+                                            }, void 0, false, {
+                                                fileName: "[project]/components/configurable-digits-controls.tsx",
+                                                lineNumber: 954,
+                                                columnNumber: 19
+                                            }, this)
+                                        }, void 0, false, {
+                                            fileName: "[project]/components/configurable-digits-controls.tsx",
+                                            lineNumber: 953,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "[project]/components/configurable-digits-controls.tsx",
+                                    lineNumber: 951,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/components/configurable-digits-controls.tsx",
+                            lineNumber: 939,
                             columnNumber: 11
                         }, this),
                         payoutEl ?? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1502,18 +1573,18 @@ function ConfigurableDigitsControls(props) {
                                 i18n_default_text: "Payout"
                             }, void 0, false, {
                                 fileName: "[project]/components/configurable-digits-controls.tsx",
-                                lineNumber: 935,
+                                lineNumber: 961,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/components/configurable-digits-controls.tsx",
-                            lineNumber: 934,
+                            lineNumber: 960,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/components/configurable-digits-controls.tsx",
-                    lineNumber: 920,
+                    lineNumber: 938,
                     columnNumber: 9
                 }, this)
         };
@@ -1531,7 +1602,7 @@ function ConfigurableDigitsControls(props) {
             autoTradingStatus: props.autoTradingStatus
         }, void 0, false, {
             fileName: "[project]/components/configurable-digits-controls.tsx",
-            lineNumber: 950,
+            lineNumber: 976,
             columnNumber: 7
         }, this);
     const renderers = {
@@ -1553,7 +1624,7 @@ function ConfigurableDigitsControls(props) {
                 children: renderers[key]()
             }, key, false, {
                 fileName: "[project]/components/configurable-digits-controls.tsx",
-                lineNumber: 978,
+                lineNumber: 1004,
                 columnNumber: 38
             }, this));
     if (compactMarketLayout && !editMode && keys) {
@@ -1566,7 +1637,7 @@ function ConfigurableDigitsControls(props) {
                             children: renderers[key]()
                         }, key, false, {
                             fileName: "[project]/components/configurable-digits-controls.tsx",
-                            lineNumber: 988,
+                            lineNumber: 1014,
                             columnNumber: 15
                         }, this)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1575,18 +1646,18 @@ function ConfigurableDigitsControls(props) {
                                 children: renderers[key]()
                             }, key, false, {
                                 fileName: "[project]/components/configurable-digits-controls.tsx",
-                                lineNumber: 994,
+                                lineNumber: 1020,
                                 columnNumber: 17
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/components/configurable-digits-controls.tsx",
-                        lineNumber: 990,
+                        lineNumber: 1016,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/configurable-digits-controls.tsx",
-                lineNumber: 983,
+                lineNumber: 1009,
                 columnNumber: 9
             }, this);
         }
@@ -1598,7 +1669,7 @@ function ConfigurableDigitsControls(props) {
                         children: renderers[key]()
                     }, key, false, {
                         fileName: "[project]/components/configurable-digits-controls.tsx",
-                        lineNumber: 1007,
+                        lineNumber: 1033,
                         columnNumber: 13
                     }, this)),
                 orderedKeys.includes('digitStats') && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1606,7 +1677,7 @@ function ConfigurableDigitsControls(props) {
                     children: renderDigitStats(orderedKeys.includes('tick'))
                 }, void 0, false, {
                     fileName: "[project]/components/configurable-digits-controls.tsx",
-                    lineNumber: 1010,
+                    lineNumber: 1036,
                     columnNumber: 11
                 }, this),
                 !orderedKeys.includes('digitStats') && orderedKeys.includes('tick') && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1614,13 +1685,13 @@ function ConfigurableDigitsControls(props) {
                     children: renderTick()
                 }, void 0, false, {
                     fileName: "[project]/components/configurable-digits-controls.tsx",
-                    lineNumber: 1015,
+                    lineNumber: 1041,
                     columnNumber: 11
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/components/configurable-digits-controls.tsx",
-            lineNumber: 1002,
+            lineNumber: 1028,
             columnNumber: 7
         }, this);
     }
@@ -1645,21 +1716,21 @@ function ConfigurableDigitsControls(props) {
                                     className: "h-3.5 w-3.5"
                                 }, void 0, false, {
                                     fileName: "[project]/components/configurable-digits-controls.tsx",
-                                    lineNumber: 1051,
+                                    lineNumber: 1077,
                                     columnNumber: 17
                                 }, this),
                                 blockLabels[key]
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/configurable-digits-controls.tsx",
-                            lineNumber: 1044,
+                            lineNumber: 1070,
                             columnNumber: 15
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                             className: "absolute inset-0 z-[60]"
                         }, void 0, false, {
                             fileName: "[project]/components/configurable-digits-controls.tsx",
-                            lineNumber: 1054,
+                            lineNumber: 1080,
                             columnNumber: 15
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1668,19 +1739,19 @@ function ConfigurableDigitsControls(props) {
                             children: content
                         }, void 0, false, {
                             fileName: "[project]/components/configurable-digits-controls.tsx",
-                            lineNumber: 1055,
+                            lineNumber: 1081,
                             columnNumber: 15
                         }, this)
                     ]
                 }, key, true, {
                     fileName: "[project]/components/configurable-digits-controls.tsx",
-                    lineNumber: 1032,
+                    lineNumber: 1058,
                     columnNumber: 13
                 }, this);
             })
         }, void 0, false, {
             fileName: "[project]/components/configurable-digits-controls.tsx",
-            lineNumber: 1025,
+            lineNumber: 1051,
             columnNumber: 7
         }, this);
     }
@@ -1710,7 +1781,7 @@ function ConfigurableDigitsControls(props) {
                             ].join(' ')
                         }, void 0, false, {
                             fileName: "[project]/components/configurable-digits-controls.tsx",
-                            lineNumber: 1089,
+                            lineNumber: 1115,
                             columnNumber: 15
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1719,19 +1790,19 @@ function ConfigurableDigitsControls(props) {
                             children: content
                         }, void 0, false, {
                             fileName: "[project]/components/configurable-digits-controls.tsx",
-                            lineNumber: 1102,
+                            lineNumber: 1128,
                             columnNumber: 15
                         }, this)
                     ]
                 }, key, true, {
                     fileName: "[project]/components/configurable-digits-controls.tsx",
-                    lineNumber: 1077,
+                    lineNumber: 1103,
                     columnNumber: 13
                 }, this);
             })
         }, void 0, false, {
             fileName: "[project]/components/configurable-digits-controls.tsx",
-            lineNumber: 1071,
+            lineNumber: 1097,
             columnNumber: 7
         }, this);
     }
@@ -1744,13 +1815,13 @@ function ConfigurableDigitsControls(props) {
                 children: content
             }, key, false, {
                 fileName: "[project]/components/configurable-digits-controls.tsx",
-                lineNumber: 1117,
+                lineNumber: 1143,
                 columnNumber: 16
             }, this);
         })
     }, void 0, false, {
         fileName: "[project]/components/configurable-digits-controls.tsx",
-        lineNumber: 1113,
+        lineNumber: 1139,
         columnNumber: 5
     }, this);
 }
@@ -1783,7 +1854,7 @@ _c1 = ConfigurableDigitsControls;
                     children: displayName
                 }, void 0, false, {
                     fileName: "[project]/components/configurable-digits-controls.tsx",
-                    lineNumber: 1140,
+                    lineNumber: 1166,
                     columnNumber: 7
                 }, this),
                 group.map((symbol)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectItem"], {
@@ -1791,13 +1862,13 @@ _c1 = ConfigurableDigitsControls;
                         children: symbol.underlying_symbol_name
                     }, symbol.underlying_symbol, false, {
                         fileName: "[project]/components/configurable-digits-controls.tsx",
-                        lineNumber: 1142,
+                        lineNumber: 1168,
                         columnNumber: 9
                     }, this))
             ]
         }, submarket, true, {
             fileName: "[project]/components/configurable-digits-controls.tsx",
-            lineNumber: 1139,
+            lineNumber: 1165,
             columnNumber: 5
         }, this));
 }
@@ -7510,6 +7581,9 @@ function TradeControls({ contractMode, selectedDigit, isConnected, stake, onStak
         locale
     ]);
     const isAutoTrading = autoTradingStatus !== 'idle';
+    const predictionBarrier = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$market$2d$scanner$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getContractBarrier"])(contractMode, selectedDigit);
+    const showPredictionDigit = showDigitInPrediction(contractMode) && predictionBarrier !== undefined;
+    const awaitingDiffersScan = contractMode === 'DIGITDIFF' && predictionBarrier === undefined;
     const buyButtonLabel = autoTradingStatus === 'stopping' ? localize('Stopping...') : autoTradingStatus === 'scanning' ? localize('Stop scanning') : autoTradingStatus === 'running' ? localize('Stop auto-trading') : isBuying ? localize('Purchasing...') : localize('Scan & trade');
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: "space-y-2 sm:space-y-4",
@@ -7527,12 +7601,12 @@ function TradeControls({ contractMode, selectedDigit, isConnected, stake, onStak
                                     i18n_default_text: "Stake"
                                 }, void 0, false, {
                                     fileName: "[project]/components/trade-controls.tsx",
-                                    lineNumber: 192,
+                                    lineNumber: 195,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/components/trade-controls.tsx",
-                                lineNumber: 191,
+                                lineNumber: 194,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -7554,13 +7628,13 @@ function TradeControls({ contractMode, selectedDigit, isConnected, stake, onStak
                                 disabled: isAutoTrading
                             }, void 0, false, {
                                 fileName: "[project]/components/trade-controls.tsx",
-                                lineNumber: 194,
+                                lineNumber: 197,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/trade-controls.tsx",
-                        lineNumber: 190,
+                        lineNumber: 193,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7573,12 +7647,12 @@ function TradeControls({ contractMode, selectedDigit, isConnected, stake, onStak
                                     i18n_default_text: "Duration"
                                 }, void 0, false, {
                                     fileName: "[project]/components/trade-controls.tsx",
-                                    lineNumber: 210,
+                                    lineNumber: 213,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/components/trade-controls.tsx",
-                                lineNumber: 209,
+                                lineNumber: 212,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -7614,19 +7688,19 @@ function TradeControls({ contractMode, selectedDigit, isConnected, stake, onStak
                                 disabled: isAutoTrading
                             }, void 0, false, {
                                 fileName: "[project]/components/trade-controls.tsx",
-                                lineNumber: 212,
+                                lineNumber: 215,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/trade-controls.tsx",
-                        lineNumber: 208,
+                        lineNumber: 211,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/trade-controls.tsx",
-                lineNumber: 189,
+                lineNumber: 192,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7638,12 +7712,12 @@ function TradeControls({ contractMode, selectedDigit, isConnected, stake, onStak
                             i18n_default_text: "Prediction"
                         }, void 0, false, {
                             fileName: "[project]/components/trade-controls.tsx",
-                            lineNumber: 247,
+                            lineNumber: 250,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/components/trade-controls.tsx",
-                        lineNumber: 246,
+                        lineNumber: 249,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -7653,7 +7727,7 @@ function TradeControls({ contractMode, selectedDigit, isConnected, stake, onStak
                                 i18n_default_text: "Last digit of the price will"
                             }, void 0, false, {
                                 fileName: "[project]/components/trade-controls.tsx",
-                                lineNumber: 250,
+                                lineNumber: 253,
                                 columnNumber: 11
                             }, this),
                             ' ',
@@ -7662,30 +7736,53 @@ function TradeControls({ contractMode, selectedDigit, isConnected, stake, onStak
                                 children: getPredictionText(contractMode, localize)
                             }, void 0, false, {
                                 fileName: "[project]/components/trade-controls.tsx",
-                                lineNumber: 251,
+                                lineNumber: 254,
                                 columnNumber: 11
                             }, this),
-                            showDigitInPrediction(contractMode) && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                            showPredictionDigit && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
                                 children: [
                                     ' ',
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                         className: "inline-flex w-5 h-5 rounded-full bg-primary text-primary-foreground items-center justify-center text-xs font-bold",
-                                        children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$market$2d$scanner$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getContractBarrier"])(contractMode, selectedDigit)
+                                        children: predictionBarrier
                                     }, void 0, false, {
                                         fileName: "[project]/components/trade-controls.tsx",
-                                        lineNumber: 257,
+                                        lineNumber: 260,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/trade-controls.tsx",
-                                lineNumber: 255,
+                                lineNumber: 258,
+                                columnNumber: 13
+                            }, this),
+                            awaitingDiffersScan && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                                children: [
+                                    ' ',
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        className: "text-muted-foreground",
+                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$deriv$2d$com$2f$translations$2f$dist$2f$components$2f$localize$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Localize$3e$__["Localize"], {
+                                            i18n_default_text: "Awaiting scan"
+                                        }, void 0, false, {
+                                            fileName: "[project]/components/trade-controls.tsx",
+                                            lineNumber: 269,
+                                            columnNumber: 17
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "[project]/components/trade-controls.tsx",
+                                        lineNumber: 268,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/components/trade-controls.tsx",
+                                lineNumber: 266,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/trade-controls.tsx",
-                        lineNumber: 249,
+                        lineNumber: 252,
                         columnNumber: 9
                     }, this),
                     (proposal || isProposalLoading) && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7697,19 +7794,19 @@ function TradeControls({ contractMode, selectedDigit, isConnected, stake, onStak
                                     i18n_default_text: "Payout"
                                 }, void 0, false, {
                                     fileName: "[project]/components/trade-controls.tsx",
-                                    lineNumber: 266,
+                                    lineNumber: 277,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/components/trade-controls.tsx",
-                                lineNumber: 265,
+                                lineNumber: 276,
                                 columnNumber: 13
                             }, this),
                             isProposalLoading ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$skeleton$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Skeleton"], {
                                 className: "h-4 w-24"
                             }, void 0, false, {
                                 fileName: "[project]/components/trade-controls.tsx",
-                                lineNumber: 269,
+                                lineNumber: 280,
                                 columnNumber: 15
                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                 className: "text-sm font-bold text-foreground",
@@ -7719,19 +7816,19 @@ function TradeControls({ contractMode, selectedDigit, isConnected, stake, onStak
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/trade-controls.tsx",
-                                lineNumber: 271,
+                                lineNumber: 282,
                                 columnNumber: 15
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/trade-controls.tsx",
-                        lineNumber: 264,
+                        lineNumber: 275,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/trade-controls.tsx",
-                lineNumber: 245,
+                lineNumber: 248,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7743,18 +7840,18 @@ function TradeControls({ contractMode, selectedDigit, isConnected, stake, onStak
                     children: buyButtonLabel
                 }, void 0, false, {
                     fileName: "[project]/components/trade-controls.tsx",
-                    lineNumber: 287,
+                    lineNumber: 298,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/components/trade-controls.tsx",
-                lineNumber: 280,
+                lineNumber: 291,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/components/trade-controls.tsx",
-        lineNumber: 188,
+        lineNumber: 191,
         columnNumber: 5
     }, this);
 }
@@ -9239,8 +9336,8 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
     });
     // Digits-specific trade state
     const [tradeType, setTradeTypeRaw] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])('matches-differs');
-    const [contractMode, setContractMode] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])('DIGITDIFF');
-    const [selectedDigit, setSelectedDigit] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(5);
+    const [contractMode, setContractModeRaw] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])('DIGITDIFF');
+    const [selectedDigit, setSelectedDigit] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     const [stake, setStake] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])('2.5');
     const [duration, setDuration] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(2);
     const [takeProfit, setTakeProfit] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])('5');
@@ -9258,8 +9355,21 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
     const [autoTradingMarket, setAutoTradingMarket] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     const [autoTradingEstimatedWinRate, setAutoTradingEstimatedWinRate] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     const [autoTradingScanProgress, setAutoTradingScanProgress] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
+    const [scannerPredictionSeed, setScannerPredictionSeed] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     const autoSessionRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
     const selectSymbolRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(selectSymbol);
+    const setContractMode = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
+        "useDigitsTrading.useCallback[setContractMode]": (mode)=>{
+            setContractModeRaw(mode);
+            if (mode === 'DIGITOVER') {
+                setSelectedDigit(1);
+            } else if (mode === 'DIGITUNDER') {
+                setSelectedDigit(8);
+            } else {
+                setSelectedDigit(null);
+            }
+        }
+    }["useDigitsTrading.useCallback[setContractMode]"], []);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "useDigitsTrading.useEffect": ()=>{
             selectSymbolRef.current = selectSymbol;
@@ -9306,27 +9416,41 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
                     break;
             }
         }
-    }["useDigitsTrading.useCallback[setTradeType]"], []);
-    const digitStats = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useMemo"])({
-        "useDigitsTrading.useMemo[digitStats]": ()=>(0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$digit$2d$stats$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["computeDigitStats"])(prices, pipSize)
-    }["useDigitsTrading.useMemo[digitStats]"], [
+    }["useDigitsTrading.useCallback[setTradeType]"], [
+        setContractMode
+    ]);
+    const useScannerPredictionSeed = activeSymbol?.underlying_symbol === scannerPredictionSeed?.symbol && prices.length < (scannerPredictionSeed?.prices.length ?? 0);
+    const predictionPrices = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useMemo"])({
+        "useDigitsTrading.useMemo[predictionPrices]": ()=>useScannerPredictionSeed ? [
+                ...scannerPredictionSeed?.prices ?? [],
+                ...prices
+            ].slice(-__TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$market$2d$scanner$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["MARKET_SCAN_TICK_COUNT"]) : prices
+    }["useDigitsTrading.useMemo[predictionPrices]"], [
         prices,
-        pipSize
+        scannerPredictionSeed,
+        useScannerPredictionSeed
+    ]);
+    const predictionPipSize = useScannerPredictionSeed && scannerPredictionSeed ? scannerPredictionSeed.pipSize : pipSize;
+    const digitStats = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useMemo"])({
+        "useDigitsTrading.useMemo[digitStats]": ()=>(0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$digit$2d$stats$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["computeDigitStats"])(predictionPrices, predictionPipSize)
+    }["useDigitsTrading.useMemo[digitStats]"], [
+        predictionPrices,
+        predictionPipSize
     ]);
     const lastDigit = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useMemo"])({
         "useDigitsTrading.useMemo[lastDigit]": ()=>{
             if (currentTick) {
                 return (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$digit$2d$stats$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getLastDigit"])(currentTick.quote, pipSize);
             }
-            if (prices.length > 0) {
-                return (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$digit$2d$stats$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getLastDigit"])(prices[prices.length - 1], pipSize);
+            if (predictionPrices.length > 0) {
+                return (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$digit$2d$stats$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getLastDigit"])(predictionPrices[predictionPrices.length - 1], predictionPipSize);
             }
             return null;
         }
     }["useDigitsTrading.useMemo[lastDigit]"], [
         currentTick,
-        prices,
-        pipSize
+        predictionPrices,
+        predictionPipSize
     ]);
     const { buyContract: buyWithProposal, isBuying, buyResult, buyError, clearBuyResult } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$packages$2f$core$2f$src$2f$react$2f$useBuy$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useBuy"])(tradingWs, tradingIsConnected);
     // Null out params while a buy is in-flight — forces useProposal to unsubscribe
@@ -9335,6 +9459,7 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
     const proposalParams = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useMemo"])({
         "useDigitsTrading.useMemo[proposalParams]": ()=>{
             if (isBuying || !activeSymbol) return null;
+            if (contractMode === 'DIGITDIFF' && selectedDigit === null) return null;
             const stakeNum = parseFloat(stake);
             if (!stakeNum || stakeNum <= 0) return null;
             const barrier = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$market$2d$scanner$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getContractBarrier"])(contractMode, selectedDigit);
@@ -9418,6 +9543,7 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
             autoSessionRef.current = session;
             setThresholdResult(null);
             setAutoTradingStatus('scanning');
+            if (selectedContractMode === 'DIGITDIFF') setSelectedDigit(null);
             setAutoTradingTradeCount(0);
             setAutoTradingProfit(0);
             setAutoTradingMarket(null);
@@ -9440,7 +9566,7 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
             const rejectedCandidates = new Set();
             const skippedNoReturnCandidates = new Set();
             const skippedNegativeEvCandidates = new Set();
-            let currentBarrier = selectedDigit;
+            let currentBarrier = selectedDigit ?? 5;
             let scanNumber = 0;
             let candidatesFromCurrentScan = [];
             let nextCandidateIndex = 0;
@@ -9549,6 +9675,11 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
                         currentBarrier = candidate.barrier;
                         setSelectedDigit(candidate.barrier);
                     }
+                    setScannerPredictionSeed({
+                        symbol: candidate.symbol.underlying_symbol,
+                        pipSize: (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$digit$2d$stats$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["pipSizeFromPip"])(candidate.symbol.pip_size),
+                        prices: candidate.predictionPrices
+                    });
                     selectSymbolRef.current(candidate.symbol.underlying_symbol);
                     setAutoTradingMarket(marketName);
                     setAutoTradingEstimatedWinRate(candidate.estimatedWinRate);
@@ -9793,6 +9924,7 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
         localize,
         martingaleMode,
         martingaleValues,
+        setContractMode,
         selectedDigit,
         symbols,
         stake,
@@ -9857,7 +9989,7 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
         stopAutoTrading
     };
 }
-_s(useDigitsTrading, "9X5DzCKa7OYwDl1GOwC+SLY/+0o=", false, function() {
+_s(useDigitsTrading, "gard2FrR4GhlscgfC5l4vYqYNZc=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$custom$2f$i18n$2d$provider$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAppTranslations"],
         __TURBOPACK__imported__module__$5b$project$5d2f$hooks$2f$use$2d$base$2d$trading$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useBaseTrading"],
@@ -11082,7 +11214,7 @@ function getScannableMarkets(symbols) {
 function getContractBarrier(contractMode, differsDigit) {
     switch(contractMode){
         case 'DIGITDIFF':
-            return differsDigit;
+            return differsDigit ?? undefined;
         case 'DIGITOVER':
             return 1;
         case 'DIGITUNDER':
@@ -11092,8 +11224,9 @@ function getContractBarrier(contractMode, differsDigit) {
     }
 }
 function scoreMarket(symbol, prices, contractMode) {
+    const predictionPrices = prices.filter((price)=>Number.isFinite(price));
     const pipSize = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$digit$2d$stats$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["pipSizeFromPip"])(symbol.pip_size);
-    const digits = prices.filter((price)=>Number.isFinite(price)).map((price)=>(0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$digit$2d$stats$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getLastDigit"])(price, pipSize));
+    const digits = predictionPrices.map((price)=>(0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$digit$2d$stats$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getLastDigit"])(price, pipSize));
     if (digits.length < MINIMUM_MARKET_SCAN_TICKS) return null;
     const counts = Array.from({
         length: 10
@@ -11136,6 +11269,7 @@ function scoreMarket(symbol, prices, contractMode) {
         symbol,
         contractMode,
         barrier,
+        predictionPrices: predictionPrices.slice(-MARKET_SCAN_TICK_COUNT),
         estimatedWinRate,
         probabilityEdge: estimatedWinRate - baselineWinRate,
         sampleCount: digits.length

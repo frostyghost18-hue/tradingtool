@@ -19,7 +19,7 @@ import type {
 import { toast } from 'sonner';
 import { useBaseTrading } from '@/hooks/use-base-trading';
 import type { UseBaseTradingParams } from '@/hooks/use-base-trading';
-import { computeDigitStats, getLastDigit } from '../lib/digit-stats';
+import { computeDigitStats, getLastDigit, pipSizeFromPip } from '../lib/digit-stats';
 import {
   getContractBarrier,
   getScannableMarkets,
@@ -327,7 +327,7 @@ interface UseDigitsTradingReturn {
   setTradeType: (type: TradeType) => void;
   contractMode: ContractMode;
   setContractMode: (mode: ContractMode) => void;
-  selectedDigit: number;
+  selectedDigit: number | null;
   contractsAvailable: boolean;
   pipSize: number;
   stake: string;
@@ -396,8 +396,8 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
 
   // Digits-specific trade state
   const [tradeType, setTradeTypeRaw] = useState<TradeType>('matches-differs');
-  const [contractMode, setContractMode] = useState<ContractMode>('DIGITDIFF');
-  const [selectedDigit, setSelectedDigit] = useState<number>(5);
+  const [contractMode, setContractModeRaw] = useState<ContractMode>('DIGITDIFF');
+  const [selectedDigit, setSelectedDigit] = useState<number | null>(null);
   const [stake, setStake] = useState<string>('2.5');
   const [duration, setDuration] = useState<number>(2);
   const [takeProfit, setTakeProfit] = useState('5');
@@ -416,8 +416,24 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
   const [autoTradingEstimatedWinRate, setAutoTradingEstimatedWinRate] = useState<number | null>(null);
   const [autoTradingScanProgress, setAutoTradingScanProgress] =
     useState<AutoTradingScanProgress | null>(null);
+  const [scannerPredictionSeed, setScannerPredictionSeed] = useState<{
+    symbol: string;
+    pipSize: number;
+    prices: number[];
+  } | null>(null);
   const autoSessionRef = useRef<{ stopRequested: boolean } | null>(null);
   const selectSymbolRef = useRef(selectSymbol);
+
+  const setContractMode = useCallback((mode: ContractMode) => {
+    setContractModeRaw(mode);
+    if (mode === 'DIGITOVER') {
+      setSelectedDigit(1);
+    } else if (mode === 'DIGITUNDER') {
+      setSelectedDigit(8);
+    } else {
+      setSelectedDigit(null);
+    }
+  }, []);
 
   useEffect(() => {
     selectSymbolRef.current = selectSymbol;
@@ -452,22 +468,34 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
         setContractMode('DIGITEVEN');
         break;
     }
-  }, []);
+  }, [setContractMode]);
 
+  const useScannerPredictionSeed =
+    activeSymbol?.underlying_symbol === scannerPredictionSeed?.symbol &&
+    prices.length < (scannerPredictionSeed?.prices.length ?? 0);
+  const predictionPrices = useMemo(
+    () => useScannerPredictionSeed
+      ? [...(scannerPredictionSeed?.prices ?? []), ...prices].slice(-MARKET_SCAN_TICK_COUNT)
+      : prices,
+    [prices, scannerPredictionSeed, useScannerPredictionSeed]
+  );
+  const predictionPipSize = useScannerPredictionSeed && scannerPredictionSeed
+    ? scannerPredictionSeed.pipSize
+    : pipSize;
   const digitStats: DigitStats = useMemo(
-    () => computeDigitStats(prices, pipSize),
-    [prices, pipSize]
+    () => computeDigitStats(predictionPrices, predictionPipSize),
+    [predictionPrices, predictionPipSize]
   );
 
   const lastDigit = useMemo(() => {
     if (currentTick) {
       return getLastDigit(currentTick.quote, pipSize);
     }
-    if (prices.length > 0) {
-      return getLastDigit(prices[prices.length - 1], pipSize);
+    if (predictionPrices.length > 0) {
+      return getLastDigit(predictionPrices[predictionPrices.length - 1], predictionPipSize);
     }
     return null;
-  }, [currentTick, prices, pipSize]);
+  }, [currentTick, predictionPrices, predictionPipSize]);
 
   const {
     buyContract: buyWithProposal,
@@ -482,6 +510,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
   // real params and useProposal re-subscribes to get a fresh proposal.
   const proposalParams: ProposalParams | null = useMemo(() => {
     if (isBuying || !activeSymbol) return null;
+    if (contractMode === 'DIGITDIFF' && selectedDigit === null) return null;
     const stakeNum = parseFloat(stake);
     if (!stakeNum || stakeNum <= 0) return null;
 
@@ -555,6 +584,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
     autoSessionRef.current = session;
     setThresholdResult(null);
     setAutoTradingStatus('scanning');
+    if (selectedContractMode === 'DIGITDIFF') setSelectedDigit(null);
     setAutoTradingTradeCount(0);
     setAutoTradingProfit(0);
     setAutoTradingMarket(null);
@@ -572,7 +602,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
     const rejectedCandidates = new Set<string>();
     const skippedNoReturnCandidates = new Set<string>();
     const skippedNegativeEvCandidates = new Set<string>();
-    let currentBarrier = selectedDigit;
+    let currentBarrier = selectedDigit ?? 5;
     let scanNumber = 0;
     let candidatesFromCurrentScan: MarketScanCandidate[] = [];
     let nextCandidateIndex = 0;
@@ -702,6 +732,11 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
         currentBarrier = candidate.barrier;
         setSelectedDigit(candidate.barrier);
       }
+      setScannerPredictionSeed({
+        symbol: candidate.symbol.underlying_symbol,
+        pipSize: pipSizeFromPip(candidate.symbol.pip_size),
+        prices: candidate.predictionPrices,
+      });
       selectSymbolRef.current(candidate.symbol.underlying_symbol);
       setAutoTradingMarket(marketName);
       setAutoTradingEstimatedWinRate(candidate.estimatedWinRate);
@@ -963,6 +998,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
     localize,
     martingaleMode,
     martingaleValues,
+    setContractMode,
     selectedDigit,
     symbols,
     stake,

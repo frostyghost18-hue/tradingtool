@@ -21,7 +21,7 @@ import type {
 
 interface TradeControlsProps {
   contractMode: ContractMode;
-  selectedDigit: number;
+  selectedDigit: number | null;
   isConnected: boolean;
   stake: string;
   onStakeChange: (value: string) => void;
@@ -174,6 +174,9 @@ export function TradeControls({
   }, [buyResult, autoTradingStatus, onClearBuyResult, localize, locale]);
 
   const isAutoTrading = autoTradingStatus !== 'idle';
+  const predictionBarrier = getContractBarrier(contractMode, selectedDigit);
+  const showPredictionDigit = showDigitInPrediction(contractMode) && predictionBarrier !== undefined;
+  const awaitingDiffersScan = contractMode === 'DIGITDIFF' && predictionBarrier === undefined;
   const buyButtonLabel = autoTradingStatus === 'stopping'
     ? localize('Stopping...')
     : autoTradingStatus === 'scanning'
@@ -251,11 +254,19 @@ export function TradeControls({
           <span className="text-primary font-bold">
             {getPredictionText(contractMode, localize)}
           </span>
-          {showDigitInPrediction(contractMode) && (
+          {showPredictionDigit && (
             <>
               {' '}
               <span className="inline-flex w-5 h-5 rounded-full bg-primary text-primary-foreground items-center justify-center text-xs font-bold">
-                {getContractBarrier(contractMode, selectedDigit)}
+                {predictionBarrier}
+              </span>
+            </>
+          )}
+          {awaitingDiffersScan && (
+            <>
+              {' '}
+              <span className="text-muted-foreground">
+                <Localize i18n_default_text="Awaiting scan" />
               </span>
             </>
           )}

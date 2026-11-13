@@ -11,7 +11,7 @@ import type { DigitStats } from '../lib/types';
 
 interface DigitStatsBarProps {
   digitStats: DigitStats;
-  selectedDigit: number;
+  selectedDigit: number | null;
   lastDigit?: number | null;
   headerRight?: ReactNode;
   onDigitSelect?: (digit: number) => void;

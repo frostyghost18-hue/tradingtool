@@ -207,7 +207,7 @@ export interface ConfigurableDigitsControlsProps {
   onTradeTypeChange: (type: TradeType) => void;
   contractMode: ContractMode;
   onContractModeChange: (mode: ContractMode) => void;
-  selectedDigit: number;
+  selectedDigit: number | null;
   stake: string;
   onStakeChange: (value: string) => void;
   duration: number;
@@ -858,7 +858,9 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
   // Real control = the bordered prediction box. Same data in every variant.
   const renderPrediction = () => {
     const predictionText = getPredictionText(contractMode, localize);
-    const showDigit = showDigitInPrediction(contractMode);
+    const predictionBarrier = getContractBarrier(contractMode, selectedDigit);
+    const showDigit = showDigitInPrediction(contractMode) && predictionBarrier !== undefined;
+    const awaitingDiffersScan = contractMode === 'DIGITDIFF' && predictionBarrier === undefined;
     const payoutEl =
       proposal || isProposalLoading ? (
         isProposalLoading ? (
@@ -882,7 +884,15 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
               <>
                 {' '}
                 <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                  {getContractBarrier(contractMode, selectedDigit)}
+                  {predictionBarrier}
+                </span>
+              </>
+            )}
+            {awaitingDiffersScan && (
+              <>
+                {' '}
+                <span className="text-muted-foreground">
+                  <Localize i18n_default_text="Awaiting scan" />
                 </span>
               </>
             )}
@@ -907,7 +917,15 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
               <>
                 {' '}
                 <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                  {getContractBarrier(contractMode, selectedDigit)}
+                  {predictionBarrier}
+                </span>
+              </>
+            )}
+            {awaitingDiffersScan && (
+              <>
+                {' '}
+                <span className="text-muted-foreground">
+                  <Localize i18n_default_text="Awaiting scan" />
                 </span>
               </>
             )}
@@ -925,7 +943,15 @@ export function ConfigurableDigitsControls(props: ConfigurableDigitsControlsProp
               <>
                 {' '}
                 <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                  {selectedDigit}
+                  {predictionBarrier}
+                </span>
+              </>
+            )}
+            {awaitingDiffersScan && (
+              <>
+                {' '}
+                <span className="text-muted-foreground">
+                  <Localize i18n_default_text="Awaiting scan" />
                 </span>
               </>
             )}

@@ -12,6 +12,7 @@ export interface MarketScanCandidate {
   symbol: ActiveSymbol;
   contractMode: Exclude<ContractMode, 'DIGITMATCH'>;
   barrier: number | null;
+  predictionPrices: number[];
   estimatedWinRate: number;
   probabilityEdge: number;
   sampleCount: number;
@@ -34,10 +35,13 @@ export function getScannableMarkets(symbols: ActiveSymbol[]): ActiveSymbol[] {
   );
 }
 
-export function getContractBarrier(contractMode: ContractMode, differsDigit: number): number | undefined {
+export function getContractBarrier(
+  contractMode: ContractMode,
+  differsDigit: number | null
+): number | undefined {
   switch (contractMode) {
     case 'DIGITDIFF':
-      return differsDigit;
+      return differsDigit ?? undefined;
     case 'DIGITOVER':
       return 1;
     case 'DIGITUNDER':
@@ -52,10 +56,9 @@ export function scoreMarket(
   prices: number[],
   contractMode: Exclude<ContractMode, 'DIGITMATCH'>
 ): MarketScanCandidate | null {
+  const predictionPrices = prices.filter((price) => Number.isFinite(price));
   const pipSize = pipSizeFromPip(symbol.pip_size);
-  const digits = prices
-    .filter((price) => Number.isFinite(price))
-    .map((price) => getLastDigit(price, pipSize));
+  const digits = predictionPrices.map((price) => getLastDigit(price, pipSize));
 
   if (digits.length < MINIMUM_MARKET_SCAN_TICKS) return null;
 
@@ -100,6 +103,7 @@ export function scoreMarket(
     symbol,
     contractMode,
     barrier,
+    predictionPrices: predictionPrices.slice(-MARKET_SCAN_TICK_COUNT),
     estimatedWinRate,
     probabilityEdge: estimatedWinRate - baselineWinRate,
     sampleCount: digits.length,
