@@ -3,6 +3,7 @@ import { getLastDigit, pipSizeFromPip } from '@/lib/digit-stats';
 import type { ContractMode } from '@/lib/types';
 
 export const MARKET_SCAN_TICK_COUNT = 100;
+export const MARKET_SCAN_DURATION_SECONDS = 15;
 export const MINIMUM_MARKET_SCAN_TICKS = 80;
 
 export interface MarketScanCandidate {
@@ -11,6 +12,12 @@ export interface MarketScanCandidate {
   barrier: number | null;
   estimatedWinRate: number;
   sampleCount: number;
+}
+
+export function getScannableMarkets(symbols: ActiveSymbol[]): ActiveSymbol[] {
+  return symbols.filter(
+    (symbol) => symbol.exchange_is_open === 1 && symbol.is_trading_suspended === 0
+  );
 }
 
 export function getContractBarrier(contractMode: ContractMode, differsDigit: number): number | undefined {

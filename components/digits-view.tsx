@@ -10,6 +10,7 @@ import { Header } from '@/components/custom/header';
 import { LoginPromptDialog } from '@/components/custom/login-prompt-dialog';
 import { PinnedBuyBar } from '@/components/custom/pinned-buy-bar';
 import { ThresholdResultDialog } from '@/components/custom/threshold-result-dialog';
+import { MarketScannerNotification } from '@/components/custom/market-scanner-notification';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useAppTranslations } from '@/components/custom/i18n-provider';
@@ -34,7 +35,10 @@ import type {
 import type { ContractMode, TradeType, DigitStats } from '../lib/types';
 import type { MartingaleMode } from '../lib/martingale';
 import type { OpenPosition } from '@/hooks/use-open-positions';
-import type { AutoTradingThresholdResult } from '@/hooks/use-digits-trading';
+import type {
+  AutoTradingScanProgress,
+  AutoTradingThresholdResult,
+} from '@/hooks/use-digits-trading';
 import { useSessionTransactions } from '@/hooks/use-session-transactions';
 import { ALL_CONTROL_KEYS } from '../lib/app-config';
 import type { ControlKey, DigitsAppConfig } from '../lib/app-config';
@@ -124,6 +128,7 @@ export interface DigitsViewProps {
   autoTradingProfit: number;
   autoTradingMarket: string | null;
   autoTradingEstimatedWinRate: number | null;
+  autoTradingScanProgress: AutoTradingScanProgress | null;
   thresholdResult: AutoTradingThresholdResult | null;
   clearThresholdResult: () => void;
   stopAutoTrading: () => void;
@@ -198,6 +203,7 @@ export function DigitsView({
   autoTradingProfit,
   autoTradingMarket,
   autoTradingEstimatedWinRate,
+  autoTradingScanProgress,
   thresholdResult,
   clearThresholdResult,
   stopAutoTrading,
@@ -845,6 +851,11 @@ export function DigitsView({
         onOpenChange={setShowLoginPrompt}
         onLogin={editMode ? noopAsyncAuth : onLogin}
         onSignUp={editMode ? noopAsyncAuth : onSignUp}
+      />
+      <MarketScannerNotification
+        progress={autoTradingScanProgress}
+        status={autoTradingStatus}
+        onStop={stopAutoTrading}
       />
       <ThresholdResultDialog result={thresholdResult} onClose={clearThresholdResult} />
     </main>

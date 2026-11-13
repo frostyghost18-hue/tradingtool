@@ -21,7 +21,9 @@ import type { UseBaseTradingParams } from '@/hooks/use-base-trading';
 import { computeDigitStats, getLastDigit } from '../lib/digit-stats';
 import {
   getContractBarrier,
+  getScannableMarkets,
   hasPriceReversalRisk,
+  MARKET_SCAN_DURATION_SECONDS,
   MARKET_SCAN_TICK_COUNT,
   scoreMarket,
 } from '../lib/market-scanner';
@@ -36,9 +38,20 @@ const CONTRACT_TYPES = ['DIGITDIFF', 'DIGITOVER', 'DIGITUNDER', 'DIGITEVEN', 'DI
 type AutoTradingStatus = 'idle' | 'scanning' | 'running' | 'stopping';
 const CONTRACT_SETTLEMENT_TIMEOUT_MS = 15 * 60 * 1000;
 const CONNECTION_POLL_INTERVAL_MS = 250;
-const MARKET_SCAN_CONCURRENCY = 6;
-const MARKET_RESCAN_DELAY_MS = 3000;
+const MARKET_SCAN_CONCURRENCY = 12;
 const CONNECTION_LOST = Symbol('connection-lost');
+
+export interface AutoTradingScanProgress {
+  phase: 'connecting' | 'scanning' | 'selected';
+  countdownSeconds: number;
+  scannedMarkets: number;
+  totalMarkets: number;
+  scanNumber: number;
+  selectedMarket: string | null;
+  estimatedWinRate: number | null;
+}
+
+type MarketScanProgressCallback = (scannedMarkets: number, totalMarkets: number) => void;
 
 async function fetchTickHistory(
   ws: NonNullable<UseBaseTradingParams['ws']>,
@@ -85,21 +98,27 @@ async function scanMarkets(
   ws: NonNullable<UseBaseTradingParams['ws']>,
   symbols: ActiveSymbol[],
   contractMode: ContractMode,
-  shouldStop: () => boolean
+  shouldStop: () => boolean,
+  onProgress: MarketScanProgressCallback
 ): Promise<MarketScanCandidate | null> {
   const candidates: MarketScanCandidate[] = [];
   const failures: string[] = [];
-  const openSymbols = symbols.filter(
-    (symbol) => symbol.exchange_is_open === 1 && symbol.is_trading_suspended === 0
-  );
+  const openSymbols = getScannableMarkets(symbols);
   if (openSymbols.length === 0) {
     throw new Error('No open, unsuspended markets are available to scan.');
   }
 
-  for (let index = 0; index < openSymbols.length; index += MARKET_SCAN_CONCURRENCY) {
-    if (shouldStop()) return null;
-    const batch = openSymbols.slice(index, index + MARKET_SCAN_CONCURRENCY);
-    const results = await Promise.all(batch.map(async (symbol) => {
+  let nextIndex = 0;
+  let scannedMarkets = 0;
+  onProgress(scannedMarkets, openSymbols.length);
+
+  const scanWorker = async () => {
+    while (!shouldStop()) {
+      const index = nextIndex;
+      nextIndex += 1;
+      const symbol = openSymbols[index];
+      if (!symbol) return;
+
       try {
         const prices = await fetchTickHistory(
           ws,
@@ -107,20 +126,27 @@ async function scanMarkets(
           MARKET_SCAN_TICK_COUNT,
           shouldStop
         );
-        if (!prices || shouldStop()) return null;
-        return scoreMarket(symbol, prices, contractMode);
+        if (prices && !shouldStop()) {
+          const candidate = scoreMarket(symbol, prices, contractMode);
+          if (candidate) candidates.push(candidate);
+        }
       } catch (error) {
         failures.push(
           `${symbol.underlying_symbol}: ${error instanceof Error ? error.message : String(error)}`
         );
-        return null;
+      } finally {
+        scannedMarkets += 1;
+        onProgress(scannedMarkets, openSymbols.length);
       }
-    }));
-
-    for (const candidate of results) {
-      if (candidate) candidates.push(candidate);
     }
-  }
+  };
+
+  await Promise.all(
+    Array.from(
+      { length: Math.min(MARKET_SCAN_CONCURRENCY, openSymbols.length) },
+      () => scanWorker()
+    )
+  );
 
   if (shouldStop()) return null;
   if (failures.length > 0) {
@@ -138,11 +164,27 @@ async function scanMarkets(
   return candidates[0] ?? null;
 }
 
-async function waitBeforeRescan(shouldStop: () => boolean): Promise<void> {
-  const deadline = Date.now() + MARKET_RESCAN_DELAY_MS;
-  while (!shouldStop() && Date.now() < deadline) {
-    await new Promise((resolve) => setTimeout(resolve, CONNECTION_POLL_INTERVAL_MS));
+async function runMarketScanCountdown(
+  onCountdown: (seconds: number) => void,
+  shouldStop: () => boolean
+): Promise<boolean> {
+  const deadline = Date.now() + MARKET_SCAN_DURATION_SECONDS * 1000;
+  let remaining = MARKET_SCAN_DURATION_SECONDS;
+  onCountdown(remaining);
+
+  while (!shouldStop()) {
+    const nextRemaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+    if (nextRemaining !== remaining) {
+      remaining = nextRemaining;
+      onCountdown(remaining);
+    }
+    if (remaining === 0) return true;
+    await new Promise((resolve) => setTimeout(
+      resolve,
+      Math.min(CONNECTION_POLL_INTERVAL_MS, Math.max(1, deadline - Date.now()))
+    ));
   }
+  return false;
 }
 
 export interface AutoTradingThresholdResult {
@@ -288,6 +330,7 @@ interface UseDigitsTradingReturn {
   autoTradingProfit: number;
   autoTradingMarket: string | null;
   autoTradingEstimatedWinRate: number | null;
+  autoTradingScanProgress: AutoTradingScanProgress | null;
   stopAutoTrading: () => void;
 }
 
@@ -337,6 +380,8 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
   const [autoTradingProfit, setAutoTradingProfit] = useState(0);
   const [autoTradingMarket, setAutoTradingMarket] = useState<string | null>(null);
   const [autoTradingEstimatedWinRate, setAutoTradingEstimatedWinRate] = useState<number | null>(null);
+  const [autoTradingScanProgress, setAutoTradingScanProgress] =
+    useState<AutoTradingScanProgress | null>(null);
   const autoSessionRef = useRef<{ stopRequested: boolean } | null>(null);
   const selectSymbolRef = useRef(selectSymbol);
 
@@ -355,6 +400,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
   const stopAutoTrading = useCallback(() => {
     if (!autoSessionRef.current) return;
     autoSessionRef.current.stopRequested = true;
+    setAutoTradingScanProgress(null);
     setAutoTradingStatus('stopping');
   }, []);
 
@@ -474,6 +520,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
     setAutoTradingProfit(0);
     setAutoTradingMarket(null);
     setAutoTradingEstimatedWinRate(null);
+    setAutoTradingScanProgress(null);
 
     let sessionProfit = 0;
     let tradeCount = 0;
@@ -483,6 +530,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
     let reachedThreshold: AutoTradingThresholdResult | null = null;
     const currentMarketRef: { current: ActiveSymbol | null } = { current: null };
     let currentBarrier = selectedDigit;
+    let scanNumber = 1;
 
     const scanForMarket = async (): Promise<MarketScanCandidate | null> => {
       setAutoTradingStatus('scanning');
@@ -497,29 +545,78 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
         );
         if (!connected) return null;
 
-        const candidate = await scanMarkets(
-          tradingWs,
-          symbols,
-          contractMode,
-          () => session.stopRequested
+        const totalMarkets = getScannableMarkets(symbols).length;
+        setAutoTradingScanProgress({
+          phase: 'scanning',
+          countdownSeconds: MARKET_SCAN_DURATION_SECONDS,
+          scannedMarkets: 0,
+          totalMarkets,
+          scanNumber,
+          selectedMarket: null,
+          estimatedWinRate: null,
+        });
+
+        let scanFailed = false;
+        const countdown = runMarketScanCountdown(
+          (countdownSeconds) => {
+            setAutoTradingScanProgress((progress) =>
+              progress?.phase === 'scanning'
+                ? { ...progress, countdownSeconds }
+                : progress
+            );
+          },
+          () => session.stopRequested || scanFailed
         );
+        let candidate: MarketScanCandidate | null;
+        try {
+          candidate = await scanMarkets(
+            tradingWs,
+            symbols,
+            contractMode,
+            () => session.stopRequested,
+            (scannedMarkets, marketCount) => {
+              setAutoTradingScanProgress((progress) =>
+                progress?.phase === 'scanning'
+                  ? { ...progress, scannedMarkets, totalMarkets: marketCount }
+                  : progress
+              );
+            }
+          );
+        } catch (error) {
+          scanFailed = true;
+          await countdown;
+          throw error;
+        }
+        const countdownComplete = await countdown;
+        if (!countdownComplete || session.stopRequested) return null;
         if (candidate) return candidate;
-        await waitBeforeRescan(() => session.stopRequested);
+        scanNumber += 1;
       }
       return null;
     };
 
     const useScannedMarket = (candidate: MarketScanCandidate) => {
       currentMarketRef.current = candidate.symbol;
+      const marketName =
+        candidate.symbol.underlying_symbol_name || candidate.symbol.underlying_symbol;
       if (candidate.barrier !== null) {
         currentBarrier = candidate.barrier;
         setSelectedDigit(candidate.barrier);
       }
       selectSymbolRef.current(candidate.symbol.underlying_symbol);
-      setAutoTradingMarket(
-        candidate.symbol.underlying_symbol_name || candidate.symbol.underlying_symbol
-      );
+      setAutoTradingMarket(marketName);
       setAutoTradingEstimatedWinRate(candidate.estimatedWinRate);
+      setAutoTradingScanProgress((progress) =>
+        progress
+          ? {
+              ...progress,
+              phase: 'selected',
+              countdownSeconds: 0,
+              selectedMarket: marketName,
+              estimatedWinRate: candidate.estimatedWinRate,
+            }
+          : progress
+      );
       setAutoTradingStatus('running');
     };
 
@@ -617,6 +714,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
           throw new Error(localize('Trade purchase failed. Auto-trading was stopped.'));
         }
         clearBuyResult();
+        setAutoTradingScanProgress(null);
 
         tradeCount += 1;
         setAutoTradingTradeCount(tradeCount);
@@ -694,6 +792,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
       toast.error(localize('Auto-trading stopped'), { description: message });
     } finally {
       autoSessionRef.current = null;
+      setAutoTradingScanProgress(null);
       setAutoTradingStatus('idle');
     }
   }, [
@@ -766,6 +865,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
     autoTradingProfit,
     autoTradingMarket,
     autoTradingEstimatedWinRate,
+    autoTradingScanProgress,
     stopAutoTrading,
   };
 }

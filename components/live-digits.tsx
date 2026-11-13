@@ -98,6 +98,7 @@ export function LiveDigits({
       autoTradingProfit={trading.autoTradingProfit}
       autoTradingMarket={trading.autoTradingMarket}
       autoTradingEstimatedWinRate={trading.autoTradingEstimatedWinRate}
+      autoTradingScanProgress={trading.autoTradingScanProgress}
       thresholdResult={trading.thresholdResult}
       clearThresholdResult={trading.clearThresholdResult}
       stopAutoTrading={trading.stopAutoTrading}
