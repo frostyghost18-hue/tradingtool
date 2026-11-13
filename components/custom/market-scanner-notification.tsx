@@ -97,6 +97,13 @@ export function MarketScannerNotification({
                 total: progress.totalMarkets,
               })}
             </p>
+            {progress.skippedNoReturnMarkets > 0 && (
+              <p className="mt-1 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                {localize('{{count}} no-return markets skipped', {
+                  count: progress.skippedNoReturnMarkets,
+                })}
+              </p>
+            )}
             <div
               className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"
               role="progressbar"

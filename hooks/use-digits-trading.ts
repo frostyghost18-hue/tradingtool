@@ -49,6 +49,7 @@ export interface AutoTradingScanProgress {
   scanNumber: number;
   selectedMarket: string | null;
   estimatedWinRate: number | null;
+  skippedNoReturnMarkets: number;
 }
 
 type MarketScanProgressCallback = (scannedMarkets: number, totalMarkets: number) => void;
@@ -99,14 +100,19 @@ async function scanMarkets(
   symbols: ActiveSymbol[],
   contractMode: ContractMode,
   shouldStop: () => boolean,
+  excludedSymbols: Set<string>,
   onProgress: MarketScanProgressCallback
 ): Promise<MarketScanCandidate | null> {
   const candidates: MarketScanCandidate[] = [];
   const failures: string[] = [];
-  const openSymbols = getScannableMarkets(symbols);
-  if (openSymbols.length === 0) {
+  const eligibleSymbols = getScannableMarkets(symbols);
+  if (eligibleSymbols.length === 0) {
     throw new Error('No open, unsuspended markets are available to scan.');
   }
+  const openSymbols = eligibleSymbols.filter(
+    (symbol) => !excludedSymbols.has(symbol.underlying_symbol)
+  );
+  if (openSymbols.length === 0) return null;
 
   let nextIndex = 0;
   let scannedMarkets = 0;
@@ -529,6 +535,8 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
     let stopReason = '';
     let reachedThreshold: AutoTradingThresholdResult | null = null;
     const currentMarketRef: { current: ActiveSymbol | null } = { current: null };
+    const rejectedNoReturnSymbols = new Set<string>();
+    const skippedNoReturnSymbols = new Set<string>();
     let currentBarrier = selectedDigit;
     let scanNumber = 1;
 
@@ -545,7 +553,16 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
         );
         if (!connected) return null;
 
-        const totalMarkets = getScannableMarkets(symbols).length;
+        const eligibleMarkets = getScannableMarkets(symbols);
+        if (eligibleMarkets.length === 0) {
+          throw new Error(localize('No open, unsuspended markets are available to scan.'));
+        }
+        if (eligibleMarkets.every((symbol) => rejectedNoReturnSymbols.has(symbol.underlying_symbol))) {
+          rejectedNoReturnSymbols.clear();
+        }
+        const totalMarkets = eligibleMarkets.filter(
+          (symbol) => !rejectedNoReturnSymbols.has(symbol.underlying_symbol)
+        ).length;
         setAutoTradingScanProgress({
           phase: 'scanning',
           countdownSeconds: MARKET_SCAN_DURATION_SECONDS,
@@ -554,6 +571,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
           scanNumber,
           selectedMarket: null,
           estimatedWinRate: null,
+          skippedNoReturnMarkets: skippedNoReturnSymbols.size,
         });
 
         let scanFailed = false;
@@ -574,6 +592,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
             symbols,
             contractMode,
             () => session.stopRequested,
+            rejectedNoReturnSymbols,
             (scannedMarkets, marketCount) => {
               setAutoTradingScanProgress((progress) =>
                 progress?.phase === 'scanning'
@@ -590,6 +609,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
         const countdownComplete = await countdown;
         if (!countdownComplete || session.stopRequested) return null;
         if (candidate) return candidate;
+        if (rejectedNoReturnSymbols.size > 0) rejectedNoReturnSymbols.clear();
         scanNumber += 1;
       }
       return null;
@@ -676,6 +696,18 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
         const quote = proposalResponse.proposal;
         if (!quote?.id || !Number.isFinite(quote.ask_price) || quote.ask_price <= 0) {
           throw new Error(localize('Could not get a valid proposal for the next trade.'));
+        }
+        if (!Number.isFinite(quote.payout)) {
+          throw new Error(localize('The proposal did not include a valid potential payout.'));
+        }
+        if (quote.payout <= quote.ask_price) {
+          rejectedNoReturnSymbols.add(market.underlying_symbol);
+          skippedNoReturnSymbols.add(market.underlying_symbol);
+          scanNumber += 1;
+          const nextMarket = await scanForMarket();
+          if (!nextMarket) break;
+          useScannedMarket(nextMarket);
+          continue;
         }
 
         if (!tradingWs.isConnected) {
