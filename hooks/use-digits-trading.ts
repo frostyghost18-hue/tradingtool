@@ -223,7 +223,6 @@ async function scanMarkets(
   }
 
   candidates.sort((a, b) =>
-    Number(b.eligibleForTrading) - Number(a.eligibleForTrading) ||
     b.probabilityEdge - a.probabilityEdge ||
     b.estimatedWinRate - a.estimatedWinRate ||
     b.sampleCount - a.sampleCount ||

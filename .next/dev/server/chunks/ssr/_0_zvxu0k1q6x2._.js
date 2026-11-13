@@ -3547,8 +3547,9 @@ function MarketScannerNotification({ progress, status, onStop }) {
     const { localize } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$custom$2f$i18n$2d$provider$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useAppTranslations"])();
     if (!progress) return null;
     const isSelected = progress.phase === 'selected';
+    const hasSignal = progress.prediction !== null;
     const progressPercent = progress.totalMarkets > 0 ? Math.min(100, progress.scannedMarkets / progress.totalMarkets * 100) : 0;
-    const statusText = isSelected ? localize('MARKET SELECTED') : localize('SCANNING LIVE');
+    const statusText = isSelected ? localize('MARKET SELECTED') : hasSignal ? localize('SIGNAL READY') : localize('SCANNING LIVE');
     const prediction = progress.prediction;
     const predictionContractLabel = (()=>{
         switch(prediction?.contractMode){
@@ -3566,7 +3567,7 @@ function MarketScannerNotification({ progress, status, onStop }) {
                 return null;
         }
     })();
-    const description = isSelected ? localize('Starting the first trade now.') : progress.countdownSeconds === 0 && progress.scannedMarkets < progress.totalMarkets ? localize('Finishing market checks before selecting.') : progress.countdownSeconds === 0 ? localize('Selecting the highest-qualified market.') : progress.scannedMarkets === progress.totalMarkets ? localize('Markets checked. Waiting for the scan timer.') : localize('Checking recent tick history across open markets.');
+    const description = isSelected ? localize('Starting the first trade now.') : hasSignal ? localize('Showing the latest market signal while scanning continues.') : progress.countdownSeconds === 0 && progress.scannedMarkets < progress.totalMarkets ? localize('Finishing market checks before selecting.') : progress.countdownSeconds === 0 ? localize('Selecting the highest-qualified market.') : progress.scannedMarkets === progress.totalMarkets ? localize('Markets checked. Waiting for the scan timer.') : localize('Checking recent tick history across open markets.');
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: "pointer-events-none fixed inset-0 z-[80] flex items-center justify-center p-4",
         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
@@ -3585,18 +3586,18 @@ function MarketScannerNotification({ progress, status, onStop }) {
                                         className: "h-6 w-6"
                                     }, void 0, false, {
                                         fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                        lineNumber: 66,
+                                        lineNumber: 71,
                                         columnNumber: 17
                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$radar$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Radar$3e$__["Radar"], {
                                         className: "market-scan-spinner h-6 w-6"
                                     }, void 0, false, {
                                         fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                        lineNumber: 68,
+                                        lineNumber: 73,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                    lineNumber: 64,
+                                    lineNumber: 69,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3607,7 +3608,7 @@ function MarketScannerNotification({ progress, status, onStop }) {
                                             children: localize('Pulse Factor Scanner')
                                         }, void 0, false, {
                                             fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                            lineNumber: 72,
+                                            lineNumber: 77,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3615,19 +3616,19 @@ function MarketScannerNotification({ progress, status, onStop }) {
                                             children: statusText
                                         }, void 0, false, {
                                             fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                            lineNumber: 75,
+                                            lineNumber: 80,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                    lineNumber: 71,
+                                    lineNumber: 76,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                            lineNumber: 63,
+                            lineNumber: 68,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -3637,13 +3638,13 @@ function MarketScannerNotification({ progress, status, onStop }) {
                             })
                         }, void 0, false, {
                             fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                            lineNumber: 80,
+                            lineNumber: 85,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                    lineNumber: 62,
+                    lineNumber: 67,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3660,14 +3661,14 @@ function MarketScannerNotification({ progress, status, onStop }) {
                                     className: "h-7 w-7 text-primary"
                                 }, void 0, false, {
                                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                    lineNumber: 94,
+                                    lineNumber: 99,
                                     columnNumber: 15
                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                     className: "font-mono text-3xl font-black tabular-nums text-primary",
                                     children: String(progress.countdownSeconds).padStart(2, '0')
                                 }, void 0, false, {
                                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                    lineNumber: 96,
+                                    lineNumber: 101,
                                     columnNumber: 15
                                 }, this),
                                 !isSelected && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -3675,13 +3676,13 @@ function MarketScannerNotification({ progress, status, onStop }) {
                                     children: localize('Seconds')
                                 }, void 0, false, {
                                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                    lineNumber: 101,
+                                    lineNumber: 106,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                            lineNumber: 86,
+                            lineNumber: 91,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3694,7 +3695,7 @@ function MarketScannerNotification({ progress, status, onStop }) {
                                             className: "h-3.5 w-3.5 text-primary"
                                         }, void 0, false, {
                                             fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                            lineNumber: 108,
+                                            lineNumber: 113,
                                             columnNumber: 31
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -3703,13 +3704,13 @@ function MarketScannerNotification({ progress, status, onStop }) {
                                             children: description
                                         }, void 0, false, {
                                             fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                            lineNumber: 109,
+                                            lineNumber: 114,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                    lineNumber: 107,
+                                    lineNumber: 112,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3720,7 +3721,7 @@ function MarketScannerNotification({ progress, status, onStop }) {
                                     })
                                 }, void 0, false, {
                                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                    lineNumber: 111,
+                                    lineNumber: 116,
                                     columnNumber: 13
                                 }, this),
                                 progress.skippedNoReturnMarkets > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3730,7 +3731,7 @@ function MarketScannerNotification({ progress, status, onStop }) {
                                     })
                                 }, void 0, false, {
                                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                    lineNumber: 118,
+                                    lineNumber: 123,
                                     columnNumber: 15
                                 }, this),
                                 progress.skippedNegativeEvSetups > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3740,7 +3741,7 @@ function MarketScannerNotification({ progress, status, onStop }) {
                                     })
                                 }, void 0, false, {
                                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                    lineNumber: 125,
+                                    lineNumber: 130,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3757,24 +3758,24 @@ function MarketScannerNotification({ progress, status, onStop }) {
                                         }
                                     }, void 0, false, {
                                         fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                        lineNumber: 139,
+                                        lineNumber: 144,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                    lineNumber: 131,
+                                    lineNumber: 136,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                            lineNumber: 106,
+                            lineNumber: 111,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                    lineNumber: 85,
+                    lineNumber: 90,
                     columnNumber: 9
                 }, this),
                 prediction ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3788,12 +3789,12 @@ function MarketScannerNotification({ progress, status, onStop }) {
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                             className: "text-[9px] font-bold uppercase tracking-widest text-muted-foreground",
-                                            children: localize('Scan {{number}} model forecast', {
+                                            children: localize('Scan {{number}} market signal', {
                                                 number: prediction.scanNumber
                                             })
                                         }, void 0, false, {
                                             fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                            lineNumber: 151,
+                                            lineNumber: 156,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3807,13 +3808,13 @@ function MarketScannerNotification({ progress, status, onStop }) {
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                            lineNumber: 156,
+                                            lineNumber: 161,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                    lineNumber: 150,
+                                    lineNumber: 155,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3827,7 +3828,7 @@ function MarketScannerNotification({ progress, status, onStop }) {
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                            lineNumber: 162,
+                                            lineNumber: 167,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3835,19 +3836,19 @@ function MarketScannerNotification({ progress, status, onStop }) {
                                             children: localize('Blended estimate')
                                         }, void 0, false, {
                                             fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                            lineNumber: 165,
+                                            lineNumber: 170,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                    lineNumber: 161,
+                                    lineNumber: 166,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                            lineNumber: 149,
+                            lineNumber: 154,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3875,7 +3876,7 @@ function MarketScannerNotification({ progress, status, onStop }) {
                                             children: label
                                         }, void 0, false, {
                                             fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                            lineNumber: 179,
+                                            lineNumber: 184,
                                             columnNumber: 21
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3883,7 +3884,7 @@ function MarketScannerNotification({ progress, status, onStop }) {
                                             children: signal ? `${(signal.winRate * 100).toFixed(1)}%` : '—'
                                         }, void 0, false, {
                                             fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                            lineNumber: 182,
+                                            lineNumber: 187,
                                             columnNumber: 21
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3893,19 +3894,19 @@ function MarketScannerNotification({ progress, status, onStop }) {
                                             }) : localize('insufficient matches')
                                         }, void 0, false, {
                                             fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                            lineNumber: 185,
+                                            lineNumber: 190,
                                             columnNumber: 21
                                         }, this)
                                     ]
                                 }, key, true, {
                                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                    lineNumber: 178,
+                                    lineNumber: 183,
                                     columnNumber: 19
                                 }, this);
                             })
                         }, void 0, false, {
                             fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                            lineNumber: 170,
+                            lineNumber: 175,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3918,7 +3919,7 @@ function MarketScannerNotification({ progress, status, onStop }) {
                                     })
                                 }, void 0, false, {
                                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                    lineNumber: 195,
+                                    lineNumber: 200,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -3926,13 +3927,13 @@ function MarketScannerNotification({ progress, status, onStop }) {
                                     children: prediction.eligibleForTrading ? localize('Passes historical screen') : localize('Forecast only')
                                 }, void 0, false, {
                                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                    lineNumber: 201,
+                                    lineNumber: 206,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                            lineNumber: 194,
+                            lineNumber: 199,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3940,20 +3941,20 @@ function MarketScannerNotification({ progress, status, onStop }) {
                             children: localize('These experimental estimates use past ticks and do not guarantee future results. Quotes are checked before any trade.')
                         }, void 0, false, {
                             fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                            lineNumber: 207,
+                            lineNumber: 212,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                    lineNumber: 148,
+                    lineNumber: 153,
                     columnNumber: 11
                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                     className: "mt-3 rounded-xl border border-border bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground",
-                    children: localize('No usable tick history yet; a forecast is unavailable for this scan.')
+                    children: localize('Waiting for a complete 100-tick sample before issuing a signal.')
                 }, void 0, false, {
                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                    lineNumber: 212,
+                    lineNumber: 217,
                     columnNumber: 11
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -3966,18 +3967,18 @@ function MarketScannerNotification({ progress, status, onStop }) {
                     children: status === 'stopping' ? localize('Stopping...') : isSelected ? localize('Stop auto-trading') : localize('Stop scan')
                 }, void 0, false, {
                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                    lineNumber: 217,
+                    lineNumber: 222,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/components/custom/market-scanner-notification.tsx",
-            lineNumber: 58,
+            lineNumber: 63,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/components/custom/market-scanner-notification.tsx",
-        lineNumber: 57,
+        lineNumber: 62,
         columnNumber: 5
     }, this);
 }
@@ -8872,7 +8873,7 @@ async function scanMarkets(ws, symbols, contractMode, shouldStop, excludedCandid
     if (candidates.length === 0 && failures.length === openSymbols.length) {
         throw new Error('The market scanner could not retrieve tick history for any available market.');
     }
-    candidates.sort((a, b)=>Number(b.eligibleForTrading) - Number(a.eligibleForTrading) || b.probabilityEdge - a.probabilityEdge || b.estimatedWinRate - a.estimatedWinRate || b.sampleCount - a.sampleCount || a.contractMode.localeCompare(b.contractMode) || a.symbol.underlying_symbol.localeCompare(b.symbol.underlying_symbol));
+    candidates.sort((a, b)=>b.probabilityEdge - a.probabilityEdge || b.estimatedWinRate - a.estimatedWinRate || b.sampleCount - a.sampleCount || a.contractMode.localeCompare(b.contractMode) || a.symbol.underlying_symbol.localeCompare(b.symbol.underlying_symbol));
     return candidates;
 }
 async function runMarketScanCountdown(onCountdown, shouldStop) {
@@ -10634,7 +10635,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$digit$2d$stats$2e$ts_
 ;
 const MARKET_SCAN_TICK_COUNT = 100;
 const MARKET_SCAN_DURATION_SECONDS = 15;
-const MINIMUM_MARKET_SCAN_TICKS = 80;
+const MINIMUM_MARKET_SCAN_TICKS = MARKET_SCAN_TICK_COUNT;
 const WILSON_Z_95 = 1.6448536269514722;
 const SEQUENCE_LENGTH = 2;
 const ANALOG_PATTERN_LENGTH = 5;
@@ -10763,10 +10764,10 @@ function getContractBarrier(contractMode, differsDigit) {
     }
 }
 function scoreMarket(symbol, prices, contractMode) {
-    const predictionPrices = prices.filter((price)=>Number.isFinite(price));
+    const predictionPrices = prices.filter((price)=>Number.isFinite(price)).slice(-MARKET_SCAN_TICK_COUNT);
     const pipSize = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$digit$2d$stats$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["pipSizeFromPip"])(symbol.pip_size);
     const digits = predictionPrices.map((price)=>(0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$digit$2d$stats$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getLastDigit"])(price, pipSize));
-    if (digits.length === 0) return null;
+    if (digits.length < MARKET_SCAN_TICK_COUNT) return null;
     const counts = Array.from({
         length: 10
     }, ()=>0);

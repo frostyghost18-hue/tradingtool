@@ -4,7 +4,7 @@ import type { ContractMode } from '@/lib/types';
 
 export const MARKET_SCAN_TICK_COUNT = 100;
 export const MARKET_SCAN_DURATION_SECONDS = 15;
-export const MINIMUM_MARKET_SCAN_TICKS = 80;
+export const MINIMUM_MARKET_SCAN_TICKS = MARKET_SCAN_TICK_COUNT;
 
 const WILSON_Z_95 = 1.6448536269514722;
 const SEQUENCE_LENGTH = 2;
@@ -226,11 +226,13 @@ export function scoreMarket(
   prices: number[],
   contractMode: Exclude<ContractMode, 'DIGITMATCH'>
 ): MarketScanCandidate | null {
-  const predictionPrices = prices.filter((price) => Number.isFinite(price));
+  const predictionPrices = prices
+    .filter((price) => Number.isFinite(price))
+    .slice(-MARKET_SCAN_TICK_COUNT);
   const pipSize = pipSizeFromPip(symbol.pip_size);
   const digits = predictionPrices.map((price) => getLastDigit(price, pipSize));
 
-  if (digits.length === 0) return null;
+  if (digits.length < MARKET_SCAN_TICK_COUNT) return null;
 
   const counts = Array.from({ length: 10 }, () => 0);
   for (const digit of digits) counts[digit] += 1;

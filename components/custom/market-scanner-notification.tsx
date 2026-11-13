@@ -20,11 +20,14 @@ export function MarketScannerNotification({
   if (!progress) return null;
 
   const isSelected = progress.phase === 'selected';
+  const hasSignal = progress.prediction !== null;
   const progressPercent = progress.totalMarkets > 0
     ? Math.min(100, (progress.scannedMarkets / progress.totalMarkets) * 100)
     : 0;
   const statusText = isSelected
     ? localize('MARKET SELECTED')
+    : hasSignal
+      ? localize('SIGNAL READY')
     : localize('SCANNING LIVE');
   const prediction = progress.prediction;
   const predictionContractLabel = (() => {
@@ -45,6 +48,8 @@ export function MarketScannerNotification({
   })();
   const description = isSelected
     ? localize('Starting the first trade now.')
+    : hasSignal
+      ? localize('Showing the latest market signal while scanning continues.')
     : progress.countdownSeconds === 0 && progress.scannedMarkets < progress.totalMarkets
       ? localize('Finishing market checks before selecting.')
       : progress.countdownSeconds === 0
@@ -149,7 +154,7 @@ export function MarketScannerNotification({
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
-                  {localize('Scan {{number}} model forecast', {
+                  {localize('Scan {{number}} market signal', {
                     number: prediction.scanNumber,
                   })}
                 </p>
@@ -210,7 +215,7 @@ export function MarketScannerNotification({
           </div>
         ) : (
           <div className="mt-3 rounded-xl border border-border bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground">
-            {localize('No usable tick history yet; a forecast is unavailable for this scan.')}
+            {localize('Waiting for a complete 100-tick sample before issuing a signal.')}
           </div>
         )}
 
