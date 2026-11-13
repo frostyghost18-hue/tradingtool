@@ -42,27 +42,8 @@
 
 .factorpulse-shell {
   background-color: rgb(var(--background));
-  background-image: radial-gradient(at 8% 0, #82361c33, #0000 38rem), radial-gradient(at 94% 8%, #532a8424, #0000 34rem);
-}
-
-.aurora .factorpulse-shell {
-  background-image: radial-gradient(at 8% 0, #2dd4bf2e, #0000 38rem), radial-gradient(at 94% 8%, #3b82f629, #0000 34rem);
-}
-
-.ocean .factorpulse-shell {
-  background-image: radial-gradient(at 8% 0, #2563eb38, #0000 38rem), radial-gradient(at 94% 8%, #06b6d426, #0000 34rem);
-}
-
-.sunset .factorpulse-shell {
-  background-image: radial-gradient(at 8% 0, #f43f5e33, #0000 38rem), radial-gradient(at 94% 8%, #f9731629, #0000 34rem);
-}
-
-.forest .factorpulse-shell {
-  background-image: radial-gradient(at 8% 0, #22c55e2e, #0000 38rem), radial-gradient(at 94% 8%, #14b8a624, #0000 34rem);
-}
-
-.amethyst .factorpulse-shell {
-  background-image: radial-gradient(at 8% 0, #8b5cf633, #0000 38rem), radial-gradient(at 94% 8%, #d946ef24, #0000 34rem);
+  background-image: radial-gradient(ellipse at 8% 0%, rgb(var(--primary) / .18), transparent 38rem),
+    radial-gradient(ellipse at 94% 8%, rgb(var(--chart-2) / .15), transparent 34rem);
 }
 
 .factorpulse-panel {

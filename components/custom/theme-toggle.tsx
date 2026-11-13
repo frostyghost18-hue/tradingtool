@@ -1,24 +1,26 @@
 'use client';
 
-import { Moon, Sun } from 'lucide-react';
+import { Palette } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { useAppTranslations } from '@/components/custom/i18n-provider';
+import { APPEARANCE_THEME_NAMES } from '@/lib/appearance-themes';
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const { localize } = useAppTranslations();
-  const isLight = theme === 'light';
+  const currentThemeIndex = APPEARANCE_THEME_NAMES.findIndex((value) => value === theme);
+  const nextTheme = APPEARANCE_THEME_NAMES[(currentThemeIndex + 1) % APPEARANCE_THEME_NAMES.length]
+    ?? APPEARANCE_THEME_NAMES[0];
 
   return (
     <Button
       variant="ghost"
       size="icon"
-      aria-label={localize(isLight ? 'Switch to dark theme' : 'Switch to light theme')}
-      onClick={() => setTheme(isLight ? 'dark' : 'light')}
+      aria-label={localize('Change appearance theme')}
+      onClick={() => setTheme(nextTheme)}
     >
-      <Sun className={`h-[1.2rem] w-[1.2rem] transition-all ${isLight ? 'rotate-0 scale-100' : '-rotate-90 scale-0'}`} />
-      <Moon className={`absolute h-[1.2rem] w-[1.2rem] transition-all ${isLight ? 'rotate-90 scale-0' : 'rotate-0 scale-100'}`} />
+      <Palette className="h-[1.2rem] w-[1.2rem]" />
     </Button>
   );
 }

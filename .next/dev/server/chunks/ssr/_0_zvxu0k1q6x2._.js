@@ -2240,55 +2240,65 @@ function preventDismissFromPopoverOrHeader(event) {
 }
 const APPEARANCE_OPTIONS = [
     {
-        value: 'light',
-        label: 'Light',
-        swatch: 'linear-gradient(135deg, #f8fafc, #94a3b8)'
+        value: 'quantum-neon',
+        label: 'Quantum Neon',
+        swatch: 'linear-gradient(135deg, #080516, #cb47ff)'
     },
     {
-        value: 'dark',
-        label: 'Dark',
-        swatch: 'linear-gradient(135deg, #190f0d, #f2a137)'
+        value: 'royal-gold',
+        label: 'Royal Gold',
+        swatch: 'linear-gradient(135deg, #0f0b07, #f5be42)'
     },
     {
-        value: 'aurora',
-        label: 'Aurora',
-        swatch: 'linear-gradient(135deg, #08141f, #4fe0c4)'
+        value: 'midnight-eclipse',
+        label: 'Midnight Eclipse',
+        swatch: 'linear-gradient(135deg, #050c19, #70baff)'
     },
     {
-        value: 'ocean',
-        label: 'Ocean',
-        swatch: 'linear-gradient(135deg, #09132b, #5ea5ff)'
+        value: 'crimson-storm',
+        label: 'Crimson Storm',
+        swatch: 'linear-gradient(135deg, #140509, #ff374a)'
     },
     {
-        value: 'sunset',
-        label: 'Sunset',
-        swatch: 'linear-gradient(135deg, #220f26, #ff775f)'
+        value: 'aurora-dream',
+        label: 'Aurora Dream',
+        swatch: 'linear-gradient(135deg, #07111f, #48dccd)'
     },
     {
-        value: 'forest',
-        label: 'Forest',
-        swatch: 'linear-gradient(135deg, #0a1d1a, #68dc9d)'
+        value: 'neon-samurai',
+        label: 'Neon Samurai',
+        swatch: 'linear-gradient(135deg, #100608, #ff3354)'
     },
     {
-        value: 'amethyst',
-        label: 'Amethyst',
-        swatch: 'linear-gradient(135deg, #16112a, #b991ff)'
+        value: 'ice-phantom',
+        label: 'Ice Phantom',
+        swatch: 'linear-gradient(135deg, #050f1b, #64cbff)'
+    },
+    {
+        value: 'royal-galaxy',
+        label: 'Royal Galaxy',
+        swatch: 'linear-gradient(135deg, #0d071c, #b66eff)'
+    },
+    {
+        value: 'cyber-matrix',
+        label: 'Cyber Matrix',
+        swatch: 'linear-gradient(135deg, #04120b, #33e87e)'
     }
 ];
 function AppearanceLabel({ value }) {
-    const option = APPEARANCE_OPTIONS.find((item)=>item.value === value) ?? APPEARANCE_OPTIONS[1];
+    const option = APPEARANCE_OPTIONS.find((item)=>item.value === value) ?? APPEARANCE_OPTIONS[4];
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$deriv$2d$com$2f$translations$2f$dist$2f$components$2f$localize$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Localize$3e$__["Localize"], {
         i18n_default_text: option.label
     }, void 0, false, {
         fileName: "[project]/components/custom/header.tsx",
-        lineNumber: 125,
+        lineNumber: 127,
         columnNumber: 10
     }, this);
 }
 function AppearancePicker() {
     const { theme, setTheme } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2d$themes$2f$dist$2f$index$2e$module$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useTheme"])();
     const [open, setOpen] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
-    const selected = APPEARANCE_OPTIONS.some((option)=>option.value === theme) ? theme : 'dark';
+    const selected = APPEARANCE_OPTIONS.some((option)=>option.value === theme) ? theme : 'aurora-dream';
     const handleSelect = (value)=>{
         setTheme(value);
         setOpen(false);
@@ -2302,12 +2312,12 @@ function AppearancePicker() {
                     i18n_default_text: "Appearance"
                 }, void 0, false, {
                     fileName: "[project]/components/custom/header.tsx",
-                    lineNumber: 143,
+                    lineNumber: 145,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/components/custom/header.tsx",
-                lineNumber: 142,
+                lineNumber: 144,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$popover$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Popover"], {
@@ -2327,12 +2337,12 @@ function AppearancePicker() {
                                         value: selected
                                     }, void 0, false, {
                                         fileName: "[project]/components/custom/header.tsx",
-                                        lineNumber: 153,
+                                        lineNumber: 155,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/components/custom/header.tsx",
-                                    lineNumber: 152,
+                                    lineNumber: 154,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
@@ -2348,23 +2358,23 @@ function AppearancePicker() {
                                         d: "M19 9l-7 7-7-7"
                                     }, void 0, false, {
                                         fileName: "[project]/components/custom/header.tsx",
-                                        lineNumber: 166,
+                                        lineNumber: 168,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/components/custom/header.tsx",
-                                    lineNumber: 155,
+                                    lineNumber: 157,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/custom/header.tsx",
-                            lineNumber: 147,
+                            lineNumber: 149,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/components/custom/header.tsx",
-                        lineNumber: 146,
+                        lineNumber: 148,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$popover$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["PopoverContent"], {
@@ -2387,47 +2397,47 @@ function AppearancePicker() {
                                                 "aria-hidden": "true"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/custom/header.tsx",
-                                                lineNumber: 187,
+                                                lineNumber: 189,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(AppearanceLabel, {
                                                 value: option.value
                                             }, void 0, false, {
                                                 fileName: "[project]/components/custom/header.tsx",
-                                                lineNumber: 192,
+                                                lineNumber: 194,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/custom/header.tsx",
-                                        lineNumber: 178,
+                                        lineNumber: 180,
                                         columnNumber: 17
                                     }, this)
                                 }, option.value, false, {
                                     fileName: "[project]/components/custom/header.tsx",
-                                    lineNumber: 177,
+                                    lineNumber: 179,
                                     columnNumber: 15
                                 }, this))
                         }, void 0, false, {
                             fileName: "[project]/components/custom/header.tsx",
-                            lineNumber: 175,
+                            lineNumber: 177,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/components/custom/header.tsx",
-                        lineNumber: 171,
+                        lineNumber: 173,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/custom/header.tsx",
-                lineNumber: 145,
+                lineNumber: 147,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/components/custom/header.tsx",
-        lineNumber: 141,
+        lineNumber: 143,
         columnNumber: 5
     }, this);
 }
@@ -2443,20 +2453,20 @@ function MobileAuthButtons({ isAuthenticated, isAuthenticating, onLogin, onLogou
                     className: "h-4 w-4 mr-2"
                 }, void 0, false, {
                     fileName: "[project]/components/custom/header.tsx",
-                    lineNumber: 221,
+                    lineNumber: 223,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$deriv$2d$com$2f$translations$2f$dist$2f$components$2f$localize$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Localize$3e$__["Localize"], {
                     i18n_default_text: "Log out"
                 }, void 0, false, {
                     fileName: "[project]/components/custom/header.tsx",
-                    lineNumber: 222,
+                    lineNumber: 224,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/components/custom/header.tsx",
-            lineNumber: 220,
+            lineNumber: 222,
             columnNumber: 7
         }, this);
     }
@@ -2471,18 +2481,18 @@ function MobileAuthButtons({ isAuthenticated, isAuthenticating, onLogin, onLogou
                     i18n_default_text: "Logging in..."
                 }, void 0, false, {
                     fileName: "[project]/components/custom/header.tsx",
-                    lineNumber: 236,
+                    lineNumber: 238,
                     columnNumber: 11
                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$deriv$2d$com$2f$translations$2f$dist$2f$components$2f$localize$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Localize$3e$__["Localize"], {
                     i18n_default_text: "Log in"
                 }, void 0, false, {
                     fileName: "[project]/components/custom/header.tsx",
-                    lineNumber: 238,
+                    lineNumber: 240,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/components/custom/header.tsx",
-                lineNumber: 229,
+                lineNumber: 231,
                 columnNumber: 7
             }, this),
             onSignUp && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -2493,18 +2503,18 @@ function MobileAuthButtons({ isAuthenticated, isAuthenticating, onLogin, onLogou
                     i18n_default_text: "Sign up"
                 }, void 0, false, {
                     fileName: "[project]/components/custom/header.tsx",
-                    lineNumber: 243,
+                    lineNumber: 245,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/components/custom/header.tsx",
-                lineNumber: 242,
+                lineNumber: 244,
                 columnNumber: 9
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/components/custom/header.tsx",
-        lineNumber: 228,
+        lineNumber: 230,
         columnNumber: 5
     }, this);
 }
@@ -2550,7 +2560,7 @@ function Header({ authState, accounts, activeAccount, onLogin, onLogout, onSwitc
                             children: logoLetter
                         }, void 0, false, {
                             fileName: "[project]/components/custom/header.tsx",
-                            lineNumber: 293,
+                            lineNumber: 295,
                             columnNumber: 13
                         }, this) : // eslint-disable-next-line @next/next/no-img-element -- next/image is avoided here intentionally: it errors in the optimizer when /logo.png is absent locally; a plain img with onError gives the same silent fallback behaviour
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
@@ -2560,12 +2570,12 @@ function Header({ authState, accounts, activeAccount, onLogin, onLogout, onSwitc
                             onError: ()=>setLogoError(true)
                         }, void 0, false, {
                             fileName: "[project]/components/custom/header.tsx",
-                            lineNumber: 298,
+                            lineNumber: 300,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/components/custom/header.tsx",
-                        lineNumber: 291,
+                        lineNumber: 293,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
@@ -2573,13 +2583,13 @@ function Header({ authState, accounts, activeAccount, onLogin, onLogout, onSwitc
                         children: resolvedName
                     }, void 0, false, {
                         fileName: "[project]/components/custom/header.tsx",
-                        lineNumber: 306,
+                        lineNumber: 308,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/custom/header.tsx",
-                lineNumber: 290,
+                lineNumber: 292,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2598,30 +2608,30 @@ function Header({ authState, accounts, activeAccount, onLogin, onLogout, onSwitc
                                         className: "h-4 w-4"
                                     }, void 0, false, {
                                         fileName: "[project]/components/custom/header.tsx",
-                                        lineNumber: 314,
+                                        lineNumber: 316,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$deriv$2d$com$2f$translations$2f$dist$2f$components$2f$localize$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Localize$3e$__["Localize"], {
                                         i18n_default_text: "Settings"
                                     }, void 0, false, {
                                         fileName: "[project]/components/custom/header.tsx",
-                                        lineNumber: 315,
+                                        lineNumber: 317,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/custom/header.tsx",
-                                lineNumber: 313,
+                                lineNumber: 315,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/components/custom/header.tsx",
-                            lineNumber: 312,
+                            lineNumber: 314,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/components/custom/header.tsx",
-                        lineNumber: 311,
+                        lineNumber: 313,
                         columnNumber: 9
                     }, this),
                     isAuthenticated && activeAccount && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$popover$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Popover"], {
@@ -2640,7 +2650,7 @@ function Header({ authState, accounts, activeAccount, onLogin, onLogout, onSwitc
                                                     type: activeAccount.account_type
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/custom/header.tsx",
-                                                    lineNumber: 324,
+                                                    lineNumber: 326,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2652,13 +2662,13 @@ function Header({ authState, accounts, activeAccount, onLogin, onLogout, onSwitc
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/components/custom/header.tsx",
-                                                    lineNumber: 325,
+                                                    lineNumber: 327,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/custom/header.tsx",
-                                            lineNumber: 323,
+                                            lineNumber: 325,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
@@ -2673,23 +2683,23 @@ function Header({ authState, accounts, activeAccount, onLogin, onLogout, onSwitc
                                                 d: "M19 9l-7 7-7-7"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/custom/header.tsx",
-                                                lineNumber: 339,
+                                                lineNumber: 341,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/components/custom/header.tsx",
-                                            lineNumber: 329,
+                                            lineNumber: 331,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/custom/header.tsx",
-                                    lineNumber: 322,
+                                    lineNumber: 324,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/components/custom/header.tsx",
-                                lineNumber: 321,
+                                lineNumber: 323,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$popover$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["PopoverContent"], {
@@ -2708,7 +2718,7 @@ function Header({ authState, accounts, activeAccount, onLogin, onLogout, onSwitc
                                                     type: account.account_type
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/custom/header.tsx",
-                                                    lineNumber: 359,
+                                                    lineNumber: 361,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2720,29 +2730,29 @@ function Header({ authState, accounts, activeAccount, onLogin, onLogout, onSwitc
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/components/custom/header.tsx",
-                                                    lineNumber: 360,
+                                                    lineNumber: 362,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, account.account_id, true, {
                                             fileName: "[project]/components/custom/header.tsx",
-                                            lineNumber: 346,
+                                            lineNumber: 348,
                                             columnNumber: 19
                                         }, this))
                                 }, void 0, false, {
                                     fileName: "[project]/components/custom/header.tsx",
-                                    lineNumber: 344,
+                                    lineNumber: 346,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/components/custom/header.tsx",
-                                lineNumber: 343,
+                                lineNumber: 345,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/custom/header.tsx",
-                        lineNumber: 320,
+                        lineNumber: 322,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2755,12 +2765,12 @@ function Header({ authState, accounts, activeAccount, onLogin, onLogout, onSwitc
                             onSignUp: onSignUp
                         }, void 0, false, {
                             fileName: "[project]/components/custom/header.tsx",
-                            lineNumber: 370,
+                            lineNumber: 372,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/components/custom/header.tsx",
-                        lineNumber: 369,
+                        lineNumber: 371,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$radix$2d$ui$2f$react$2d$dialog$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Trigger"], {
@@ -2774,35 +2784,35 @@ function Header({ authState, accounts, activeAccount, onLogin, onLogout, onSwitc
                                 className: "h-5 w-5"
                             }, void 0, false, {
                                 fileName: "[project]/components/custom/header.tsx",
-                                lineNumber: 385,
+                                lineNumber: 387,
                                 columnNumber: 31
                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$menu$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Menu$3e$__["Menu"], {
                                 className: "h-5 w-5"
                             }, void 0, false, {
                                 fileName: "[project]/components/custom/header.tsx",
-                                lineNumber: 385,
+                                lineNumber: 387,
                                 columnNumber: 59
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/components/custom/header.tsx",
-                            lineNumber: 379,
+                            lineNumber: 381,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/components/custom/header.tsx",
-                        lineNumber: 378,
+                        lineNumber: 380,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/custom/header.tsx",
-                lineNumber: 310,
+                lineNumber: 312,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/components/custom/header.tsx",
-        lineNumber: 289,
+        lineNumber: 291,
         columnNumber: 7
     }, this);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$radix$2d$ui$2f$react$2d$dialog$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Root"], {
@@ -2843,12 +2853,12 @@ function Header({ authState, accounts, activeAccount, onLogin, onLogout, onSwitc
                                                                     i18n_default_text: "Your preferences"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/custom/header.tsx",
-                                                                    lineNumber: 414,
+                                                                    lineNumber: 416,
                                                                     columnNumber: 19
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/custom/header.tsx",
-                                                                lineNumber: 413,
+                                                                lineNumber: 415,
                                                                 columnNumber: 17
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2857,18 +2867,18 @@ function Header({ authState, accounts, activeAccount, onLogin, onLogout, onSwitc
                                                                     i18n_default_text: "Settings"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/custom/header.tsx",
-                                                                    lineNumber: 417,
+                                                                    lineNumber: 419,
                                                                     columnNumber: 19
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/custom/header.tsx",
-                                                                lineNumber: 416,
+                                                                lineNumber: 418,
                                                                 columnNumber: 17
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/custom/header.tsx",
-                                                        lineNumber: 412,
+                                                        lineNumber: 414,
                                                         columnNumber: 15
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$radix$2d$ui$2f$react$2d$dialog$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Description"], {
@@ -2880,12 +2890,12 @@ function Header({ authState, accounts, activeAccount, onLogin, onLogout, onSwitc
                                                                     i18n_default_text: "A space that feels like you."
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/custom/header.tsx",
-                                                                    lineNumber: 422,
+                                                                    lineNumber: 424,
                                                                     columnNumber: 19
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/custom/header.tsx",
-                                                                lineNumber: 421,
+                                                                lineNumber: 423,
                                                                 columnNumber: 17
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2894,24 +2904,24 @@ function Header({ authState, accounts, activeAccount, onLogin, onLogout, onSwitc
                                                                     i18n_default_text: "Manage your appearance and language preferences."
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/custom/header.tsx",
-                                                                    lineNumber: 425,
+                                                                    lineNumber: 427,
                                                                     columnNumber: 19
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/custom/header.tsx",
-                                                                lineNumber: 424,
+                                                                lineNumber: 426,
                                                                 columnNumber: 17
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/custom/header.tsx",
-                                                        lineNumber: 420,
+                                                        lineNumber: 422,
                                                         columnNumber: 15
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/custom/header.tsx",
-                                                lineNumber: 411,
+                                                lineNumber: 413,
                                                 columnNumber: 13
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$radix$2d$ui$2f$react$2d$dialog$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Close"], {
@@ -2925,28 +2935,28 @@ function Header({ authState, accounts, activeAccount, onLogin, onLogout, onSwitc
                                                         className: "h-4 w-4"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/custom/header.tsx",
-                                                        lineNumber: 431,
+                                                        lineNumber: 433,
                                                         columnNumber: 17
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/custom/header.tsx",
-                                                    lineNumber: 430,
+                                                    lineNumber: 432,
                                                     columnNumber: 15
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/components/custom/header.tsx",
-                                                lineNumber: 429,
+                                                lineNumber: 431,
                                                 columnNumber: 13
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/custom/header.tsx",
-                                        lineNumber: 410,
+                                        lineNumber: 412,
                                         columnNumber: 11
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(AppearancePicker, {}, void 0, false, {
                                         fileName: "[project]/components/custom/header.tsx",
-                                        lineNumber: 435,
+                                        lineNumber: 437,
                                         columnNumber: 11
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2958,25 +2968,25 @@ function Header({ authState, accounts, activeAccount, onLogin, onLogout, onSwitc
                                                     i18n_default_text: "Language"
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/custom/header.tsx",
-                                                    lineNumber: 438,
+                                                    lineNumber: 440,
                                                     columnNumber: 15
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/components/custom/header.tsx",
-                                                lineNumber: 437,
+                                                lineNumber: 439,
                                                 columnNumber: 13
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$custom$2f$language$2d$switcher$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["LanguageSwitcher"], {
                                                 className: "w-full h-11 font-semibold"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/custom/header.tsx",
-                                                lineNumber: 440,
+                                                lineNumber: 442,
                                                 columnNumber: 13
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/custom/header.tsx",
-                                        lineNumber: 436,
+                                        lineNumber: 438,
                                         columnNumber: 11
                                     }, this),
                                     isAuthenticated && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2988,12 +2998,12 @@ function Header({ authState, accounts, activeAccount, onLogin, onLogout, onSwitc
                                                     i18n_default_text: "Trading"
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/custom/header.tsx",
-                                                    lineNumber: 445,
+                                                    lineNumber: 447,
                                                     columnNumber: 17
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/components/custom/header.tsx",
-                                                lineNumber: 444,
+                                                lineNumber: 446,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -3007,29 +3017,29 @@ function Header({ authState, accounts, activeAccount, onLogin, onLogout, onSwitc
                                                         i18n_default_text: "View your positions →"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/custom/header.tsx",
-                                                        lineNumber: 449,
+                                                        lineNumber: 451,
                                                         columnNumber: 19
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/custom/header.tsx",
-                                                    lineNumber: 448,
+                                                    lineNumber: 450,
                                                     columnNumber: 17
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/components/custom/header.tsx",
-                                                lineNumber: 447,
+                                                lineNumber: 449,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/custom/header.tsx",
-                                        lineNumber: 443,
+                                        lineNumber: 445,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/custom/header.tsx",
-                                lineNumber: 409,
+                                lineNumber: 411,
                                 columnNumber: 9
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3045,34 +3055,34 @@ function Header({ authState, accounts, activeAccount, onLogin, onLogout, onSwitc
                                     onSignUp: onSignUp
                                 }, void 0, false, {
                                     fileName: "[project]/components/custom/header.tsx",
-                                    lineNumber: 456,
+                                    lineNumber: 458,
                                     columnNumber: 11
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/components/custom/header.tsx",
-                                lineNumber: 455,
+                                lineNumber: 457,
                                 columnNumber: 9
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/custom/header.tsx",
-                        lineNumber: 401,
+                        lineNumber: 403,
                         columnNumber: 7
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/components/custom/header.tsx",
-                    lineNumber: 400,
+                    lineNumber: 402,
                     columnNumber: 7
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/components/custom/header.tsx",
-                lineNumber: 399,
+                lineNumber: 401,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/components/custom/header.tsx",
-        lineNumber: 393,
+        lineNumber: 395,
         columnNumber: 5
     }, this);
 }

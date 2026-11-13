@@ -514,34 +514,34 @@ img, video {
 
 :root {
   --radius: .5rem;
-  --primary: 194 126 36;
-  --accent: 246 247 248;
-  --background: 255 255 255;
-  --border: 229 229 229;
-  --card: 255 255 255;
-  --card-foreground: 10 10 10;
+  --primary: 72 220 205;
+  --accent: 23 50 68;
+  --background: 7 17 31;
+  --border: 39 75 98;
+  --card: 12 28 45;
+  --card-foreground: 228 246 255;
   --destructive: 230 25 14 / .72;
   --destructive-foreground: 254 252 252;
-  --accent-foreground: 17 20 27;
-  --foreground: 10 10 10;
-  --input: 0 0 0 / .08;
-  --muted: 245 245 245;
-  --popover: 255 255 255;
-  --popover-foreground: 10 10 10;
-  --primary-foreground: 255 255 255;
-  --ring: 163 163 163;
-  --secondary: 255 255 255;
-  --secondary-foreground: 0 0 0;
-  --muted-foreground: 115 115 115;
-  --chart-1: 234 88 12;
-  --chart-2: 13 148 136;
-  --chart-3: 22 78 99;
-  --chart-4: 251 191 36;
-  --chart-5: 245 158 11;
-  --buy-background: 0 195 144;
-  --buy-foreground: 255 255 255;
-  --sell-background: 222 0 64;
-  --sell-foreground: 255 255 255;
+  --accent-foreground: 117 235 220;
+  --foreground: 228 246 255;
+  --input: 72 220 205 / .2;
+  --muted: 19 39 55;
+  --popover: 10 24 40;
+  --popover-foreground: 228 246 255;
+  --primary-foreground: 4 25 37;
+  --ring: 72 220 205;
+  --secondary: 17 39 56;
+  --secondary-foreground: 223 242 255;
+  --muted-foreground: 150 178 198;
+  --chart-1: 72 220 205;
+  --chart-2: 81 141 255;
+  --chart-3: 181 121 255;
+  --chart-4: 248 202 88;
+  --chart-5: 255 118 166;
+  --buy-background: 45 212 160;
+  --buy-foreground: 4 29 33;
+  --sell-background: 251 113 133;
+  --sell-foreground: 35 10 20;
   --button-black: 0 0 0;
   --button-black-foreground: 255 255 255;
   --button-white: 255 255 255;
@@ -572,6 +572,9 @@ img, video {
   --button-blackwhite-foreground: 255 255 255;
   --checkmark-foreground: 255 255 255;
   --checkmark: 10 10 10;
+  --lightningcss-light: ;
+  --lightningcss-dark: initial;
+  color-scheme: dark;
 }
 
 .dark {
@@ -631,7 +634,7 @@ img, video {
   --checkmark: 255 255 255;
 }
 
-.aurora, .ocean, .sunset, .forest, .amethyst {
+.aurora, .ocean, .sunset, .forest, .amethyst, .quantum-neon, .royal-gold, .midnight-eclipse, .crimson-storm, .aurora-dream, .neon-samurai, .ice-phantom, .royal-galaxy, .cyber-matrix {
   --lightningcss-light: ;
   --lightningcss-dark: initial;
   color-scheme: dark;
@@ -657,6 +660,23 @@ img, video {
   --border-focus-destructive: 255 77 77;
   --button-blackwhite: 255 255 255;
   --button-blackwhite-foreground: 0 0 0;
+  --buy-background: 45 212 160;
+  --buy-foreground: 4 29 33;
+  --sell-background: 251 113 133;
+  --sell-foreground: 35 10 20;
+  --buy-20: 45 212 160 / .32;
+  --sell-20: 251 113 133 / .32;
+  --chart-1: var(--primary);
+  --chart-2: 96 165 250;
+  --chart-3: 192 132 252;
+  --chart-4: 250 204 21;
+  --chart-5: 251 113 133;
+  --section-message: 14 116 144 / .3;
+  --blue-500: 56 189 248;
+  --outline: var(--primary) / .45;
+  --outline-10: var(--primary) / .12;
+  --destructive-20: 248 113 113 / .25;
+  --destructive-40: 248 113 113 / .45;
   --checkmark-foreground: var(--background);
   --checkmark: 255 255 255;
 }
@@ -844,6 +864,222 @@ img, video {
   --outline-10: 185 145 255 / .12;
   --destructive-20: 248 113 113 / .25;
   --destructive-40: 248 113 113 / .45;
+}
+
+.quantum-neon {
+  --background: 8 5 22;
+  --foreground: 246 230 255;
+  --card: 19 10 39;
+  --card-foreground: 246 230 255;
+  --popover: 13 7 30;
+  --popover-foreground: 246 230 255;
+  --primary: 203 71 255;
+  --primary-foreground: 27 5 38;
+  --secondary: 34 14 62;
+  --secondary-foreground: 237 215 255;
+  --muted: 30 17 52;
+  --muted-foreground: 187 159 213;
+  --accent: 49 19 82;
+  --accent-foreground: 225 146 255;
+  --border: 91 45 130;
+  --input: 203 71 255 / .22;
+  --ring: 203 71 255;
+  --chart-2: 104 102 255;
+  --chart-3: 255 74 226;
+  --chart-4: 80 234 255;
+  --chart-5: 255 183 74;
+}
+
+.royal-gold {
+  --background: 15 11 7;
+  --foreground: 255 242 205;
+  --card: 28 19 9;
+  --card-foreground: 255 242 205;
+  --popover: 22 15 8;
+  --popover-foreground: 255 242 205;
+  --primary: 245 190 66;
+  --primary-foreground: 37 23 3;
+  --secondary: 48 34 15;
+  --secondary-foreground: 255 235 184;
+  --muted: 39 29 16;
+  --muted-foreground: 195 171 122;
+  --accent: 63 44 17;
+  --accent-foreground: 255 211 104;
+  --border: 111 79 31;
+  --input: 245 190 66 / .2;
+  --ring: 245 190 66;
+  --chart-2: 255 220 112;
+  --chart-3: 214 143 50;
+  --chart-4: 117 198 146;
+  --chart-5: 232 107 83;
+}
+
+.midnight-eclipse {
+  --background: 5 12 25;
+  --foreground: 226 240 255;
+  --card: 10 24 44;
+  --card-foreground: 226 240 255;
+  --popover: 8 19 37;
+  --popover-foreground: 226 240 255;
+  --primary: 112 186 255;
+  --primary-foreground: 5 24 48;
+  --secondary: 17 36 62;
+  --secondary-foreground: 220 238 255;
+  --muted: 18 34 55;
+  --muted-foreground: 149 177 208;
+  --accent: 24 49 80;
+  --accent-foreground: 148 207 255;
+  --border: 42 79 119;
+  --input: 112 186 255 / .2;
+  --ring: 112 186 255;
+  --chart-2: 58 142 246;
+  --chart-3: 117 221 255;
+  --chart-4: 183 152 255;
+  --chart-5: 255 198 110;
+}
+
+.crimson-storm {
+  --background: 20 5 9;
+  --foreground: 255 232 235;
+  --card: 36 11 18;
+  --card-foreground: 255 232 235;
+  --popover: 28 8 14;
+  --popover-foreground: 255 232 235;
+  --primary: 255 55 74;
+  --primary-foreground: 48 4 11;
+  --secondary: 57 15 25;
+  --secondary-foreground: 255 224 228;
+  --muted: 47 15 23;
+  --muted-foreground: 207 151 161;
+  --accent: 73 18 30;
+  --accent-foreground: 255 121 133;
+  --border: 120 41 54;
+  --input: 255 55 74 / .2;
+  --ring: 255 55 74;
+  --chart-2: 255 126 86;
+  --chart-3: 255 190 78;
+  --chart-4: 166 57 96;
+  --chart-5: 116 163 255;
+}
+
+.aurora-dream {
+  --background: 7 17 31;
+  --foreground: 228 246 255;
+  --card: 12 28 45;
+  --card-foreground: 228 246 255;
+  --popover: 10 24 40;
+  --popover-foreground: 228 246 255;
+  --primary: 72 220 205;
+  --primary-foreground: 4 25 37;
+  --secondary: 17 39 56;
+  --secondary-foreground: 223 242 255;
+  --muted: 19 39 55;
+  --muted-foreground: 150 178 198;
+  --accent: 23 50 68;
+  --accent-foreground: 117 235 220;
+  --border: 39 75 98;
+  --input: 72 220 205 / .2;
+  --ring: 72 220 205;
+  --chart-2: 81 141 255;
+  --chart-3: 181 121 255;
+  --chart-4: 248 202 88;
+  --chart-5: 255 118 166;
+}
+
+.neon-samurai {
+  --background: 16 6 8;
+  --foreground: 255 231 233;
+  --card: 31 11 15;
+  --card-foreground: 255 231 233;
+  --popover: 24 8 12;
+  --popover-foreground: 255 231 233;
+  --primary: 255 51 84;
+  --primary-foreground: 49 3 12;
+  --secondary: 50 14 21;
+  --secondary-foreground: 255 222 228;
+  --muted: 43 15 21;
+  --muted-foreground: 199 146 156;
+  --accent: 71 17 28;
+  --accent-foreground: 255 119 143;
+  --border: 116 40 56;
+  --input: 255 51 84 / .2;
+  --ring: 255 51 84;
+  --chart-2: 255 143 95;
+  --chart-3: 255 205 100;
+  --chart-4: 137 221 159;
+  --chart-5: 123 161 255;
+}
+
+.ice-phantom {
+  --background: 5 15 27;
+  --foreground: 229 246 255;
+  --card: 10 28 45;
+  --card-foreground: 229 246 255;
+  --popover: 8 22 38;
+  --popover-foreground: 229 246 255;
+  --primary: 100 203 255;
+  --primary-foreground: 4 25 42;
+  --secondary: 17 42 62;
+  --secondary-foreground: 222 243 255;
+  --muted: 18 40 58;
+  --muted-foreground: 151 185 207;
+  --accent: 23 55 79;
+  --accent-foreground: 142 222 255;
+  --border: 42 91 123;
+  --input: 100 203 255 / .2;
+  --ring: 100 203 255;
+  --chart-2: 64 145 255;
+  --chart-3: 114 242 242;
+  --chart-4: 181 154 255;
+  --chart-5: 255 213 126;
+}
+
+.royal-galaxy {
+  --background: 13 7 28;
+  --foreground: 246 235 255;
+  --card: 24 14 45;
+  --card-foreground: 246 235 255;
+  --popover: 19 10 37;
+  --popover-foreground: 246 235 255;
+  --primary: 182 110 255;
+  --primary-foreground: 31 8 54;
+  --secondary: 39 23 66;
+  --secondary-foreground: 239 223 255;
+  --muted: 34 21 57;
+  --muted-foreground: 181 160 209;
+  --accent: 53 28 83;
+  --accent-foreground: 213 161 255;
+  --border: 87 54 130;
+  --input: 182 110 255 / .2;
+  --ring: 182 110 255;
+  --chart-2: 255 102 209;
+  --chart-3: 100 195 255;
+  --chart-4: 255 201 104;
+  --chart-5: 128 234 203;
+}
+
+.cyber-matrix {
+  --background: 4 18 11;
+  --foreground: 228 255 237;
+  --card: 9 31 19;
+  --card-foreground: 228 255 237;
+  --popover: 7 25 15;
+  --popover-foreground: 228 255 237;
+  --primary: 51 232 126;
+  --primary-foreground: 3 32 14;
+  --secondary: 15 48 27;
+  --secondary-foreground: 218 255 229;
+  --muted: 15 41 25;
+  --muted-foreground: 146 194 160;
+  --accent: 19 63 34;
+  --accent-foreground: 107 255 160;
+  --border: 39 105 59;
+  --input: 51 232 126 / .2;
+  --ring: 51 232 126;
+  --chart-2: 31 173 110;
+  --chart-3: 121 255 200;
+  --chart-4: 200 255 105;
+  --chart-5: 79 178 255;
 }
 
 * {
@@ -1556,35 +1792,8 @@ body {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
-.-rotate-90 {
-  --tw-rotate: -90deg;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.rotate-0 {
-  --tw-rotate: 0deg;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
 .rotate-180 {
   --tw-rotate: 180deg;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.rotate-90 {
-  --tw-rotate: 90deg;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.scale-0 {
-  --tw-scale-x: 0;
-  --tw-scale-y: 0;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.scale-100 {
-  --tw-scale-x: 1;
-  --tw-scale-y: 1;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
@@ -4134,27 +4343,8 @@ body {
 
 .factorpulse-shell {
   background-color: rgb(var(--background));
-  background-image: radial-gradient(at 8% 0, #82361c33, #0000 38rem), radial-gradient(at 94% 8%, #532a8424, #0000 34rem);
-}
-
-.aurora .factorpulse-shell {
-  background-image: radial-gradient(at 8% 0, #2dd4bf2e, #0000 38rem), radial-gradient(at 94% 8%, #3b82f629, #0000 34rem);
-}
-
-.ocean .factorpulse-shell {
-  background-image: radial-gradient(at 8% 0, #2563eb38, #0000 38rem), radial-gradient(at 94% 8%, #06b6d426, #0000 34rem);
-}
-
-.sunset .factorpulse-shell {
-  background-image: radial-gradient(at 8% 0, #f43f5e33, #0000 38rem), radial-gradient(at 94% 8%, #f9731629, #0000 34rem);
-}
-
-.forest .factorpulse-shell {
-  background-image: radial-gradient(at 8% 0, #22c55e2e, #0000 38rem), radial-gradient(at 94% 8%, #14b8a624, #0000 34rem);
-}
-
-.amethyst .factorpulse-shell {
-  background-image: radial-gradient(at 8% 0, #8b5cf633, #0000 38rem), radial-gradient(at 94% 8%, #d946ef24, #0000 34rem);
+  background-image: radial-gradient(ellipse at 8% 0%, rgb(var(--primary) / .18), transparent 38rem),
+    radial-gradient(ellipse at 94% 8%, rgb(var(--chart-2) / .15), transparent 34rem);
 }
 
 .factorpulse-panel {

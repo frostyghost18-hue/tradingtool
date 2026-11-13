@@ -109,19 +109,21 @@ function preventDismissFromPopoverOrHeader(event: {
 }
 
 const APPEARANCE_OPTIONS = [
-  { value: 'light', label: 'Light', swatch: 'linear-gradient(135deg, #f8fafc, #94a3b8)' },
-  { value: 'dark', label: 'Dark', swatch: 'linear-gradient(135deg, #190f0d, #f2a137)' },
-  { value: 'aurora', label: 'Aurora', swatch: 'linear-gradient(135deg, #08141f, #4fe0c4)' },
-  { value: 'ocean', label: 'Ocean', swatch: 'linear-gradient(135deg, #09132b, #5ea5ff)' },
-  { value: 'sunset', label: 'Sunset', swatch: 'linear-gradient(135deg, #220f26, #ff775f)' },
-  { value: 'forest', label: 'Forest', swatch: 'linear-gradient(135deg, #0a1d1a, #68dc9d)' },
-  { value: 'amethyst', label: 'Amethyst', swatch: 'linear-gradient(135deg, #16112a, #b991ff)' },
+  { value: 'quantum-neon', label: 'Quantum Neon', swatch: 'linear-gradient(135deg, #080516, #cb47ff)' },
+  { value: 'royal-gold', label: 'Royal Gold', swatch: 'linear-gradient(135deg, #0f0b07, #f5be42)' },
+  { value: 'midnight-eclipse', label: 'Midnight Eclipse', swatch: 'linear-gradient(135deg, #050c19, #70baff)' },
+  { value: 'crimson-storm', label: 'Crimson Storm', swatch: 'linear-gradient(135deg, #140509, #ff374a)' },
+  { value: 'aurora-dream', label: 'Aurora Dream', swatch: 'linear-gradient(135deg, #07111f, #48dccd)' },
+  { value: 'neon-samurai', label: 'Neon Samurai', swatch: 'linear-gradient(135deg, #100608, #ff3354)' },
+  { value: 'ice-phantom', label: 'Ice Phantom', swatch: 'linear-gradient(135deg, #050f1b, #64cbff)' },
+  { value: 'royal-galaxy', label: 'Royal Galaxy', swatch: 'linear-gradient(135deg, #0d071c, #b66eff)' },
+  { value: 'cyber-matrix', label: 'Cyber Matrix', swatch: 'linear-gradient(135deg, #04120b, #33e87e)' },
 ] as const;
 
 type AppearanceTheme = (typeof APPEARANCE_OPTIONS)[number]['value'];
 
 function AppearanceLabel({ value }: { value: AppearanceTheme }) {
-  const option = APPEARANCE_OPTIONS.find((item) => item.value === value) ?? APPEARANCE_OPTIONS[1];
+  const option = APPEARANCE_OPTIONS.find((item) => item.value === value) ?? APPEARANCE_OPTIONS[4];
   return <Localize i18n_default_text={option.label} />;
 }
 
@@ -130,7 +132,7 @@ function AppearancePicker() {
   const [open, setOpen] = useState(false);
   const selected = APPEARANCE_OPTIONS.some((option) => option.value === theme)
     ? theme as AppearanceTheme
-    : 'dark';
+    : 'aurora-dream';
 
   const handleSelect = (value: AppearanceTheme) => {
     setTheme(value);
