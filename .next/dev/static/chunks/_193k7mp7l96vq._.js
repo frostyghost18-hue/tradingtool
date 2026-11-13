@@ -9376,7 +9376,7 @@ async function scanMarkets(ws, symbols, contractMode, shouldStop, excludedCandid
     const failures = [];
     const eligibleSymbols = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$market$2d$scanner$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getScannableMarkets"])(symbols);
     if (eligibleSymbols.length === 0) {
-        throw new Error('No open, unsuspended markets are available to scan.');
+        throw new Error('No open, unsuspended continuous indices are available to scan.');
     }
     const openSymbols = eligibleSymbols.filter((symbol)=>hasAvailableScanMode(symbol.underlying_symbol, contractMode, excludedCandidates));
     if (openSymbols.length === 0) return [];
@@ -9776,7 +9776,7 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
                         scanNumber += 1;
                         const eligibleMarkets = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$market$2d$scanner$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getScannableMarkets"])(symbols);
                         if (eligibleMarkets.length === 0) {
-                            throw new Error(localize('No open, unsuspended markets are available to scan.'));
+                            throw new Error(localize('No open, unsuspended continuous indices are available to scan.'));
                         }
                         if (eligibleMarkets.every({
                             "useDigitsTrading.useCallback[buyContract].scanForMarket": (symbol)=>!hasAvailableScanMode(symbol.underlying_symbol, selectedContractMode, rejectedCandidates)
@@ -11417,7 +11417,10 @@ __turbopack_context__.s([
     "scoreMarket",
     ()=>scoreMarket
 ]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$packages$2f$core$2f$src$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/packages/core/src/index.ts [app-client] (ecmascript) <locals>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$packages$2f$core$2f$src$2f$utils$2f$is$2d$continuous$2d$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/packages/core/src/utils/is-continuous-index.ts [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$digit$2d$stats$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/lib/digit-stats.ts [app-client] (ecmascript)");
+;
 ;
 const MARKET_SCAN_TICK_COUNT = 30;
 const MARKET_SCAN_DURATION_SECONDS = 15;
@@ -11541,7 +11544,7 @@ function getClusterSignal(digits, contractMode, barrier, priorRate) {
     };
 }
 function getScannableMarkets(symbols) {
-    return symbols.filter((symbol)=>symbol.exchange_is_open === 1 && symbol.is_trading_suspended === 0);
+    return symbols.filter((symbol)=>symbol.exchange_is_open === 1 && symbol.is_trading_suspended === 0 && (0, __TURBOPACK__imported__module__$5b$project$5d2f$packages$2f$core$2f$src$2f$utils$2f$is$2d$continuous$2d$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["isContinuousIndexSymbol"])(symbol));
 }
 function getContractBarrier(contractMode, differsDigit) {
     switch(contractMode){

@@ -175,7 +175,7 @@ async function scanMarkets(
   const failures: string[] = [];
   const eligibleSymbols = getScannableMarkets(symbols);
   if (eligibleSymbols.length === 0) {
-    throw new Error('No open, unsuspended markets are available to scan.');
+    throw new Error('No open, unsuspended continuous indices are available to scan.');
   }
   const openSymbols = eligibleSymbols.filter(
     (symbol) => hasAvailableScanMode(symbol.underlying_symbol, contractMode, excludedCandidates)
@@ -689,7 +689,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
 
         const eligibleMarkets = getScannableMarkets(symbols);
         if (eligibleMarkets.length === 0) {
-          throw new Error(localize('No open, unsuspended markets are available to scan.'));
+          throw new Error(localize('No open, unsuspended continuous indices are available to scan.'));
         }
         if (eligibleMarkets.every(
           (symbol) => !hasAvailableScanMode(

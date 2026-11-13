@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { DerivWS } from '../ws';
 import type { ActiveSymbol, ContractsForResponse, ContractInfo, DurationLimits } from '../types';
+import { isContinuousIndexSymbol } from '../utils/is-continuous-index';
 import { pickDefaultSymbol } from '../utils/pick-default-symbol';
 
 const SYMBOL_PARAM = 'symbol';
@@ -91,8 +92,8 @@ export function useActiveSymbols(
         });
         if (disposed) return;
 
-        const allSymbols = response.active_symbols;
-        if (!allSymbols || allSymbols.length === 0) {
+        const allSymbols = response.active_symbols?.filter(isContinuousIndexSymbol) ?? [];
+        if (allSymbols.length === 0) {
           throw new Error('No symbols available');
         }
 

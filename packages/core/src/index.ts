@@ -68,6 +68,7 @@ export { getAuthBaseUrl, getApiBaseUrl, getPublicWsUrl } from './config';
 
 // Utils
 export { pickDefaultSymbol } from './utils/pick-default-symbol';
+export { isContinuousIndexSymbol } from './utils/is-continuous-index';
 
 // WebSocket
 export { DerivWS, DerivApiError, isDerivApiError } from './ws';

@@ -1,3 +1,4 @@
+import { isContinuousIndexSymbol } from '@deriv/core';
 import type { ActiveSymbol } from '@deriv/core';
 import { getLastDigit, pipSizeFromPip } from '@/lib/digit-stats';
 import type { ContractMode } from '@/lib/types';
@@ -211,7 +212,10 @@ function getClusterSignal(
 
 export function getScannableMarkets(symbols: ActiveSymbol[]): ActiveSymbol[] {
   return symbols.filter(
-    (symbol) => symbol.exchange_is_open === 1 && symbol.is_trading_suspended === 0
+    (symbol) =>
+      symbol.exchange_is_open === 1 &&
+      symbol.is_trading_suspended === 0 &&
+      isContinuousIndexSymbol(symbol)
   );
 }
 
