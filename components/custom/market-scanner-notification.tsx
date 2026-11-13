@@ -197,15 +197,18 @@ export function MarketScannerNotification({
                 );
               })}
             </div>
-            <div className="flex items-center justify-between gap-2 text-[9px] text-muted-foreground">
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-[9px] text-muted-foreground">
               <span>
                 {localize('{{ticks}} / 30 recent ticks · Wilson {{rate}}%', {
                   ticks: prediction.sampleCount,
                   rate: (prediction.estimatedWinRate * 100).toFixed(1),
                 })}
               </span>
-              <span className="shrink-0">
-                {localize('{{count}} / 4 active states', { count: prediction.activeSignalCount })}
+              <span>
+                {localize('{{count}} / 4 active · {{required}} required', {
+                  count: prediction.activeSignalCount,
+                  required: prediction.requiredActiveSignalCount,
+                })}
               </span>
               <span className={prediction.eligibleForTrading ? 'text-emerald-500' : 'text-amber-500'}>
                 {prediction.eligibleForTrading

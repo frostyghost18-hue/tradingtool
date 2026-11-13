@@ -3914,7 +3914,7 @@ function MarketScannerNotification({ progress, status, onStop }) {
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "flex items-center justify-between gap-2 text-[9px] text-muted-foreground",
+                            className: "mt-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-[9px] text-muted-foreground",
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                     children: localize('{{ticks}} / 30 recent ticks · Wilson {{rate}}%', {
@@ -3927,9 +3927,9 @@ function MarketScannerNotification({ progress, status, onStop }) {
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                    className: "shrink-0",
-                                    children: localize('{{count}} / 4 active states', {
-                                        count: prediction.activeSignalCount
+                                    children: localize('{{count}} / 4 active · {{required}} required', {
+                                        count: prediction.activeSignalCount,
+                                        required: prediction.requiredActiveSignalCount
                                     })
                                 }, void 0, false, {
                                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
@@ -3941,7 +3941,7 @@ function MarketScannerNotification({ progress, status, onStop }) {
                                     children: prediction.eligibleForTrading ? localize('Active · trade candidate') : localize('Forecast only')
                                 }, void 0, false, {
                                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                                    lineNumber: 210,
+                                    lineNumber: 213,
                                     columnNumber: 15
                                 }, this)
                             ]
@@ -3955,7 +3955,7 @@ function MarketScannerNotification({ progress, status, onStop }) {
                             children: localize('These experimental estimates use past ticks and do not guarantee future results. Quotes are checked before any trade.')
                         }, void 0, false, {
                             fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                            lineNumber: 216,
+                            lineNumber: 219,
                             columnNumber: 13
                         }, this)
                     ]
@@ -3968,7 +3968,7 @@ function MarketScannerNotification({ progress, status, onStop }) {
                     children: localize('Evaluating open markets for the strongest active signal.')
                 }, void 0, false, {
                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                    lineNumber: 221,
+                    lineNumber: 224,
                     columnNumber: 11
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -3981,7 +3981,7 @@ function MarketScannerNotification({ progress, status, onStop }) {
                     children: status === 'stopping' ? localize('Stopping...') : isSelected ? localize('Stop auto-trading') : localize('Stop scan')
                 }, void 0, false, {
                     fileName: "[project]/components/custom/market-scanner-notification.tsx",
-                    lineNumber: 226,
+                    lineNumber: 229,
                     columnNumber: 9
                 }, this)
             ]
@@ -4649,6 +4649,8 @@ function TransactionsPanel({ transactions, onReset, isAuthenticated }) {
     const visibleTransactions = transactions.filter((transaction)=>filter === 'all' || transaction.status === filter);
     const openCount = transactions.filter((transaction)=>transaction.status === 'open').length;
     const closedCount = transactions.length - openCount;
+    const winCount = transactions.filter((transaction)=>transaction.status === 'closed' && transaction.profit > 0).length;
+    const lossCount = transactions.filter((transaction)=>transaction.status === 'closed' && transaction.profit < 0).length;
     const totalProfit = transactions.reduce((total, transaction)=>total + (Number.isFinite(transaction.profit) ? transaction.profit : 0), 0);
     const currency = transactions[0]?.currency ?? '';
     const contractTypeLabels = {
@@ -4673,7 +4675,7 @@ function TransactionsPanel({ transactions, onReset, isAuthenticated }) {
                                 className: "h-4 w-4 shrink-0 text-primary"
                             }, void 0, false, {
                                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                                lineNumber: 73,
+                                lineNumber: 79,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardTitle"], {
@@ -4682,18 +4684,18 @@ function TransactionsPanel({ transactions, onReset, isAuthenticated }) {
                                     i18n_default_text: "Transactions"
                                 }, void 0, false, {
                                     fileName: "[project]/components/custom/transactions-panel.tsx",
-                                    lineNumber: 75,
+                                    lineNumber: 81,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                                lineNumber: 74,
+                                lineNumber: 80,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/custom/transactions-panel.tsx",
-                        lineNumber: 72,
+                        lineNumber: 78,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4711,20 +4713,20 @@ function TransactionsPanel({ transactions, onReset, isAuthenticated }) {
                                         className: "h-3.5 w-3.5"
                                     }, void 0, false, {
                                         fileName: "[project]/components/custom/transactions-panel.tsx",
-                                        lineNumber: 88,
+                                        lineNumber: 94,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                         children: localize('Reset')
                                     }, void 0, false, {
                                         fileName: "[project]/components/custom/transactions-panel.tsx",
-                                        lineNumber: 89,
+                                        lineNumber: 95,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                                lineNumber: 80,
+                                lineNumber: 86,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Select"], {
@@ -4736,12 +4738,12 @@ function TransactionsPanel({ transactions, onReset, isAuthenticated }) {
                                         className: "h-8 w-[98px] shrink-0 text-xs",
                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectValue"], {}, void 0, false, {
                                             fileName: "[project]/components/custom/transactions-panel.tsx",
-                                            lineNumber: 94,
+                                            lineNumber: 100,
                                             columnNumber: 15
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/components/custom/transactions-panel.tsx",
-                                        lineNumber: 93,
+                                        lineNumber: 99,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectContent"], {
@@ -4755,7 +4757,7 @@ function TransactionsPanel({ transactions, onReset, isAuthenticated }) {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                                                lineNumber: 97,
+                                                lineNumber: 103,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectItem"], {
@@ -4767,7 +4769,7 @@ function TransactionsPanel({ transactions, onReset, isAuthenticated }) {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                                                lineNumber: 98,
+                                                lineNumber: 104,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectItem"], {
@@ -4779,97 +4781,128 @@ function TransactionsPanel({ transactions, onReset, isAuthenticated }) {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                                                lineNumber: 99,
+                                                lineNumber: 105,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/custom/transactions-panel.tsx",
-                                        lineNumber: 96,
+                                        lineNumber: 102,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                                lineNumber: 92,
+                                lineNumber: 98,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/custom/transactions-panel.tsx",
-                        lineNumber: 78,
+                        lineNumber: 84,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                lineNumber: 71,
+                lineNumber: 77,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "flex items-center justify-between gap-3 border-b border-border/60 px-4 py-2.5",
+                className: "grid grid-cols-2 gap-3 border-b border-border/60 px-4 py-2.5 sm:grid-cols-4",
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "flex items-center gap-3 text-xs",
                         children: [
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                className: "text-muted-foreground",
-                                children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$deriv$2d$com$2f$translations$2f$dist$2f$components$2f$localize$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Localize$3e$__["Localize"], {
-                                        i18n_default_text: "Open"
-                                    }, void 0, false, {
-                                        fileName: "[project]/components/custom/transactions-panel.tsx",
-                                        lineNumber: 108,
-                                        columnNumber: 13
-                                    }, this),
-                                    " ",
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("strong", {
-                                        className: "text-foreground",
-                                        children: openCount
-                                    }, void 0, false, {
-                                        fileName: "[project]/components/custom/transactions-panel.tsx",
-                                        lineNumber: 108,
-                                        columnNumber: 51
-                                    }, this)
-                                ]
-                            }, void 0, true, {
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-[10px] uppercase tracking-wide text-muted-foreground",
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$deriv$2d$com$2f$translations$2f$dist$2f$components$2f$localize$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Localize$3e$__["Localize"], {
+                                    i18n_default_text: "Wins"
+                                }, void 0, false, {
+                                    fileName: "[project]/components/custom/transactions-panel.tsx",
+                                    lineNumber: 114,
+                                    columnNumber: 13
+                                }, this)
+                            }, void 0, false, {
                                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                                lineNumber: 107,
+                                lineNumber: 113,
                                 columnNumber: 11
                             }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                className: "text-muted-foreground",
-                                children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$deriv$2d$com$2f$translations$2f$dist$2f$components$2f$localize$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Localize$3e$__["Localize"], {
-                                        i18n_default_text: "Closed"
-                                    }, void 0, false, {
-                                        fileName: "[project]/components/custom/transactions-panel.tsx",
-                                        lineNumber: 111,
-                                        columnNumber: 13
-                                    }, this),
-                                    " ",
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("strong", {
-                                        className: "text-foreground",
-                                        children: closedCount
-                                    }, void 0, false, {
-                                        fileName: "[project]/components/custom/transactions-panel.tsx",
-                                        lineNumber: 111,
-                                        columnNumber: 53
-                                    }, this)
-                                ]
-                            }, void 0, true, {
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-sm font-bold tabular-nums text-emerald-500",
+                                children: winCount
+                            }, void 0, false, {
                                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                                lineNumber: 110,
+                                lineNumber: 116,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/custom/transactions-panel.tsx",
-                        lineNumber: 106,
+                        lineNumber: 112,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "text-right",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-[10px] uppercase tracking-wide text-muted-foreground",
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$deriv$2d$com$2f$translations$2f$dist$2f$components$2f$localize$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Localize$3e$__["Localize"], {
+                                    i18n_default_text: "Losses"
+                                }, void 0, false, {
+                                    fileName: "[project]/components/custom/transactions-panel.tsx",
+                                    lineNumber: 120,
+                                    columnNumber: 13
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "[project]/components/custom/transactions-panel.tsx",
+                                lineNumber: 119,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-sm font-bold tabular-nums text-destructive",
+                                children: lossCount
+                            }, void 0, false, {
+                                fileName: "[project]/components/custom/transactions-panel.tsx",
+                                lineNumber: 122,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/components/custom/transactions-panel.tsx",
+                        lineNumber: 118,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-[10px] uppercase tracking-wide text-muted-foreground",
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$deriv$2d$com$2f$translations$2f$dist$2f$components$2f$localize$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Localize$3e$__["Localize"], {
+                                    i18n_default_text: "Contracts"
+                                }, void 0, false, {
+                                    fileName: "[project]/components/custom/transactions-panel.tsx",
+                                    lineNumber: 126,
+                                    columnNumber: 13
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "[project]/components/custom/transactions-panel.tsx",
+                                lineNumber: 125,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-sm font-bold tabular-nums text-foreground",
+                                children: transactions.length
+                            }, void 0, false, {
+                                fileName: "[project]/components/custom/transactions-panel.tsx",
+                                lineNumber: 128,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/components/custom/transactions-panel.tsx",
+                        lineNumber: 124,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "text-left sm:text-right",
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                 className: "text-[10px] uppercase tracking-wide text-muted-foreground",
@@ -4877,12 +4910,12 @@ function TransactionsPanel({ transactions, onReset, isAuthenticated }) {
                                     i18n_default_text: "Total P/L"
                                 }, void 0, false, {
                                     fileName: "[project]/components/custom/transactions-panel.tsx",
-                                    lineNumber: 116,
+                                    lineNumber: 132,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                                lineNumber: 115,
+                                lineNumber: 131,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -4893,19 +4926,19 @@ function TransactionsPanel({ transactions, onReset, isAuthenticated }) {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                                lineNumber: 118,
+                                lineNumber: 134,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/custom/transactions-panel.tsx",
-                        lineNumber: 114,
+                        lineNumber: 130,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                lineNumber: 105,
+                lineNumber: 111,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4931,7 +4964,7 @@ function TransactionsPanel({ transactions, onReset, isAuthenticated }) {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                                                lineNumber: 141,
+                                                lineNumber: 157,
                                                 columnNumber: 21
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -4944,13 +4977,13 @@ function TransactionsPanel({ transactions, onReset, isAuthenticated }) {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                                                lineNumber: 144,
+                                                lineNumber: 160,
                                                 columnNumber: 21
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/custom/transactions-panel.tsx",
-                                        lineNumber: 140,
+                                        lineNumber: 156,
                                         columnNumber: 19
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
@@ -4959,13 +4992,13 @@ function TransactionsPanel({ transactions, onReset, isAuthenticated }) {
                                         children: transaction.status === 'open' ? localize('Open') : localize('Closed')
                                     }, void 0, false, {
                                         fileName: "[project]/components/custom/transactions-panel.tsx",
-                                        lineNumber: 148,
+                                        lineNumber: 164,
                                         columnNumber: 19
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                                lineNumber: 139,
+                                lineNumber: 155,
                                 columnNumber: 17
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4983,12 +5016,12 @@ function TransactionsPanel({ transactions, onReset, isAuthenticated }) {
                                                             i18n_default_text: "Last digit"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/custom/transactions-panel.tsx",
-                                                            lineNumber: 163,
+                                                            lineNumber: 179,
                                                             columnNumber: 25
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/custom/transactions-panel.tsx",
-                                                        lineNumber: 162,
+                                                        lineNumber: 178,
                                                         columnNumber: 23
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -4996,13 +5029,13 @@ function TransactionsPanel({ transactions, onReset, isAuthenticated }) {
                                                         children: transaction.status === 'closed' ? localize('Final contract tick') : localize('Latest contract tick')
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/custom/transactions-panel.tsx",
-                                                        lineNumber: 165,
+                                                        lineNumber: 181,
                                                         columnNumber: 23
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                                                lineNumber: 161,
+                                                lineNumber: 177,
                                                 columnNumber: 21
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -5010,13 +5043,13 @@ function TransactionsPanel({ transactions, onReset, isAuthenticated }) {
                                                 children: transaction.lastDigit ?? '—'
                                             }, void 0, false, {
                                                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                                                lineNumber: 171,
+                                                lineNumber: 187,
                                                 columnNumber: 21
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/custom/transactions-panel.tsx",
-                                        lineNumber: 160,
+                                        lineNumber: 176,
                                         columnNumber: 19
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5028,12 +5061,12 @@ function TransactionsPanel({ transactions, onReset, isAuthenticated }) {
                                                     i18n_default_text: "P/L"
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/custom/transactions-panel.tsx",
-                                                    lineNumber: 177,
+                                                    lineNumber: 193,
                                                     columnNumber: 23
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                                                lineNumber: 176,
+                                                lineNumber: 192,
                                                 columnNumber: 21
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -5044,19 +5077,19 @@ function TransactionsPanel({ transactions, onReset, isAuthenticated }) {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                                                lineNumber: 179,
+                                                lineNumber: 195,
                                                 columnNumber: 21
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/custom/transactions-panel.tsx",
-                                        lineNumber: 175,
+                                        lineNumber: 191,
                                         columnNumber: 19
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                                lineNumber: 159,
+                                lineNumber: 175,
                                 columnNumber: 17
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5069,7 +5102,7 @@ function TransactionsPanel({ transactions, onReset, isAuthenticated }) {
                                                 i18n_default_text: "Stake"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                                                lineNumber: 186,
+                                                lineNumber: 202,
                                                 columnNumber: 21
                                             }, this),
                                             ": ",
@@ -5079,7 +5112,7 @@ function TransactionsPanel({ transactions, onReset, isAuthenticated }) {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/custom/transactions-panel.tsx",
-                                        lineNumber: 185,
+                                        lineNumber: 201,
                                         columnNumber: 19
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -5093,19 +5126,19 @@ function TransactionsPanel({ transactions, onReset, isAuthenticated }) {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/custom/transactions-panel.tsx",
-                                        lineNumber: 188,
+                                        lineNumber: 204,
                                         columnNumber: 19
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                                lineNumber: 184,
+                                lineNumber: 200,
                                 columnNumber: 17
                             }, this)
                         ]
                     }, `${transaction.status}-${transaction.contractId}`, true, {
                         fileName: "[project]/components/custom/transactions-panel.tsx",
-                        lineNumber: 135,
+                        lineNumber: 151,
                         columnNumber: 15
                     }, this);
                 }) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -5115,18 +5148,18 @@ function TransactionsPanel({ transactions, onReset, isAuthenticated }) {
                     })
                 }, void 0, false, {
                     fileName: "[project]/components/custom/transactions-panel.tsx",
-                    lineNumber: 198,
+                    lineNumber: 214,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/components/custom/transactions-panel.tsx",
-                lineNumber: 124,
+                lineNumber: 140,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/components/custom/transactions-panel.tsx",
-        lineNumber: 67,
+        lineNumber: 73,
         columnNumber: 5
     }, this);
 }
@@ -8788,8 +8821,10 @@ const CONTRACT_TYPES = [
 const CONTRACT_SETTLEMENT_TIMEOUT_MS = 15 * 60 * 1000;
 const CONNECTION_POLL_INTERVAL_MS = 250;
 const MARKET_SCAN_CONCURRENCY = 12;
+const INITIAL_ACTIVE_STATE_REQUIREMENT = 2;
+const RESUME_ACTIVE_STATE_REQUIREMENT = 3;
 const CONNECTION_LOST = Symbol('connection-lost');
-function getCandidatePrediction(candidate, scanNumber) {
+function getCandidatePrediction(candidate, scanNumber, requiredActiveSignalCount) {
     return {
         scanNumber,
         market: candidate.symbol.underlying_symbol_name || candidate.symbol.underlying_symbol,
@@ -8800,7 +8835,8 @@ function getCandidatePrediction(candidate, scanNumber) {
         sampleCount: candidate.sampleCount,
         predictionModels: candidate.predictionModels,
         activeSignalCount: candidate.activeSignalCount,
-        eligibleForTrading: candidate.eligibleForTrading
+        requiredActiveSignalCount,
+        eligibleForTrading: candidate.eligibleForTrading && candidate.activeSignalCount >= requiredActiveSignalCount
     };
 }
 function getScanCandidateKey(symbol, contractMode) {
@@ -9208,7 +9244,8 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
         let latestPrediction = null;
         let candidatesFromCurrentScan = [];
         let nextCandidateIndex = 0;
-        const scanForMarket = async ()=>{
+        let requiredActiveSignalCount = INITIAL_ACTIVE_STATE_REQUIREMENT;
+        const scanForMarket = async (activeStateRequirement)=>{
             setAutoTradingStatus('scanning');
             setAutoTradingMarket(null);
             setAutoTradingEstimatedWinRate(null);
@@ -9261,9 +9298,9 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
                 const countdownComplete = await countdown;
                 if (!countdownComplete || session.stopRequested) return null;
                 if (candidates?.length) {
-                    const leadingCandidate = candidates[0];
+                    const leadingCandidate = candidates.find((candidate)=>candidate.eligibleForTrading && candidate.activeSignalCount >= activeStateRequirement) ?? candidates[0];
                     if (!leadingCandidate) continue;
-                    const prediction = getCandidatePrediction(leadingCandidate, scanNumber);
+                    const prediction = getCandidatePrediction(leadingCandidate, scanNumber, activeStateRequirement);
                     latestPrediction = prediction;
                     setAutoTradingScanProgress((progress)=>progress?.phase === 'scanning' ? {
                             ...progress,
@@ -9286,11 +9323,11 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
                     nextCandidateIndex += 1;
                     if (!candidate) continue;
                     const candidateKey = getScanCandidateKey(candidate.symbol.underlying_symbol, candidate.contractMode);
-                    if (!rejectedCandidates.has(candidateKey) && candidate.eligibleForTrading) {
+                    if (!rejectedCandidates.has(candidateKey) && candidate.eligibleForTrading && candidate.activeSignalCount >= requiredActiveSignalCount) {
                         return candidate;
                     }
                 }
-                const nextScanCandidates = await scanForMarket();
+                const nextScanCandidates = await scanForMarket(requiredActiveSignalCount);
                 if (!nextScanCandidates) return null;
                 candidatesFromCurrentScan = nextScanCandidates;
                 nextCandidateIndex = 0;
@@ -9298,7 +9335,7 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
             return null;
         };
         const useScannedMarket = (candidate)=>{
-            const prediction = getCandidatePrediction(candidate, scanNumber);
+            const prediction = getCandidatePrediction(candidate, scanNumber, requiredActiveSignalCount);
             latestPrediction = prediction;
             currentCandidateRef.current = candidate;
             currentMarketRef.current = candidate.symbol;
@@ -9454,6 +9491,7 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
                 }
                 clearBuyResult();
                 setAutoTradingScanProgress(null);
+                requiredActiveSignalCount = INITIAL_ACTIVE_STATE_REQUIREMENT;
                 tradeCount += 1;
                 setAutoTradingTradeCount(tradeCount);
                 const settledProfit = await waitForContractSettlement(tradingWs, purchase.contractId);
@@ -9489,6 +9527,7 @@ function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated, onAut
                     const recentPrices = await fetchTickHistory(tradingWs, market.underlying_symbol, 9, ()=>session.stopRequested);
                     if (session.stopRequested) break;
                     if (recentPrices && (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$market$2d$scanner$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["hasPriceReversalRisk"])(recentPrices)) {
+                        requiredActiveSignalCount = RESUME_ACTIVE_STATE_REQUIREMENT;
                         candidatesFromCurrentScan = [];
                         nextCandidateIndex = 0;
                         const nextMarket = await selectNextCandidate();

@@ -49,6 +49,12 @@ export function TransactionsPanel({
   );
   const openCount = transactions.filter((transaction) => transaction.status === 'open').length;
   const closedCount = transactions.length - openCount;
+  const winCount = transactions.filter(
+    (transaction) => transaction.status === 'closed' && transaction.profit > 0
+  ).length;
+  const lossCount = transactions.filter(
+    (transaction) => transaction.status === 'closed' && transaction.profit < 0
+  ).length;
   const totalProfit = transactions.reduce(
     (total, transaction) => total + (Number.isFinite(transaction.profit) ? transaction.profit : 0),
     0
@@ -102,16 +108,26 @@ export function TransactionsPanel({
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-3 border-b border-border/60 px-4 py-2.5">
-        <div className="flex items-center gap-3 text-xs">
-          <span className="text-muted-foreground">
-            <Localize i18n_default_text="Open" /> <strong className="text-foreground">{openCount}</strong>
-          </span>
-          <span className="text-muted-foreground">
-            <Localize i18n_default_text="Closed" /> <strong className="text-foreground">{closedCount}</strong>
-          </span>
+      <div className="grid grid-cols-2 gap-3 border-b border-border/60 px-4 py-2.5 sm:grid-cols-4">
+        <div>
+          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+            <Localize i18n_default_text="Wins" />
+          </p>
+          <p className="text-sm font-bold tabular-nums text-emerald-500">{winCount}</p>
         </div>
-        <div className="text-right">
+        <div>
+          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+            <Localize i18n_default_text="Losses" />
+          </p>
+          <p className="text-sm font-bold tabular-nums text-destructive">{lossCount}</p>
+        </div>
+        <div>
+          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+            <Localize i18n_default_text="Contracts" />
+          </p>
+          <p className="text-sm font-bold tabular-nums text-foreground">{transactions.length}</p>
+        </div>
+        <div className="text-left sm:text-right">
           <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
             <Localize i18n_default_text="Total P/L" />
           </p>

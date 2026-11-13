@@ -1630,6 +1630,10 @@ body {
   flex-direction: column-reverse;
 }
 
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
 .place-items-center {
   place-items: center;
 }
@@ -1706,6 +1710,15 @@ body {
 
 .gap-y-3 {
   row-gap: 12px;
+}
+
+.gap-x-2 {
+  -moz-column-gap: 8px;
+  column-gap: 8px;
+}
+
+.gap-y-1 {
+  row-gap: 4px;
 }
 
 .space-x-4 > :not([hidden]) ~ :not([hidden]) {
@@ -3639,6 +3652,10 @@ body {
     max-width: none;
   }
 
+  .sm\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
   .sm\:flex-row {
     flex-direction: row;
   }
@@ -3774,6 +3791,10 @@ body {
 
   .sm\:text-center {
     text-align: center;
+  }
+
+  .sm\:text-right {
+    text-align: right;
   }
 
   .sm\:text-2xl {

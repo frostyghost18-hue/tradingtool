@@ -31,3 +31,5 @@
 {"timestamp":"11:49:49.551","source":"Server","level":"LOG","message":"✓ Compiled in 930ms"}
 {"timestamp":"11:51:54.099","source":"Server","level":"LOG","message":"✓ Compiled in 1334ms"}
 {"timestamp":"11:52:37.006","source":"Server","level":"LOG","message":"✓ Compiled in 548ms"}
+{"timestamp":"12:01:56.977","source":"Server","level":"LOG","message":"✓ Compiled in 4.2s"}
+{"timestamp":"12:06:10.996","source":"Server","level":"LOG","message":"✓ Compiled in 1288ms"}

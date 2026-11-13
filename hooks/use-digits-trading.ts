@@ -40,6 +40,8 @@ type AutoTradingStatus = 'idle' | 'scanning' | 'running' | 'stopping';
 const CONTRACT_SETTLEMENT_TIMEOUT_MS = 15 * 60 * 1000;
 const CONNECTION_POLL_INTERVAL_MS = 250;
 const MARKET_SCAN_CONCURRENCY = 12;
+const INITIAL_ACTIVE_STATE_REQUIREMENT = 2;
+const RESUME_ACTIVE_STATE_REQUIREMENT = 3;
 const CONNECTION_LOST = Symbol('connection-lost');
 
 export interface AutoTradingScanProgress {
@@ -71,6 +73,7 @@ export interface AutoTradingPrediction {
     dominance: MarketScanSignal | null;
   };
   activeSignalCount: number;
+  requiredActiveSignalCount: number;
   eligibleForTrading: boolean;
 }
 
@@ -78,7 +81,8 @@ type MarketScanProgressCallback = (scannedMarkets: number, totalMarkets: number)
 
 function getCandidatePrediction(
   candidate: MarketScanCandidate,
-  scanNumber: number
+  scanNumber: number,
+  requiredActiveSignalCount: number
 ): AutoTradingPrediction {
   return {
     scanNumber,
@@ -90,7 +94,9 @@ function getCandidatePrediction(
     sampleCount: candidate.sampleCount,
     predictionModels: candidate.predictionModels,
     activeSignalCount: candidate.activeSignalCount,
-    eligibleForTrading: candidate.eligibleForTrading,
+    requiredActiveSignalCount,
+    eligibleForTrading: candidate.eligibleForTrading &&
+      candidate.activeSignalCount >= requiredActiveSignalCount,
   };
 }
 
@@ -662,8 +668,11 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
     let latestPrediction: AutoTradingPrediction | null = null;
     let candidatesFromCurrentScan: MarketScanCandidate[] = [];
     let nextCandidateIndex = 0;
+    let requiredActiveSignalCount = INITIAL_ACTIVE_STATE_REQUIREMENT;
 
-    const scanForMarket = async (): Promise<MarketScanCandidate[] | null> => {
+    const scanForMarket = async (
+      activeStateRequirement: number
+    ): Promise<MarketScanCandidate[] | null> => {
       setAutoTradingStatus('scanning');
       setAutoTradingMarket(null);
       setAutoTradingEstimatedWinRate(null);
@@ -747,9 +756,17 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
         const countdownComplete = await countdown;
         if (!countdownComplete || session.stopRequested) return null;
         if (candidates?.length) {
-          const leadingCandidate = candidates[0];
+          const leadingCandidate = candidates.find(
+            (candidate) =>
+              candidate.eligibleForTrading &&
+              candidate.activeSignalCount >= activeStateRequirement
+          ) ?? candidates[0];
           if (!leadingCandidate) continue;
-          const prediction = getCandidatePrediction(leadingCandidate, scanNumber);
+          const prediction = getCandidatePrediction(
+            leadingCandidate,
+            scanNumber,
+            activeStateRequirement
+          );
           latestPrediction = prediction;
           setAutoTradingScanProgress((progress) =>
             progress?.phase === 'scanning'
@@ -778,12 +795,16 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
             candidate.symbol.underlying_symbol,
             candidate.contractMode
           );
-          if (!rejectedCandidates.has(candidateKey) && candidate.eligibleForTrading) {
+          if (
+            !rejectedCandidates.has(candidateKey) &&
+            candidate.eligibleForTrading &&
+            candidate.activeSignalCount >= requiredActiveSignalCount
+          ) {
             return candidate;
           }
         }
 
-        const nextScanCandidates = await scanForMarket();
+        const nextScanCandidates = await scanForMarket(requiredActiveSignalCount);
         if (!nextScanCandidates) return null;
         candidatesFromCurrentScan = nextScanCandidates;
         nextCandidateIndex = 0;
@@ -792,7 +813,11 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
     };
 
     const useScannedMarket = (candidate: MarketScanCandidate) => {
-      const prediction = getCandidatePrediction(candidate, scanNumber);
+      const prediction = getCandidatePrediction(
+        candidate,
+        scanNumber,
+        requiredActiveSignalCount
+      );
       latestPrediction = prediction;
       currentCandidateRef.current = candidate;
       currentMarketRef.current = candidate.symbol;
@@ -988,6 +1013,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
         }
         clearBuyResult();
         setAutoTradingScanProgress(null);
+        requiredActiveSignalCount = INITIAL_ACTIVE_STATE_REQUIREMENT;
 
         tradeCount += 1;
         setAutoTradingTradeCount(tradeCount);
@@ -1038,6 +1064,7 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
           if (session.stopRequested) break;
 
           if (recentPrices && hasPriceReversalRisk(recentPrices)) {
+            requiredActiveSignalCount = RESUME_ACTIVE_STATE_REQUIREMENT;
             candidatesFromCurrentScan = [];
             nextCandidateIndex = 0;
             const nextMarket = await selectNextCandidate();
